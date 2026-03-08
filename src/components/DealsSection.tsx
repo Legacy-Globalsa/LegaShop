@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Star, Flame } from "lucide-react";
+import { Star, Flame, Plus } from "lucide-react";
 import groceriesImg from "@/assets/filipino-groceries.jpg";
 
 const deals = [
@@ -13,12 +13,12 @@ const deals = [
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
+  show: { transition: { staggerChildren: 0.05 } },
 };
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
 };
 
 const DealsSection = () => {
@@ -48,27 +48,33 @@ const DealsSection = () => {
               key={deal.name}
               variants={item}
               whileHover={{ y: -6, transition: { duration: 0.2 } }}
-              className="group bg-card rounded-2xl p-4 shadow-card hover:shadow-card-hover transition-all cursor-pointer border border-border"
+              className="group bg-card flex flex-col h-full rounded-2xl p-4 shadow-sm hover:shadow-card-hover transition-all duration-300 cursor-pointer border border-border/60 hover:border-primary/20"
             >
-              <div className="relative mb-3">
-                <div className="w-full aspect-square rounded-xl bg-secondary flex items-center justify-center text-4xl">
+              <div className="relative mb-4">
+                <div className="w-full aspect-square rounded-xl bg-slate-50 flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-300">
                   {deal.emoji}
                 </div>
-                <span className={`absolute top-2 right-2 ${deal.tag === "1 SAR" ? "gold-badge" : "deal-badge"} text-xs`}>
+                <span className={`absolute top-2 right-2 px-2.5 py-1 rounded-md font-bold ${deal.tag === "1 SAR" ? "bg-accent text-accent-foreground" : "bg-destructive text-white"} text-[10px] shadow-sm tracking-wider uppercase`}>
                   {deal.tag}
                 </span>
+                <button className="absolute -bottom-3 -right-3 w-10 h-10 bg-primary z-10 text-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-200">
+                  <Plus className="w-5 h-5" />
+                </button>
               </div>
-              <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                {deal.name}
-              </h3>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-extrabold text-lg text-primary">{deal.price} SAR</span>
-                <span className="text-xs text-muted-foreground line-through">{deal.oldPrice} SAR</span>
-              </div>
-              <div className="flex items-center gap-1 mt-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3 h-3 text-tala" fill="currentColor" />
-                ))}
+              <div className="space-y-1.5 flex-1 flex flex-col">
+                <h3 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug h-10">
+                  {deal.name}
+                </h3>
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3 h-3 text-accent" fill="currentColor" />
+                  ))}
+                  <span className="text-[10px] text-muted-foreground font-medium ml-1">(128)</span>
+                </div>
+                <div className="pt-2 flex items-baseline gap-2 mt-auto">
+                  <span className="font-extrabold text-xl text-primary leading-none">{deal.price} <span className="text-sm font-bold">SAR</span></span>
+                  <span className="text-xs text-muted-foreground line-through font-medium">{deal.oldPrice}</span>
+                </div>
               </div>
             </motion.div>
           ))}

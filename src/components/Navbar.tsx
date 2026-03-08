@@ -1,25 +1,28 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Search, Menu, X, MapPin } from "lucide-react";
-import logo from "@/assets/legashop-logo.png";
+import logo from "@/assets/legashop-logo1.png";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <motion.nav
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="sticky top-0 z-50 bg-card/90 backdrop-blur-md border-b border-border"
-    >
+    <>
+      {/* Coming Soon Top Banner */}
+      <div className="bg-primary text-white text-center py-2 px-4 text-sm font-semibold tracking-wide shadow-sm z-[60] relative">
+        🚀 We are launching soon! LEGASHOP is currently in development.
+      </div>
+      
+      <motion.nav
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="sticky top-0 z-50 bg-card/90 backdrop-blur-md border-b border-border"
+      >
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2">
-          <img src={logo} alt="LEGASHOP" className="h-10 w-10" />
-          <span className="font-display font-extrabold text-xl text-primary">
-            LEGASHOP
-          </span>
+          <img src={logo} alt="LEGASHOP" className="w-[120px] h-auto" />
         </a>
 
         {/* Desktop nav */}
@@ -32,21 +35,21 @@ const Navbar = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <button className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary text-sm text-muted-foreground hover:bg-secondary/80 transition">
+          <button className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-100 text-sm text-sky-900 font-semibold hover:bg-sky-200 transition">
             <MapPin className="w-4 h-4" />
             <span>Al Batha, Riyadh</span>
           </button>
-          <button className="p-2 rounded-lg hover:bg-secondary transition">
+          <button className="p-2 rounded-lg hover:bg-slate-100 transition">
             <Search className="w-5 h-5 text-foreground/70" />
           </button>
-          <button className="relative p-2 rounded-lg hover:bg-secondary transition">
+          <button className="relative p-2 rounded-lg hover:bg-slate-100 transition">
             <ShoppingCart className="w-5 h-5 text-foreground/70" />
-            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-tapang text-primary-foreground text-xs flex items-center justify-center font-bold">
+            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-tapang text-white text-xs flex items-center justify-center font-bold">
               3
             </span>
           </button>
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-secondary transition"
+            className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -77,6 +80,7 @@ const Navbar = () => {
         )}
       </AnimatePresence>
     </motion.nav>
+    </>
   );
 };
 

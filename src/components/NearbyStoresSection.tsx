@@ -30,9 +30,9 @@ const NearbyStoresSection = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -6 }}
-              className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all cursor-pointer border border-border"
+              transition={{ duration: 0.4, delay: i * 0.05 }}
+              whileHover={{ y: -6, transition: { duration: 0.2, delay: 0 } }}
+              className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300 cursor-pointer border border-border"
             >
               <div className="h-36 overflow-hidden">
                 <img src={baqalaImg} alt={store.name} className="w-full h-full object-cover" />

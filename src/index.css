@@ -17,47 +17,47 @@
     --popover-foreground: 220 30% 18%;
 
     /* Kalayaan Blue */
-    --primary: 220 42% 61%; /* #6B8FCC */
+    --primary: 194 86% 44%; /* #10A1CF */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 30% 94%;
-    --secondary-foreground: 220 30% 18%;
+    --secondary: 196 87% 21%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 220 20% 95%;
     --muted-foreground: 220 10% 50%;
 
     /* Tala Gold */
-    --accent: 44 84% 68%; /* #F2D06B */
+    --accent: 47 91% 56%; /* #F5CA2B */
     --accent-foreground: 220 30% 18%;
 
     /* Tapang Red / Coral */
-    --destructive: 8 56% 62%; /* #D4726A */
+    --destructive: 355 78% 54%; /* #E52E3E */
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 20% 91%;
     --input: 220 20% 91%;
-    --ring: 220 42% 61%;
+    --ring: 194 86% 44%;
 
     --radius: 0.75rem;
 
     /* Custom LEGASHOP tokens */
-    --kalayaan: 220 42% 61%;
-    --kalayaan-dark: 220 45% 48%;
-    --tapang: 8 56% 62%;
-    --tapang-light: 8 56% 92%;
-    --tala: 44 84% 68%;
-    --tala-light: 44 84% 90%;
+    --kalayaan: 194 86% 44%;
+    --kalayaan-dark: 196 87% 21%;
+    --tapang: 355 78% 54%;
+    --tapang-light: 355 78% 90%;
+    --tala: 47 91% 56%;
+    --tala-light: 47 91% 90%;
     --malinis: 210 33% 98.8%;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(220 42% 61%) 0%, hsl(220 50% 72%) 50%, hsl(44 84% 68%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(8 56% 62%) 0%, hsl(44 84% 68%) 100%);
-    --gradient-sky: linear-gradient(180deg, hsl(210 60% 95%) 0%, hsl(210 33% 98.8%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(194 86% 44%) 0%, hsl(196 87% 21%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(355 78% 54%) 0%, hsl(47 91% 56%) 100%);
+    --gradient-sky: linear-gradient(180deg, hsl(194 60% 95%) 0%, hsl(210 33% 98.8%) 100%);
 
     /* Shadows */
-    --shadow-card: 0 4px 20px -4px hsl(220 42% 61% / 0.12);
-    --shadow-card-hover: 0 8px 30px -4px hsl(220 42% 61% / 0.2);
-    --shadow-deal: 0 4px 16px -2px hsl(8 56% 62% / 0.2);
+    --shadow-card: 0 4px 20px -4px hsl(194 86% 44% / 0.12);
+    --shadow-card-hover: 0 8px 30px -4px hsl(194 86% 44% / 0.2);
+    --shadow-deal: 0 4px 16px -2px hsl(355 78% 54% / 0.2);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;

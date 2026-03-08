@@ -4,7 +4,7 @@ import familyImg from "@/assets/family-ph.jpg";
 
 const RemittanceSection = () => {
   return (
-    <section id="remittance" className="py-16 bg-secondary/50">
+    <section id="remittance" className="py-16 bg-sky-50/50">
       <div className="container">
         <div className="grid md:grid-cols-2 gap-10 items-center">
           {/* Image */}
@@ -35,7 +35,7 @@ const RemittanceSection = () => {
               in the Philippines 🇵🇭
             </h2>
 
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-foreground/80 font-medium text-lg leading-relaxed">
               Browse Puregold products, pay in Saudi Riyals, and your family 
               picks up fresh groceries at any Puregold branch — or gets them 
               delivered. No more sending cash and hoping it goes to food.

@@ -11,12 +11,17 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 0.4 }}
             className="space-y-6"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-tala-light text-sm font-semibold text-foreground">
-              <Star className="w-4 h-4 text-tala" fill="currentColor" />
-              Serving 800,000+ Filipinos in Riyadh
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-tala-light text-sm font-semibold text-foreground">
+                <Star className="w-4 h-4 text-tala" fill="currentColor" />
+                Serving 800,000+ Filipinos in Riyadh
+              </div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-destructive/10 text-sm font-bold text-destructive">
+                🚧 Coming Soon
+              </div>
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground">
@@ -60,7 +65,7 @@ const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
             className="relative"
           >
             <div className="rounded-2xl overflow-hidden shadow-card-hover">

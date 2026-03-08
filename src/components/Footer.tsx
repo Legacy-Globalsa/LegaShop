@@ -1,4 +1,4 @@
-import logo from "@/assets/legashop-logo.png";
+import logo from "@/assets/legashop-logo1.png";
 
 const Footer = () => {
   return (
@@ -7,8 +7,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="LEGASHOP" className="h-8 w-8" />
-              <span className="font-display font-extrabold text-lg text-primary-foreground">LEGASHOP</span>
+              <img src={logo} alt="LEGASHOP" className="w-[120px] h-auto"/>
             </div>
             <p className="text-sm">
               "Lega lang, kababayan." — Your affordable grocery, wherever you are. 🇵🇭
