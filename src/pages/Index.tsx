@@ -1,22 +1,26 @@
 import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import DealsSection from "@/components/DealsSection";
-import CategoriesSection from "@/components/CategoriesSection";
-import NearbyStoresSection from "@/components/NearbyStoresSection";
+import BentoHero from "@/components/BentoHero";
+import QuickLinks from "@/components/QuickLinks";
+import FlashDeals from "@/components/FlashDeals";
+import CategoryGrid from "@/components/CategoryGrid";
+import PromoBanners from "@/components/PromoBanners";
+import FeaturedProducts from "@/components/FeaturedProducts";
+import RemittancePreview from "@/components/RemittancePreview";
 import StatsSection from "@/components/StatsSection";
-import RemittanceSection from "@/components/RemittanceSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <HeroSection />
+      <BentoHero />
+      <QuickLinks />
+      <FlashDeals />
+      <CategoryGrid />
+      <PromoBanners />
+      <FeaturedProducts />
+      <RemittancePreview />
       <StatsSection />
-      <DealsSection />
-      <CategoriesSection />
-      <NearbyStoresSection />
-      <RemittanceSection />
       <Footer />
     </div>
   );

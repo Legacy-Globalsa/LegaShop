@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import logo from "@/assets/legashop-logo1.png";
 
 const Footer = () => {
@@ -17,17 +18,17 @@ const Footer = () => {
           <div>
             <h4 className="font-bold text-primary-foreground mb-3 text-sm">Shop</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">1 SAR Deals</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">5 SAR Deals</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Categories</a></li>
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Nearby Stores</a></li>
+              <li><Link to="/deals/1-sar" className="hover:text-primary-foreground transition-colors">1 SAR Deals</Link></li>
+              <li><Link to="/deals/5-sar" className="hover:text-primary-foreground transition-colors">5 SAR Deals</Link></li>
+              <li><Link to="/categories" className="hover:text-primary-foreground transition-colors">Categories</Link></li>
+              <li><Link to="/stores" className="hover:text-primary-foreground transition-colors">Nearby Stores</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold text-primary-foreground mb-3 text-sm">Services</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-primary-foreground transition-colors">Send to Philippines</a></li>
+              <li><Link to="/remittance" className="hover:text-primary-foreground transition-colors">Send to Philippines</Link></li>
               <li><a href="#" className="hover:text-primary-foreground transition-colors">Become a Partner</a></li>
               <li><a href="#" className="hover:text-primary-foreground transition-colors">Delivery Zones</a></li>
             </ul>

@@ -141,23 +141,23 @@ The platform is built as a **modern web application** with three main layers:
 ## 🎨 UI/UX & Brand Identity
 
 ### Brand Concept
-LEGASHOP's visual identity is rooted in the **Philippine flag** — but reinterpreted in a **modern, pastel, soft-toned palette** that feels premium and approachable rather than loud or overly nationalistic.
+LEGASHOP's visual identity draws inspiration from the **Philippine flag** — reinterpreted in a **modern, vibrant, confident palette** that is universally appealing across Saudi Arabia's diverse population while maintaining its Filipino cultural roots.
 
 ### Color Philosophy
 
 | Philippine Flag Color | LEGASHOP Interpretation | Where It's Used |
 |----------------------|------------------------|-----------------|
-| 🔵 Royal Blue → | **Kalayaan Blue** (soft pastel blue `#6B8FCC`) | Navigation, buttons, headers |
-| 🔴 Crimson Red → | **Tapang Red** (warm coral `#D4726A`) | Sale badges, deal tags, alerts |
-| 🟡 Golden Yellow → | **Tala Gold** (soft gold `#F2D06B`) | Star ratings, "1 Riyal" deal highlights |
+| 🔵 Royal Blue → | **Kalayaan Blue** (vibrant cyan `#10A1CF`) | Navigation, buttons, headers |
+| 🔴 Crimson Red → | **Tapang Red** (bold red `#E52E3E`) | Sale badges, deal tags, alerts |
+| 🟡 Golden Yellow → | **Tala Gold** (bright gold `#F5CA2B`) | Star ratings, "1 SAR" deal highlights |
 | ⬜ White → | **Malinis White** (clean off-white `#FAFBFC`) | Backgrounds, cards, breathing room |
 
 ### Design Personality
-- **Soft & Modern** — Rounded corners, gentle shadows, lots of whitespace
-- **Mobile-First** — Designed for the phone screen first (80%+ of OFW users browse on mobile)
-- **Culturally Warm** — Filipino-named design tokens (Langit, Sampaguita, Bukang Liwayway), subtle three-stars-and-sun motif in the logo
-- **Not Too Bright** — Pastel tones ensure the Philippine pride is felt without eye strain — the flag's spirit, not its intensity
-- **Fast & Lightweight** — Pages load in under 2 seconds even on 3G connections common in labor camps
+- **Bold & Modern** — Rounded corners, gentle shadows, lots of whitespace, vibrant accent colors
+- **Mobile-First** — Designed for the phone screen first (80%+ of users browse on mobile)
+- **Culturally Inclusive** — Filipino-named design tokens (Langit, Sampaguita, Bukang Liwayway), universally appealing to all Saudi residents
+- **E-Commerce Forward** — Shopee/Lazada-inspired bento layouts, flash deals, and category-driven navigation
+- **Fast & Lightweight** — Pages load in under 2 seconds even on 3G connections
 
 ---
 
@@ -331,7 +331,7 @@ Based on the full plan, here are **recommended additions** to make the document 
 
 ### 🎨 Presentation Tips
 
-- **Use the LEGASHOP pastel palette** throughout your PDF/slides — `#6B8FCC` blue headers, `#F2D06B` gold highlights, `#FAFBFC` white backgrounds
+- **Use the LEGASHOP brand palette** throughout your PDF/slides — `#10A1CF` blue headers, `#F5CA2B` gold highlights, `#FAFBFC` white backgrounds
 - **Include the Philippine flag subtly** — as a corner motif or in the header bar, not as a full background
 - **Lead with emotion** — start with a story about Maria or Jun (from the personas) before diving into numbers
 - **Keep slides to 1 idea per page** — the full technical plan is the backup document; the presentation should be visual and punchy

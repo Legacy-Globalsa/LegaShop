@@ -331,21 +331,21 @@ LEGASHOP solves these problems with a **dual-marketplace** model:
 
 ## 8. UI/UX Design & Brand Identity
 
-### 8.1 Philippine Flag Color System — Pastel Modern Interpretation
+### 8.1 Color System — Vibrant Modern Interpretation
 
-The Philippine flag colors (Royal Blue `#0038A8`, Crimson Red `#CE1126`, Golden Yellow `#FCD116`, White `#FFFFFF`) are reinterpreted into a **soft, modern, pastel palette** that is professional, accessible, and not overwhelming.
+The Philippine flag colors (Royal Blue `#0038A8`, Crimson Red `#CE1126`, Golden Yellow `#FCD116`, White `#FFFFFF`) are reinterpreted into a **vibrant, modern palette** that is professional, universally appealing across all Saudi residents, and optimized for e-commerce.
 
 #### Primary Palette
 
 | Color Role | Name | Hex Code | Usage |
 |-----------|------|----------|-------|
-| **Primary Blue** | *Kalayaan Blue* | `#6B8FCC` | Headers, primary buttons, navigation bar, links |
-| **Primary Blue (Light)** | *Langit* | `#B3C7E6` | Card backgrounds, hover states, info panels |
-| **Primary Blue (Dark)** | *Dagat* | `#3A5A8C` | Text on light, active states, focus rings |
-| **Accent Red** | *Tapang Red* | `#D4726A` | Sale badges, "Deal" tags, error states, CTA accents |
-| **Accent Red (Light)** | *Sampaguita Rose* | `#F0C4C0` | Notification backgrounds, promo banners |
-| **Accent Yellow** | *Tala Gold* | `#F2D06B` | Star ratings, discount badges, "1 Riyal" / "5 Riyal" deal highlights |
-| **Accent Yellow (Light)** | *Bukang Liwayway* | `#FBF0D0` | Featured product backgrounds, rewards |
+| **Primary Blue** | *Kalayaan Blue* | `#10A1CF` | Headers, primary buttons, navigation bar, links |
+| **Primary Blue (Light)** | *Langit* | `#B8E4F5` | Card backgrounds, hover states, info panels |
+| **Primary Blue (Dark)** | *Dagat* | `#074B64` | Text on light, active states, focus rings |
+| **Accent Red** | *Tapang Red* | `#E52E3E` | Sale badges, "Deal" tags, error states, CTA accents |
+| **Accent Red (Light)** | *Sampaguita Rose* | `#FADCDF` | Notification backgrounds, promo banners |
+| **Accent Yellow** | *Tala Gold* | `#F5CA2B` | Star ratings, discount badges, "1 SAR" / "5 SAR" deal highlights |
+| **Accent Yellow (Light)** | *Bukang Liwayway* | `#FDF3D0` | Featured product backgrounds, rewards |
 | **White** | *Malinis White* | `#FAFBFC` | Page backgrounds, card surfaces |
 | **Neutral Gray** | *Batong Gray* | `#6B7280` | Body text, secondary labels |
 | **Dark** | *Gabi Dark* | `#1F2937` | Headings, primary text |
@@ -356,8 +356,8 @@ The Philippine flag colors (Royal Blue `#0038A8`, Crimson Red `#CE1126`, Golden 
 |---------|-------|-----|
 | Success (Order confirmed) | Soft Green | `#7BC47F` |
 | Warning (Low stock) | Warm Amber | `#E8A945` |
-| Error (Payment failed) | Coral Red | `#D4726A` |
-| Info (Tracking update) | Sky Blue | `#6B8FCC` |
+| Error (Payment failed) | Bold Red | `#E52E3E` |
+| Info (Tracking update) | Cyan Blue | `#10A1CF` |
 
 ### 8.2 Typography
 
