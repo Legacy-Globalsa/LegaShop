@@ -4,24 +4,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const oneSarProducts = [
-  { name: "Jasmine Rice 1kg", oldPrice: "3", emoji: "🍚", rating: 4.8, sold: 3240, discount: "-67%" },
-  { name: "Century Tuna 155g", oldPrice: "2.5", emoji: "🐟", rating: 4.7, sold: 2180, discount: "-60%" },
-  { name: "Skyflakes Crackers", oldPrice: "2", emoji: "🍪", rating: 4.6, sold: 1890, discount: "-50%" },
-  { name: "Knorr Sinigang Mix", oldPrice: "2.5", emoji: "🍲", rating: 4.9, sold: 2100, discount: "-60%" },
-  { name: "Oishi Prawn Crackers", oldPrice: "2", emoji: "🦐", rating: 4.3, sold: 670, discount: "-50%" },
-  { name: "Magic Sarap 8g x12", oldPrice: "3", emoji: "✨", rating: 4.9, sold: 3200, discount: "-67%" },
-  { name: "Boy Bawang Cornick", oldPrice: "2", emoji: "🌽", rating: 4.5, sold: 1450, discount: "-50%" },
-  { name: "Ligo Sardines 155g", oldPrice: "2.5", emoji: "🐟", rating: 4.4, sold: 980, discount: "-60%" },
-  { name: "Rebisco Crackers", oldPrice: "1.5", emoji: "🍘", rating: 4.2, sold: 760, discount: "-33%" },
-  { name: "Datu Puti Vinegar 385ml", oldPrice: "2", emoji: "🧴", rating: 4.6, sold: 1120, discount: "-50%" },
-  { name: "Pancit Canton Classic", oldPrice: "1.5", emoji: "🍜", rating: 4.7, sold: 2840, discount: "-33%" },
-  { name: "Clover Chips Cheese", oldPrice: "2", emoji: "🧀", rating: 4.5, sold: 1670, discount: "-50%" },
-  { name: "SkyFlakes Fit Oats", oldPrice: "2.5", emoji: "🥣", rating: 4.3, sold: 520, discount: "-60%" },
-  { name: "Piattos Cheese 85g", oldPrice: "2", emoji: "🥔", rating: 4.6, sold: 1340, discount: "-50%" },
-  { name: "Marca Piña Soy Sauce", oldPrice: "2", emoji: "🫘", rating: 4.4, sold: 890, discount: "-50%" },
-  { name: "C2 Green Tea 500ml", oldPrice: "2", emoji: "🍵", rating: 4.3, sold: 1560, discount: "-50%" },
-  { name: "Fita Crackers Pack", oldPrice: "1.5", emoji: "🍪", rating: 4.1, sold: 430, discount: "-33%" },
-  { name: "Cup Noodles Mini", oldPrice: "2.5", emoji: "🍜", rating: 4.5, sold: 2010, discount: "-60%" },
+  { name: "Jasmine Rice 1kg", oldPrice: "3", image: "https://m.media-amazon.com/images/I/81x%2BQ20uX6L._AC_UL320_.jpg", rating: 4.8, sold: 3240, discount: "-67%" },
+  { name: "Century Tuna 155g", oldPrice: "2.5", image: "https://images.openfoodfacts.org/images/products/074/848/510/0401/front_en.54.400.jpg", rating: 4.7, sold: 2180, discount: "-60%" },
+  { name: "Skyflakes Crackers", oldPrice: "2", image: "https://down-my.img.susercontent.com/file/f41385d87567b769131b8b1db3e25878", rating: 4.6, sold: 1890, discount: "-50%" },
+  { name: "Knorr Sinigang Mix", oldPrice: "2.5", image: "https://assets.unileversolutions.com/v1/1648400.png", rating: 4.9, sold: 2100, discount: "-60%" },
+  { name: "Oishi Prawn Crackers", oldPrice: "2", image: "https://kwalityphilfoodinc.com/wp-content/uploads/2023/12/Oishi-Prawn.png", rating: 4.3, sold: 670, discount: "-50%" },
+  { name: "Magic Sarap 8g x12", oldPrice: "3", image: "https://clt-enterprise.com/wp-content/uploads/2020/09/magic-sarap-scaled.jpg", rating: 4.9, sold: 3200, discount: "-67%" },
+  { name: "Boy Bawang Cornick", oldPrice: "2", image: "http://cdn.shopify.com/s/files/1/0620/7881/2340/products/boy-bawang-cornick-garlic-flavour-100g-snack-foods-745_grande.png?v=1662141671", rating: 4.5, sold: 1450, discount: "-50%" },
+  { name: "Ligo Sardines 155g", oldPrice: "2.5", image: "https://cf.shopee.ph/file/sg-11134201-22110-hdbgd983npjv83", rating: 4.4, sold: 980, discount: "-60%" },
 ];
 
 const OneSarDeals = () => {
@@ -83,7 +73,7 @@ const OneSarDeals = () => {
               >
                 <div className="relative">
                   <div className="w-full aspect-square bg-slate-50 flex items-center justify-center text-4xl sm:text-5xl group-hover:scale-105 transition-transform duration-300">
-                    {product.emoji}
+                    <img src={product.image} alt={product.name} className="w-full h-full object-contain p-4" />
                   </div>
                   <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-destructive text-white">
                     {product.discount}

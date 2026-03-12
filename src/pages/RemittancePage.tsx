@@ -5,18 +5,18 @@ import Footer from "@/components/Footer";
 import familyImg from "@/assets/family-ph.jpg";
 
 const puregoldProducts = [
-  { name: "Puregold Rice 5kg", price: "15", pesos: "₱223", emoji: "🍚", rating: 4.9, sold: 5200 },
-  { name: "Lucky Me Noodles x24", price: "12", pesos: "₱178", emoji: "🍜", rating: 4.8, sold: 3400 },
-  { name: "Century Tuna x12", price: "10", pesos: "₱149", emoji: "🐟", rating: 4.7, sold: 2100 },
-  { name: "Argentina Corned Beef x6", price: "18", pesos: "₱267", emoji: "🥫", rating: 4.6, sold: 1890 },
-  { name: "Bear Brand Milk 1kg", price: "8", pesos: "₱119", emoji: "🥛", rating: 4.8, sold: 2780 },
-  { name: "Nescafe 3in1 x30", price: "12", pesos: "₱178", emoji: "☕", rating: 4.7, sold: 3200 },
-  { name: "Safeguard Soap x6", price: "5", pesos: "₱74", emoji: "🧼", rating: 4.5, sold: 1560 },
-  { name: "Joy Dishwashing 500ml", price: "3", pesos: "₱45", emoji: "🧴", rating: 4.4, sold: 920 },
-  { name: "Del Monte Ketchup 1L", price: "5", pesos: "₱74", emoji: "🍅", rating: 4.6, sold: 780 },
-  { name: "Silver Swan Soy 1L", price: "5", pesos: "₱74", emoji: "🧴", rating: 4.5, sold: 1340 },
-  { name: "CDO Ulam Burger x8", price: "8", pesos: "₱119", emoji: "🍔", rating: 4.5, sold: 670 },
-  { name: "Purefoods TJ Hotdog 1kg", price: "10", pesos: "₱149", emoji: "🌭", rating: 4.7, sold: 1890 },
+  { name: "Puregold Rice 5kg", price: "15", pesos: "₱223", image: "https://images.openfoodfacts.org/images/products/480/488/182/6305/front_en.4.400.jpg", rating: 4.9, sold: 5200 },
+  { name: "Lucky Me Noodles x24", price: "12", pesos: "₱178", image: "https://luckyme.ph/img/footer/footer-cropped.png", rating: 4.8, sold: 3400 },
+  { name: "Century Tuna x12", price: "10", pesos: "₱149", image: "https://images.openfoodfacts.org/images/products/074/848/510/0401/front_en.54.400.jpg", rating: 4.7, sold: 2100 },
+  { name: "Argentina Corned Beef x6", price: "18", pesos: "₱267", image: "https://www.tasteoftheorient.uk/wp-content/uploads/2021/02/argentina-corned-beef-1-off-limited-stocks-p329-1796_image.jpeg", rating: 4.6, sold: 1890 },
+  { name: "Bear Brand Milk 1kg", price: "8", pesos: "₱119", image: "https://store.iloilosupermart.com/wp-content/uploads/2020/05/75486456-1-600x658.png", rating: 4.8, sold: 2780 },
+  { name: "Nescafe 3in1 x30", price: "12", pesos: "₱178", image: "https://www.nescafe.com/ph/sites/default/files/2024-06/3-in-1 MUG(336 x 150 px)_1.png", rating: 4.7, sold: 3200 },
+  { name: "Safeguard Soap x6", price: "5", pesos: "₱74", image: "https://images.openfoodfacts.org/images/products/490/243/081/4364/front_en.12.400.jpg", rating: 4.5, sold: 1560 },
+  { name: "Joy Dishwashing 500ml", price: "3", pesos: "₱45", image: "https://cf.shopee.ph/file/d0096425ab848b2cf138dd85b1132b0c", rating: 4.4, sold: 920 },
+  { name: "Del Monte Ketchup 1L", price: "5", pesos: "₱74", image: "https://down-ph.img.susercontent.com/file/3e7aa28dd57abe0709228b11fd4edd32_tn.webp", rating: 4.6, sold: 780 },
+  { name: "Silver Swan Soy 1L", price: "5", pesos: "₱74", image: "https://thumbs.dreamstime.com/z/silver-swan-soy-sauce-supermarket-shelf-product-philippines-310322537.jpg", rating: 4.5, sold: 1340 },
+  { name: "CDO Ulam Burger x8", price: "8", pesos: "₱119", image: "https://static.wixstatic.com/media/4c9109_267daa9a9572473d8b65484668d3d783~mv2_d_4000_4000_s_4_2.jpg/v1/fill/w_498,h_498,al_c,q_85,usm_0.66_1.00_0.01/4c9109_267daa9a9572473d8b65484668d3d783~mv2_d_4000_4000_s_4_2.jpg", rating: 4.5, sold: 670 },
+  { name: "Purefoods TJ Hotdog 1kg", price: "10", pesos: "₱149", image: "https://www.srssulit.com/wp-content/uploads/products/2004893672-1.png", rating: 4.7, sold: 1890 },
 ];
 
 const RemittancePage = () => {
@@ -106,7 +106,7 @@ const RemittancePage = () => {
               >
                 <div className="relative">
                   <div className="w-full aspect-square bg-rose-50 flex items-center justify-center text-4xl sm:text-5xl group-hover:scale-105 transition-transform duration-300">
-                    {product.emoji}
+                    <img src={product.image} alt={product.name} className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
                   </div>
                   <span className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded text-[9px] font-bold bg-destructive text-white">
                     🇵🇭 PH

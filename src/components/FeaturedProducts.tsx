@@ -8,7 +8,7 @@ const products = [
   { name: "Knorr Sinigang Mix", price: "1", oldPrice: "2.5", image: "https://pinoywarehouse.com.au/wp-content/uploads/2023/12/knorr-sinigang-sa-sampalok-mix-gabi-tamarind-soup-mix-with-taro-44g-600x600.jpg", rating: 4.9, sold: 2100, tag: "Top Pick" },
   { name: "Del Monte Tomato Sauce", price: "3", oldPrice: "4.5", image: "https://filipino.is/wp-content/uploads/2022/07/450540_7727140b-f115-44e5-8315-acff0e708571.jpg", rating: 4.6, sold: 756, tag: "" },
   { name: "Bear Brand Milk 300g", price: "5", oldPrice: "8", image: "http://cdn.shopify.com/s/files/1/0358/1335/9748/products/4800361410892_7a524b56-0e5c-480d-a2b3-8247103d881c_1024x.jpg?v=1678679069", rating: 4.8, sold: 1580, tag: "Popular" },
-  { name: "UFC Banana Ketchup", price: "3", oldPrice: "5", image: "https://down-th.img.susercontent.com/file/e4e1b1c75c9d26f04e58a7e9e15d5da8", rating: 4.5, sold: 892, tag: "" },
+  { name: "UFC Banana Ketchup", price: "3", oldPrice: "5", image: "https://images.openfoodfacts.org/images/products/480/777/012/2194/front_en.16.400.jpg", rating: 4.5, sold: 892, tag: "" },
   { name: "Joy Dishwashing Liquid", price: "2", oldPrice: "3.5", image: "https://medias.watsons.com.ph/publishing/WTCPH-50050841-front-zoom.jpg?version=1734338211", rating: 4.4, sold: 1340, tag: "" },
   { name: "Nescafe 3-in-1 x10", price: "5", oldPrice: "9", image: "https://shopmetro.ph/itpark-supermarket/wp-content/uploads/2023/05/SM102724911-8.jpg", rating: 4.7, sold: 2340, tag: "Best Seller" },
   { name: "Magic Sarap 8g x12", price: "2", oldPrice: "3", image: "https://d11qgm9a5k858y.cloudfront.net/maut2sfax6i57sab5fva8lxqbipa", rating: 4.9, sold: 3200, tag: "Top Pick" },

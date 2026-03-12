@@ -4,24 +4,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const fiveSarProducts = [
-  { name: "Lucky Me Pancit Canton x3", oldPrice: "8", emoji: "🍜", rating: 4.7, sold: 2840, discount: "-38%" },
-  { name: "Silver Swan Soy Sauce 1L", oldPrice: "7", emoji: "🧴", rating: 4.6, sold: 1560, discount: "-29%" },
-  { name: "Milo Sachet x10", oldPrice: "9", emoji: "☕", rating: 4.8, sold: 3120, discount: "-44%" },
-  { name: "Argentina Corned Beef 260g", oldPrice: "8", emoji: "🥫", rating: 4.7, sold: 980, discount: "-38%" },
-  { name: "Bear Brand Milk 300g", oldPrice: "8", emoji: "🥛", rating: 4.8, sold: 1580, discount: "-38%" },
-  { name: "Nescafe 3in1 x10", oldPrice: "9", emoji: "☕", rating: 4.7, sold: 2340, discount: "-44%" },
-  { name: "Purefoods Hotdog 500g", oldPrice: "8", emoji: "🌭", rating: 4.7, sold: 1120, discount: "-38%" },
-  { name: "CDO Karne Norte 260g", oldPrice: "8", emoji: "🥩", rating: 4.5, sold: 890, discount: "-38%" },
-  { name: "UFC Banana Ketchup 550g", oldPrice: "7", emoji: "🍌", rating: 4.4, sold: 760, discount: "-29%" },
-  { name: "Del Monte Fruit Cocktail", oldPrice: "9", emoji: "🍑", rating: 4.6, sold: 670, discount: "-44%" },
-  { name: "Coconut Cream 400ml x2", oldPrice: "8", emoji: "🥥", rating: 4.5, sold: 445, discount: "-38%" },
-  { name: "Alaska Evaporada 370ml", oldPrice: "7", emoji: "🥛", rating: 4.6, sold: 1230, discount: "-29%" },
-  { name: "Spam Luncheon Meat 200g", oldPrice: "9", emoji: "🍖", rating: 4.8, sold: 2560, discount: "-44%" },
-  { name: "Kopiko Brown Coffee x10", oldPrice: "8", emoji: "☕", rating: 4.5, sold: 1890, discount: "-38%" },
-  { name: "Jack n Jill Chippy x5", oldPrice: "7", emoji: "🌽", rating: 4.3, sold: 1340, discount: "-29%" },
-  { name: "Tang Orange Juice 375g", oldPrice: "7.5", emoji: "🍊", rating: 4.4, sold: 920, discount: "-33%" },
-  { name: "Mega Sardines 425g", oldPrice: "7", emoji: "🐟", rating: 4.5, sold: 1670, discount: "-29%" },
-  { name: "Thai Jasmine Rice 2kg", oldPrice: "8", emoji: "🍚", rating: 4.9, sold: 4200, discount: "-38%" },
+  { name: "Lucky Me Pancit Canton x3", oldPrice: "8", image: "https://luckyme.ph/static/uploads/products/product_12_4e90b3e9.webp", rating: 4.7, sold: 2840, discount: "-38%" },
+  { name: "Silver Swan Soy Sauce 1L", oldPrice: "7", image: "https://clt-enterprise.com/wp-content/uploads/2018/10/Silver-Swan-Soy-sauce.jpg", rating: 4.6, sold: 1560, discount: "-29%" },
+  { name: "Milo Sachet x10", oldPrice: "9", image: "https://images.openfoodfacts.org/images/products/885/001/105/5375/front_en.3.400.jpg", rating: 4.8, sold: 3120, discount: "-44%" },
+  { name: "Argentina Corned Beef 260g", oldPrice: "8", image: "https://masaganaoriental.com/wp-content/uploads/60_original.jpg", rating: 4.7, sold: 980, discount: "-38%" },
+  { name: "Bear Brand Milk 300g", oldPrice: "8", image: "https://bahaykubo.co.uk/wp-content/uploads/2023/02/BBPM.webp", rating: 4.8, sold: 1580, discount: "-38%" },
+  { name: "Nescafe 3in1 x10", oldPrice: "9", image: "https://www.nescafe.com/mena/sites/default/files/2023-08/AE_ae_NES_3.0 Website_3in1 Classic_IMG-1_960by960px_230713_1_1689313729902_1.png", rating: 4.7, sold: 2340, discount: "-44%" },
+  { name: "Purefoods Hotdog 500g", oldPrice: "8", image: "https://down-ph.img.susercontent.com/file/4f5e3cccfe4d22cf8cdb8b8dc6dcd467_tn.webp", rating: 4.7, sold: 1120, discount: "-38%" },
+  { name: "CDO Karne Norte 260g", oldPrice: "8", image: "https://www.srssulit.com/wp-content/uploads/products/8867-1.png", rating: 4.5, sold: 890, discount: "-38%" },
 ];
 
 const FiveSarDeals = () => {
@@ -83,7 +73,7 @@ const FiveSarDeals = () => {
               >
                 <div className="relative">
                   <div className="w-full aspect-square bg-slate-50 flex items-center justify-center text-4xl sm:text-5xl group-hover:scale-105 transition-transform duration-300">
-                    {product.emoji}
+                    <img src={product.image} alt={product.name} className="w-full h-full object-contain p-4" />
                   </div>
                   <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-destructive text-white">
                     {product.discount}

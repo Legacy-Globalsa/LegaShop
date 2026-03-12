@@ -4,12 +4,12 @@ import { Flame, Plus, Star, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const flashDeals = [
-  { name: "Jasmine Rice 1kg", price: "1", oldPrice: "3", image: "https://images.openfoodfacts.org/images/products/885/135/138/1797/front_en.21.400.jpg", tag: "1 SAR", discount: "-67%" },
-  { name: "Lucky Me Pancit Canton x3", price: "5", oldPrice: "8", image: "https://images.openfoodfacts.org/images/products/480/777/027/0123/front_en.31.400.jpg", tag: "5 SAR", discount: "-38%" },
+  { name: "Jasmine Rice 1kg", price: "1", oldPrice: "3", image: "https://m.media-amazon.com/images/I/81x%2BQ20uX6L._AC_UL320_.jpg", tag: "1 SAR", discount: "-67%" },
+  { name: "Lucky Me Pancit Canton x3", price: "5", oldPrice: "8", image: "https://luckyme.ph/static/uploads/products/product_12_4e90b3e9.webp", tag: "5 SAR", discount: "-38%" },
   { name: "Century Tuna 155g", price: "1", oldPrice: "2.5", image: "https://images.openfoodfacts.org/images/products/074/848/510/0401/front_en.54.400.jpg", tag: "1 SAR", discount: "-60%" },
-  { name: "Silver Swan Soy Sauce", price: "5", oldPrice: "7", image: "https://images.openfoodfacts.org/images/products/007/980/900/1228/front_en.3.400.jpg", tag: "5 SAR", discount: "-29%" },
+  { name: "Silver Swan Soy Sauce", price: "5", oldPrice: "7", image: "https://kwalityphilfoodinc.com/wp-content/uploads/2023/12/Silver-Swan-Soy-Sauce.png", tag: "5 SAR", discount: "-29%" },
   { name: "Milo Sachet x10", price: "5", oldPrice: "9", image: "https://images.openfoodfacts.org/images/products/885/001/105/5375/front_en.3.400.jpg", tag: "5 SAR", discount: "-44%" },
-  { name: "Skyflakes Crackers", price: "1", oldPrice: "2", image: "https://images.openfoodfacts.org/images/products/075/051/501/8402/front_en.67.400.jpg", tag: "1 SAR", discount: "-50%" },
+  { name: "Skyflakes Crackers", price: "1", oldPrice: "2", image: "https://down-my.img.susercontent.com/file/f41385d87567b769131b8b1db3e25878", tag: "1 SAR", discount: "-50%" },
 ];
 
 const useCountdown = () => {
