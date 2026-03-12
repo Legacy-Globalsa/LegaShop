@@ -4,12 +4,12 @@ import { Flame, Plus, Star, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const flashDeals = [
-  { name: "Jasmine Rice 1kg", price: "1", oldPrice: "3", emoji: "🍚", tag: "1 SAR", discount: "-67%" },
-  { name: "Lucky Me Pancit Canton x3", price: "5", oldPrice: "8", emoji: "🍜", tag: "5 SAR", discount: "-38%" },
-  { name: "Century Tuna 155g", price: "1", oldPrice: "2.5", emoji: "🐟", tag: "1 SAR", discount: "-60%" },
-  { name: "Silver Swan Soy Sauce", price: "5", oldPrice: "7", emoji: "🧴", tag: "5 SAR", discount: "-29%" },
-  { name: "Milo Sachet x10", price: "5", oldPrice: "9", emoji: "☕", tag: "5 SAR", discount: "-44%" },
-  { name: "Skyflakes Crackers", price: "1", oldPrice: "2", emoji: "🍪", tag: "1 SAR", discount: "-50%" },
+  { name: "Jasmine Rice 1kg", price: "1", oldPrice: "3", image: "https://images.openfoodfacts.org/images/products/885/135/138/1797/front_en.21.400.jpg", tag: "1 SAR", discount: "-67%" },
+  { name: "Lucky Me Pancit Canton x3", price: "5", oldPrice: "8", image: "https://images.openfoodfacts.org/images/products/480/777/027/0123/front_en.31.400.jpg", tag: "5 SAR", discount: "-38%" },
+  { name: "Century Tuna 155g", price: "1", oldPrice: "2.5", image: "https://images.openfoodfacts.org/images/products/074/848/510/0401/front_en.54.400.jpg", tag: "1 SAR", discount: "-60%" },
+  { name: "Silver Swan Soy Sauce", price: "5", oldPrice: "7", image: "https://images.openfoodfacts.org/images/products/007/980/900/1228/front_en.3.400.jpg", tag: "5 SAR", discount: "-29%" },
+  { name: "Milo Sachet x10", price: "5", oldPrice: "9", image: "https://images.openfoodfacts.org/images/products/885/001/105/5375/front_en.3.400.jpg", tag: "5 SAR", discount: "-44%" },
+  { name: "Skyflakes Crackers", price: "1", oldPrice: "2", image: "https://images.openfoodfacts.org/images/products/075/051/501/8402/front_en.67.400.jpg", tag: "1 SAR", discount: "-50%" },
 ];
 
 const useCountdown = () => {
@@ -89,8 +89,8 @@ const FlashDeals = () => {
               className="min-w-[160px] md:min-w-0 group bg-card flex flex-col h-full rounded-xl p-3 shadow-sm hover:shadow-card-hover transition-all duration-300 cursor-pointer border border-border/60 hover:border-primary/30"
             >
               <div className="relative mb-3">
-                <div className="w-full aspect-square rounded-lg bg-slate-50 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
-                  {deal.emoji}
+                <div className="w-full aspect-square rounded-lg bg-slate-50 overflow-hidden">
+                  <img src={deal.image} alt={deal.name} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
                 </div>
                 <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-destructive text-white">
                   {deal.discount}
