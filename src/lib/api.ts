@@ -117,4 +117,28 @@ export function logout() {
   clearUser();
 }
 
+export async function apiGoogleLogin(idToken: string): Promise<ApiResponse<AuthResponse>> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/google/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_token: idToken }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      const errorMsg = typeof json === "object"
+        ? Object.values(json).flat().join(" ")
+        : "Google login failed";
+      return { error: errorMsg };
+    }
+
+    return { data: json };
+  } catch {
+    return { error: "Network error. Is the backend running?" };
+  }
+}
+
 export type { User, AuthTokens, AuthResponse, SignupData, LoginData };
+

@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { apiLogin } from "@/lib/api"
+import { apiLogin, apiGoogleLogin } from "@/lib/api"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
+import { GoogleLogin } from "@react-oauth/google"
 
 export function LoginForm({
   className,
@@ -100,9 +101,46 @@ export function LoginForm({
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Logging in..." : "Login"}
               </Button>
-              <Button variant="outline" className="w-full" type="button" disabled={loading}>
-                Login with Google
-              </Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                </div>
+              </div>
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={async (response) => {
+                    if (!response.credential) return
+                    setLoading(true)
+                    const result = await apiGoogleLogin(response.credential)
+                    if (result.error) {
+                      toast({
+                        title: "Google login failed",
+                        description: result.error,
+                        variant: "destructive",
+                      })
+                    } else if (result.data) {
+                      login(result.data)
+                      toast({
+                        title: "Welcome!",
+                        description: `Logged in as ${result.data.user.first_name}`,
+                      })
+                      navigate("/")
+                    }
+                    setLoading(false)
+                  }}
+                  onError={() => {
+                    toast({
+                      title: "Google login failed",
+                      description: "Could not sign in with Google.",
+                      variant: "destructive",
+                    })
+                  }}
+                  width={320}
+                />
+              </div>
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}

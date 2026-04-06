@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { apiSignup } from "@/lib/api"
+import { apiSignup, apiGoogleLogin } from "@/lib/api"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
+import { GoogleLogin } from "@react-oauth/google"
 
 export function SignupForm({
   className,
@@ -132,9 +133,46 @@ export function SignupForm({
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Creating account..." : "Create Account"}
               </Button>
-              <Button variant="outline" className="w-full" type="button" disabled={loading}>
-                Sign up with Google
-              </Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                </div>
+              </div>
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={async (response) => {
+                    if (!response.credential) return
+                    setLoading(true)
+                    const result = await apiGoogleLogin(response.credential)
+                    if (result.error) {
+                      toast({
+                        title: "Google signup failed",
+                        description: result.error,
+                        variant: "destructive",
+                      })
+                    } else if (result.data) {
+                      login(result.data)
+                      toast({
+                        title: "Account created!",
+                        description: `Welcome, ${result.data.user.first_name}!`,
+                      })
+                      navigate("/")
+                    }
+                    setLoading(false)
+                  }}
+                  onError={() => {
+                    toast({
+                      title: "Google signup failed",
+                      description: "Could not sign up with Google.",
+                      variant: "destructive",
+                    })
+                  }}
+                  width={320}
+                />
+              </div>
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
