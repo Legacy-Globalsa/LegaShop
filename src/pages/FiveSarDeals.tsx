@@ -1,17 +1,18 @@
 import { motion } from "framer-motion";
 import { Star, Plus, Filter, ArrowUpDown } from "lucide-react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const fiveSarProducts = [
-  { name: "Lucky Me Pancit Canton x3", oldPrice: "8", image: "https://luckyme.ph/static/uploads/products/product_12_4e90b3e9.webp", rating: 4.7, sold: 2840, discount: "-38%" },
-  { name: "Silver Swan Soy Sauce 1L", oldPrice: "7", image: "https://clt-enterprise.com/wp-content/uploads/2018/10/Silver-Swan-Soy-sauce.jpg", rating: 4.6, sold: 1560, discount: "-29%" },
-  { name: "Milo Sachet x10", oldPrice: "9", image: "https://images.openfoodfacts.org/images/products/885/001/105/5375/front_en.3.400.jpg", rating: 4.8, sold: 3120, discount: "-44%" },
-  { name: "Argentina Corned Beef 260g", oldPrice: "8", image: "https://masaganaoriental.com/wp-content/uploads/60_original.jpg", rating: 4.7, sold: 980, discount: "-38%" },
-  { name: "Bear Brand Milk 300g", oldPrice: "8", image: "https://bahaykubo.co.uk/wp-content/uploads/2023/02/BBPM.webp", rating: 4.8, sold: 1580, discount: "-38%" },
-  { name: "Nescafe 3in1 x10", oldPrice: "9", image: "https://www.nescafe.com/mena/sites/default/files/2023-08/AE_ae_NES_3.0 Website_3in1 Classic_IMG-1_960by960px_230713_1_1689313729902_1.png", rating: 4.7, sold: 2340, discount: "-44%" },
-  { name: "Purefoods Hotdog 500g", oldPrice: "8", image: "https://down-ph.img.susercontent.com/file/4f5e3cccfe4d22cf8cdb8b8dc6dcd467_tn.webp", rating: 4.7, sold: 1120, discount: "-38%" },
-  { name: "CDO Karne Norte 260g", oldPrice: "8", image: "https://www.srssulit.com/wp-content/uploads/products/8867-1.png", rating: 4.5, sold: 890, discount: "-38%" },
+  { id: 9, name: "Lucky Me Pancit Canton x3", oldPrice: "8", image: "https://luckyme.ph/static/uploads/products/product_12_4e90b3e9.webp", rating: 4.7, sold: 2840, discount: "-38%" },
+  { id: 10, name: "Silver Swan Soy Sauce 1L", oldPrice: "7", image: "https://clt-enterprise.com/wp-content/uploads/2018/10/Silver-Swan-Soy-sauce.jpg", rating: 4.6, sold: 1560, discount: "-29%" },
+  { id: 11, name: "Milo Sachet x10", oldPrice: "9", image: "https://images.openfoodfacts.org/images/products/885/001/105/5375/front_en.3.400.jpg", rating: 4.8, sold: 3120, discount: "-44%" },
+  { id: 12, name: "Argentina Corned Beef 260g", oldPrice: "8", image: "https://masaganaoriental.com/wp-content/uploads/60_original.jpg", rating: 4.7, sold: 980, discount: "-38%" },
+  { id: 13, name: "Bear Brand Milk 300g", oldPrice: "8", image: "https://bahaykubo.co.uk/wp-content/uploads/2023/02/BBPM.webp", rating: 4.8, sold: 1580, discount: "-38%" },
+  { id: 14, name: "Nescafe 3in1 x10", oldPrice: "9", image: "https://www.nescafe.com/mena/sites/default/files/2023-08/AE_ae_NES_3.0 Website_3in1 Classic_IMG-1_960by960px_230713_1_1689313729902_1.png", rating: 4.7, sold: 2340, discount: "-44%" },
+  { id: 15, name: "Purefoods Hotdog 500g", oldPrice: "8", image: "https://down-ph.img.susercontent.com/file/4f5e3cccfe4d22cf8cdb8b8dc6dcd467_tn.webp", rating: 4.7, sold: 1120, discount: "-38%" },
+  { id: 16, name: "CDO Karne Norte 260g", oldPrice: "8", image: "https://www.srssulit.com/wp-content/uploads/products/8867-1.png", rating: 4.5, sold: 890, discount: "-38%" },
 ];
 
 const FiveSarDeals = () => {
@@ -63,8 +64,8 @@ const FiveSarDeals = () => {
         <div className="container">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {fiveSarProducts.map((product, i) => (
+              <Link to={`/products/${product.id}`} key={product.id}>
               <motion.div
-                key={product.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -107,6 +108,7 @@ const FiveSarDeals = () => {
                   </div>
                 </div>
               </motion.div>
+              </Link>
             ))}
           </div>
         </div>

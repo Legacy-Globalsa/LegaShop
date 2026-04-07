@@ -13,6 +13,7 @@ import FiveSarDeals from "./pages/FiveSarDeals";
 import CategoriesPage from "./pages/CategoriesPage";
 import StoresPage from "./pages/StoresPage";
 import RemittancePage from "./pages/RemittancePage";
+import ProductPage from "./pages/ProductPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/categories" element={<CategoriesPage />} />
               <Route path="/stores" element={<StoresPage />} />
               <Route path="/remittance" element={<RemittancePage />} />
+              <Route path="/products/:id" element={<ProductPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

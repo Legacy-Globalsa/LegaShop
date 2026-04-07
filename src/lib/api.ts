@@ -140,5 +140,208 @@ export async function apiGoogleLogin(idToken: string): Promise<ApiResponse<AuthR
   }
 }
 
+// ──────────────────────────────────────
+// Authenticated fetch helper
+// ──────────────────────────────────────
+
+async function authFetch(url: string, options: RequestInit = {}) {
+  const token = getAccessToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return fetch(url, { ...options, headers });
+}
+
+// ──────────────────────────────────────
+// Type definitions for backend models
+// ──────────────────────────────────────
+
+export interface Category {
+  id: number;
+  name: string;
+  name_tl: string;
+  name_ar: string;
+  parent: number | null;
+  image_url: string | null;
+  is_active: boolean;
+  subcategories: Category[];
+  created_at: string;
+}
+
+export interface Product {
+  id: number;
+  store: number;
+  store_name: string;
+  category: number;
+  category_name: string;
+  name: string;
+  name_tl: string;
+  name_ar: string;
+  description: string;
+  price: string;
+  sale_price: string | null;
+  currency: string;
+  stock: number;
+  unit: string;
+  image_url: string | null;
+  is_deal: boolean;
+  deal_type: "ONE_RIYAL" | "FIVE_RIYAL" | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface Store {
+  id: number;
+  owner: number;
+  owner_name: string;
+  name: string;
+  name_ar: string;
+  description: string;
+  phone: string;
+  latitude: number;
+  longitude: number;
+  delivery_zone: number;
+  avg_delivery_min: number;
+  rating: number;
+  is_active: boolean;
+  image_url: string | null;
+  district: string;
+  created_at: string;
+}
+
+export interface Review {
+  id: number;
+  user: number;
+  reviewer_name: string;
+  store: number;
+  product: number | null;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
+
+// ──────────────────────────────────────
+// Public API — Products
+// ──────────────────────────────────────
+
+export async function fetchProducts(params?: Record<string, string>): Promise<Product[]> {
+  try {
+    const query = params ? `?${new URLSearchParams(params).toString()}` : "";
+    const res = await fetch(`${API_BASE_URL}/products/${query}`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    const { mockProducts } = await import("./mock-data");
+    return mockProducts;
+  }
+}
+
+export async function fetchProductById(id: number): Promise<Product | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/products/${id}/`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    const { mockProducts } = await import("./mock-data");
+    return mockProducts.find((p) => p.id === id) ?? null;
+  }
+}
+
+export async function fetchDeals(dealType: string): Promise<Product[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/products/deals/?deal_type=${dealType}`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    const { mockProducts } = await import("./mock-data");
+    return mockProducts.filter((p) => p.is_deal && p.deal_type === dealType);
+  }
+}
+
+// ──────────────────────────────────────
+// Public API — Categories
+// ──────────────────────────────────────
+
+export async function fetchCategories(): Promise<Category[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/categories/`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    const { mockCategories } = await import("./mock-data");
+    return mockCategories;
+  }
+}
+
+// ──────────────────────────────────────
+// Public API — Stores
+// ──────────────────────────────────────
+
+export async function fetchStores(): Promise<Store[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/stores/`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    const { mockStores } = await import("./mock-data");
+    return mockStores;
+  }
+}
+
+export async function fetchStoreById(id: number): Promise<Store | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/stores/${id}/`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    const { mockStores } = await import("./mock-data");
+    return mockStores.find((s) => s.id === id) ?? null;
+  }
+}
+
+// ──────────────────────────────────────
+// Public API — Reviews
+// ──────────────────────────────────────
+
+export async function fetchProductReviews(productId: number): Promise<Review[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews/`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchStoreReviews(storeId: number): Promise<Review[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/stores/${storeId}/reviews/`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+// ──────────────────────────────────────
+// Authenticated API — Orders
+// ──────────────────────────────────────
+
+export async function fetchOrders() {
+  const res = await authFetch(`${API_BASE_URL}/orders/`);
+  if (!res.ok) throw new Error("Failed to fetch orders");
+  return await res.json();
+}
+
+export async function fetchOrderById(id: number) {
+  const res = await authFetch(`${API_BASE_URL}/orders/${id}/`);
+  if (!res.ok) throw new Error("Failed to fetch order");
+  return await res.json();
+}
+
 export type { User, AuthTokens, AuthResponse, SignupData, LoginData };
 

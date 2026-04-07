@@ -1,17 +1,18 @@
 import { motion } from "framer-motion";
 import { Star, Plus, Filter, ArrowUpDown } from "lucide-react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const oneSarProducts = [
-  { name: "Jasmine Rice 1kg", oldPrice: "3", image: "https://m.media-amazon.com/images/I/81x%2BQ20uX6L._AC_UL320_.jpg", rating: 4.8, sold: 3240, discount: "-67%" },
-  { name: "Century Tuna 155g", oldPrice: "2.5", image: "https://images.openfoodfacts.org/images/products/074/848/510/0401/front_en.54.400.jpg", rating: 4.7, sold: 2180, discount: "-60%" },
-  { name: "Skyflakes Crackers", oldPrice: "2", image: "https://down-my.img.susercontent.com/file/f41385d87567b769131b8b1db3e25878", rating: 4.6, sold: 1890, discount: "-50%" },
-  { name: "Knorr Sinigang Mix", oldPrice: "2.5", image: "https://assets.unileversolutions.com/v1/1648400.png", rating: 4.9, sold: 2100, discount: "-60%" },
-  { name: "Oishi Prawn Crackers", oldPrice: "2", image: "https://kwalityphilfoodinc.com/wp-content/uploads/2023/12/Oishi-Prawn.png", rating: 4.3, sold: 670, discount: "-50%" },
-  { name: "Magic Sarap 8g x12", oldPrice: "3", image: "https://clt-enterprise.com/wp-content/uploads/2020/09/magic-sarap-scaled.jpg", rating: 4.9, sold: 3200, discount: "-67%" },
-  { name: "Boy Bawang Cornick", oldPrice: "2", image: "http://cdn.shopify.com/s/files/1/0620/7881/2340/products/boy-bawang-cornick-garlic-flavour-100g-snack-foods-745_grande.png?v=1662141671", rating: 4.5, sold: 1450, discount: "-50%" },
-  { name: "Ligo Sardines 155g", oldPrice: "2.5", image: "https://cf.shopee.ph/file/sg-11134201-22110-hdbgd983npjv83", rating: 4.4, sold: 980, discount: "-60%" },
+  { id: 1, name: "Jasmine Rice 1kg", oldPrice: "3", image: "https://m.media-amazon.com/images/I/81x%2BQ20uX6L._AC_UL320_.jpg", rating: 4.8, sold: 3240, discount: "-67%" },
+  { id: 2, name: "Century Tuna 155g", oldPrice: "2.5", image: "https://images.openfoodfacts.org/images/products/074/848/510/0401/front_en.54.400.jpg", rating: 4.7, sold: 2180, discount: "-60%" },
+  { id: 3, name: "Skyflakes Crackers", oldPrice: "2", image: "https://down-my.img.susercontent.com/file/f41385d87567b769131b8b1db3e25878", rating: 4.6, sold: 1890, discount: "-50%" },
+  { id: 4, name: "Knorr Sinigang Mix", oldPrice: "2.5", image: "https://assets.unileversolutions.com/v1/1648400.png", rating: 4.9, sold: 2100, discount: "-60%" },
+  { id: 5, name: "Oishi Prawn Crackers", oldPrice: "2", image: "https://kwalityphilfoodinc.com/wp-content/uploads/2023/12/Oishi-Prawn.png", rating: 4.3, sold: 670, discount: "-50%" },
+  { id: 6, name: "Magic Sarap 8g x12", oldPrice: "3", image: "https://clt-enterprise.com/wp-content/uploads/2020/09/magic-sarap-scaled.jpg", rating: 4.9, sold: 3200, discount: "-67%" },
+  { id: 7, name: "Boy Bawang Cornick", oldPrice: "2", image: "http://cdn.shopify.com/s/files/1/0620/7881/2340/products/boy-bawang-cornick-garlic-flavour-100g-snack-foods-745_grande.png?v=1662141671", rating: 4.5, sold: 1450, discount: "-50%" },
+  { id: 8, name: "Ligo Sardines 155g", oldPrice: "2.5", image: "https://cf.shopee.ph/file/sg-11134201-22110-hdbgd983npjv83", rating: 4.4, sold: 980, discount: "-60%" },
 ];
 
 const OneSarDeals = () => {
@@ -63,8 +64,8 @@ const OneSarDeals = () => {
         <div className="container">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {oneSarProducts.map((product, i) => (
+              <Link to={`/products/${product.id}`} key={product.id}>
               <motion.div
-                key={product.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -107,6 +108,7 @@ const OneSarDeals = () => {
                   </div>
                 </div>
               </motion.div>
+              </Link>
             ))}
           </div>
         </div>
