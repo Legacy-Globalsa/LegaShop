@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Flame, Plus, Star, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast";
+import { mockProducts } from "@/lib/mock-data";
 
 const flashDeals = [
   { id: 1, name: "Jasmine Rice 1kg", price: "1", oldPrice: "3", image: "https://m.media-amazon.com/images/I/81x%2BQ20uX6L._AC_UL320_.jpg", tag: "1 SAR", discount: "-67%" },
@@ -42,6 +45,18 @@ const useCountdown = () => {
 
 const FlashDeals = () => {
   const countdown = useCountdown();
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const handleQuickAdd = (e: React.MouseEvent, dealId: number, dealName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const product = mockProducts.find((p) => p.id === dealId);
+    if (product) {
+      addItem(product);
+      toast({ title: "Added to cart", description: `1× ${dealName}` });
+    }
+  };
 
   return (
     <section className="py-8 bg-background">
@@ -95,7 +110,10 @@ const FlashDeals = () => {
                 <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-destructive text-white">
                   {deal.discount}
                 </span>
-                <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary z-10 text-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all opacity-0 group-hover:opacity-100 duration-200">
+                <button
+                  onClick={(e) => handleQuickAdd(e, deal.id, deal.name)}
+                  className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary z-10 text-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all opacity-0 group-hover:opacity-100 duration-200"
+                >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>

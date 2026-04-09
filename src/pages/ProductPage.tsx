@@ -5,6 +5,8 @@ import { Star, ShoppingCart, Plus, Minus, ArrowLeft, Store, Tag, Package } from 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { fetchProductById, fetchProductReviews, type Product, type Review } from "@/lib/api";
+import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast";
 
 const ProductPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -12,6 +14,8 @@ const ProductPage = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const { addItem } = useCart();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!id) return;
@@ -200,6 +204,11 @@ const ProductPage = () => {
 
               <button
                 disabled={!inStock}
+                onClick={() => {
+                  addItem(product, quantity);
+                  toast({ title: "Added to cart", description: `${quantity}× ${product.name}` });
+                  setQuantity(1);
+                }}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-sm hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart className="w-4 h-4" />

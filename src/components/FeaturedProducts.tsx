@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { Star, Plus, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast";
+import { mockProducts } from "@/lib/mock-data";
 
 const products = [
   { id: 16, name: "CDO Karne Norte 150g", price: "3", oldPrice: "5", image: "https://images.freshop.ncrcloud.com/1564405684702539926/6104e49b211569587b50b3bd5f32d422_large.png", rating: 4.8, sold: 1240, tag: "Best Seller" },
@@ -18,6 +21,19 @@ const products = [
 ];
 
 const FeaturedProducts = () => {
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const handleQuickAdd = (e: React.MouseEvent, productId: number, productName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const product = mockProducts.find((p) => p.id === productId);
+    if (product) {
+      addItem(product);
+      toast({ title: "Added to cart", description: `1× ${productName}` });
+    }
+  };
+
   return (
     <section className="py-8 bg-background">
       <div className="container">
@@ -50,7 +66,10 @@ const FeaturedProducts = () => {
                     {product.tag}
                   </span>
                 )}
-                <button className="absolute bottom-2 right-2 w-8 h-8 bg-primary z-10 text-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all opacity-0 group-hover:opacity-100 duration-200">
+                <button
+                  onClick={(e) => handleQuickAdd(e, product.id, product.name)}
+                  className="absolute bottom-2 right-2 w-8 h-8 bg-primary z-10 text-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all opacity-0 group-hover:opacity-100 duration-200"
+                >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>

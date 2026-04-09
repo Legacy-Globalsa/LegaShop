@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Search, Menu, X, MapPin, User, LogOut, Package, ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
+import { useCart } from "@/hooks/use-cart";
+import CartDrawer from "@/components/CartDrawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +16,9 @@ import logo from "@/assets/legashop-logo1.png";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const { itemCount } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -62,11 +66,13 @@ const Navbar = () => {
           <button className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition">
             <Search className="w-5 h-5 text-foreground/70" />
           </button>
-          <button className="relative p-2 rounded-lg hover:bg-slate-100 transition">
+          <button onClick={() => setCartOpen(true)} className="relative p-2 rounded-lg hover:bg-slate-100 transition">
             <ShoppingCart className="w-5 h-5 text-foreground/70" />
-            <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 rounded-full bg-destructive text-white text-[10px] flex items-center justify-center font-bold">
-              3
-            </span>
+            {itemCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 rounded-full bg-destructive text-white text-[10px] flex items-center justify-center font-bold">
+                {itemCount > 99 ? "99+" : itemCount}
+              </span>
+            )}
           </button>
 
           {/* Auth: Login button or User dropdown */}
@@ -182,6 +188,7 @@ const Navbar = () => {
         )}
       </AnimatePresence>
     </motion.nav>
+    <CartDrawer open={cartOpen} onOpenChange={setCartOpen} />
     </>
   );
 };

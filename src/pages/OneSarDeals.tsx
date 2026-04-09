@@ -3,6 +3,9 @@ import { Star, Plus, Filter, ArrowUpDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useCart } from "@/hooks/use-cart";
+import { useToast } from "@/hooks/use-toast";
+import { mockProducts } from "@/lib/mock-data";
 
 const oneSarProducts = [
   { id: 1, name: "Jasmine Rice 1kg", oldPrice: "3", image: "https://m.media-amazon.com/images/I/81x%2BQ20uX6L._AC_UL320_.jpg", rating: 4.8, sold: 3240, discount: "-67%" },
@@ -16,6 +19,19 @@ const oneSarProducts = [
 ];
 
 const OneSarDeals = () => {
+  const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const handleQuickAdd = (e: React.MouseEvent, productId: number, productName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const product = mockProducts.find((p) => p.id === productId);
+    if (product) {
+      addItem(product);
+      toast({ title: "Added to cart", description: `1× ${productName}` });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -82,7 +98,10 @@ const OneSarDeals = () => {
                   <span className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-accent text-foreground">
                     1 SAR
                   </span>
-                  <button className="absolute bottom-2 right-2 w-8 h-8 bg-primary z-10 text-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all opacity-0 group-hover:opacity-100 duration-200">
+                  <button
+                    onClick={(e) => handleQuickAdd(e, product.id, product.name)}
+                    className="absolute bottom-2 right-2 w-8 h-8 bg-primary z-10 text-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all opacity-0 group-hover:opacity-100 duration-200"
+                  >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>

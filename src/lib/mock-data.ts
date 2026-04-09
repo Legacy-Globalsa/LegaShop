@@ -5,6 +5,88 @@
 
 import type { Product, Category, Store } from "./api";
 
+export interface MockAddress {
+  id: number;
+  label: "HOME" | "WORK" | "OTHER";
+  street: string;
+  district: string;
+  city: string;
+  latitude: number;
+  longitude: number;
+  is_default: boolean;
+}
+
+export interface MockOrder {
+  id: number;
+  store: number;
+  store_name: string;
+  status: "PENDING" | "CONFIRMED" | "PREPARING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
+  order_type: "LOCAL_RIYADH" | "PH_REMITTANCE";
+  subtotal: string;
+  delivery_fee: string;
+  total: string;
+  notes: string;
+  created_at: string;
+  items: MockOrderItem[];
+  payment: MockPayment;
+}
+
+export interface MockOrderItem {
+  id: number;
+  product: number;
+  product_name: string;
+  product_image: string | null;
+  quantity: number;
+  price: string;
+}
+
+export interface MockPayment {
+  method: "COD" | "MADA" | "VISA" | "APPLE_PAY";
+  status: "PENDING" | "PAID" | "FAILED";
+  reference: string;
+}
+
+export const mockAddresses: MockAddress[] = [
+  { id: 1, label: "HOME", street: "Building 12, Apt 3, Street 15", district: "Al Batha", city: "Riyadh", latitude: 24.6350, longitude: 46.7100, is_default: true },
+  { id: 2, label: "WORK", street: "King Fahd Road, Tower B, Floor 5", district: "Al Olaya", city: "Riyadh", latitude: 24.6900, longitude: 46.6850, is_default: false },
+];
+
+export const mockOrders: MockOrder[] = [
+  {
+    id: 1001, store: 1, store_name: "Abu Khalid Baqala",
+    status: "DELIVERED", order_type: "LOCAL_RIYADH",
+    subtotal: "12.00", delivery_fee: "3.00", total: "15.00", notes: "",
+    created_at: "2026-04-07T14:30:00Z",
+    items: [
+      { id: 1, product: 1, product_name: "Jasmine Rice 1kg", product_image: "https://m.media-amazon.com/images/I/81x%2BQ20uX6L._AC_UL320_.jpg", quantity: 2, price: "1.00" },
+      { id: 2, product: 9, product_name: "Lucky Me Pancit Canton x3", product_image: "https://www.oishi.com.ph/wp-content/uploads/2019/05/lm-pancit-canton-original.png", quantity: 2, price: "5.00" },
+    ],
+    payment: { method: "COD", status: "PAID", reference: "COD-1001" },
+  },
+  {
+    id: 1002, store: 3, store_name: "Pinoy Corner Store",
+    status: "PREPARING", order_type: "LOCAL_RIYADH",
+    subtotal: "7.00", delivery_fee: "3.00", total: "10.00", notes: "Please deliver to gate 2",
+    created_at: "2026-04-09T09:15:00Z",
+    items: [
+      { id: 3, product: 5, product_name: "Oishi Prawn Crackers", product_image: "https://kwalityphilfoodinc.com/wp-content/uploads/2023/12/Oishi-Prawn.png", quantity: 2, price: "1.00" },
+      { id: 4, product: 12, product_name: "Argentina Corned Beef 260g", product_image: "https://cf.shopee.ph/file/sg-11134201-22120-1nq4qh4r6mkv19", quantity: 1, price: "5.00" },
+    ],
+    payment: { method: "MADA", status: "PAID", reference: "MADA-20260409-1002" },
+  },
+  {
+    id: 1003, store: 2, store_name: "Al Noor Mini Mart",
+    status: "PENDING", order_type: "LOCAL_RIYADH",
+    subtotal: "25.00", delivery_fee: "3.00", total: "28.00", notes: "",
+    created_at: "2026-04-09T10:45:00Z",
+    items: [
+      { id: 5, product: 14, product_name: "Nescafe Classic 100g", product_image: "https://m.media-amazon.com/images/I/61JHkrMFyjL._AC_UL320_.jpg", quantity: 1, price: "15.00" },
+      { id: 6, product: 10, product_name: "Silver Swan Soy Sauce 1L", product_image: "https://cf.shopee.ph/file/34b7cda3929c41d7d37d6fb2bf8d2564", quantity: 2, price: "5.00" },
+    ],
+    payment: { method: "COD", status: "PENDING", reference: "" },
+  },
+];
+
 export const mockProducts: Product[] = [
   // ── 1 SAR Deals ──
   {
