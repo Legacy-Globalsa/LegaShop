@@ -343,5 +343,103 @@ export async function fetchOrderById(id: number) {
   return await res.json();
 }
 
+// ──────────────────────────────────────
+// Authenticated API — Addresses
+// ──────────────────────────────────────
+
+export interface Address {
+  id: number;
+  label: "HOME" | "WORK" | "OTHER";
+  street: string;
+  city: string;
+  district: string;
+  latitude: number | null;
+  longitude: number | null;
+  is_default: boolean;
+  created_at: string;
+}
+
+export type AddressInput = Omit<Address, "id" | "created_at">;
+
+export async function fetchAddresses(): Promise<Address[]> {
+  try {
+    const res = await authFetch(`${API_BASE_URL}/addresses/`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    const { mockAddresses } = await import("./mock-data");
+    return mockAddresses.map((a) => ({ ...a, created_at: new Date().toISOString() }));
+  }
+}
+
+export async function createAddress(data: AddressInput): Promise<Address> {
+  const res = await authFetch(`${API_BASE_URL}/addresses/`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(typeof err === "object" ? Object.values(err).flat().join(" ") : "Failed to create address");
+  }
+  return await res.json();
+}
+
+export async function updateAddress(id: number, data: Partial<AddressInput>): Promise<Address> {
+  const res = await authFetch(`${API_BASE_URL}/addresses/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(typeof err === "object" ? Object.values(err).flat().join(" ") : "Failed to update address");
+  }
+  return await res.json();
+}
+
+export async function deleteAddress(id: number): Promise<void> {
+  const res = await authFetch(`${API_BASE_URL}/addresses/${id}/`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete address");
+}
+
+// ──────────────────────────────────────
+// Authenticated API — Profile
+// ──────────────────────────────────────
+
+export async function fetchProfile(): Promise<User> {
+  const res = await authFetch(`${API_BASE_URL}/profile/`);
+  if (!res.ok) throw new Error("Failed to fetch profile");
+  return await res.json();
+}
+
+export async function updateProfile(data: { first_name?: string; phone_number?: string }): Promise<User> {
+  const res = await authFetch(`${API_BASE_URL}/profile/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(typeof err === "object" ? Object.values(err).flat().join(" ") : "Failed to update profile");
+  }
+  return await res.json();
+}
+
+export async function changePassword(data: {
+  current_password: string;
+  new_password: string;
+  confirm_new_password: string;
+}): Promise<{ detail: string }> {
+  const res = await authFetch(`${API_BASE_URL}/change-password/`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(typeof err === "object" ? Object.values(err).flat().join(" ") : "Failed to change password");
+  }
+  return await res.json();
+}
+
 export type { User, AuthTokens, AuthResponse, SignupData, LoginData };
 

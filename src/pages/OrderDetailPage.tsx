@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Package, Clock, CheckCircle, Truck, XCircle, MapPin, CreditCard, Store } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { mockOrders, mockAddresses } from "@/lib/mock-data";
+import { mockOrders } from "@/lib/mock-data";
 import { Separator } from "@/components/ui/separator";
 
 const statusSteps = [
@@ -19,7 +19,6 @@ const statusOrder = ["PENDING", "CONFIRMED", "PREPARING", "OUT_FOR_DELIVERY", "D
 const OrderDetailPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const order = mockOrders.find((o) => o.id === Number(orderId));
-  const address = mockAddresses[0]; // Mock: always use first address
 
   if (!order) {
     return (
@@ -142,8 +141,8 @@ const OrderDetailPage = () => {
               <MapPin className="w-4 h-4 text-primary" />
               Delivery Address
             </h2>
-            <p className="text-sm">{address.street}</p>
-            <p className="text-xs text-muted-foreground">{address.district}, {address.city}</p>
+            <p className="text-sm">Riyadh, Saudi Arabia</p>
+            <p className="text-xs text-muted-foreground">Address details available in order confirmation email</p>
           </motion.section>
 
           {/* Payment */}

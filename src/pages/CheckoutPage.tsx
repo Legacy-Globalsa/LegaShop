@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, CreditCard, Banknote, Smartphone, Check } from "lucide-react";
+import { ArrowLeft, MapPin, CreditCard, Banknote, Smartphone, Check, Plus, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
-import { mockAddresses } from "@/lib/mock-data";
+import { Address, AddressInput, fetchAddresses, createAddress } from "@/lib/api";
+import AddressFormDialog from "@/components/account/AddressFormDialog";
 import { Separator } from "@/components/ui/separator";
 
 type PaymentMethod = "COD" | "MADA" | "VISA";
@@ -21,10 +22,49 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const { items, subtotal, deliveryFee, total, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
-  const [selectedAddress, setSelectedAddress] = useState(mockAddresses.find((a) => a.is_default)?.id ?? mockAddresses[0]?.id);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [addressLoading, setAddressLoading] = useState(true);
+  const [selectedAddress, setSelectedAddress] = useState<number | undefined>();
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>("COD");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [addressSaving, setAddressSaving] = useState(false);
+
+  const loadAddresses = useCallback(async () => {
+    if (!isAuthenticated) {
+      setAddressLoading(false);
+      return;
+    }
+    try {
+      const data = await fetchAddresses();
+      setAddresses(data);
+      const defaultAddr = data.find((a) => a.is_default) ?? data[0];
+      if (defaultAddr) setSelectedAddress(defaultAddr.id);
+    } catch {
+      // fallback already handled in fetchAddresses
+    } finally {
+      setAddressLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    loadAddresses();
+  }, [loadAddresses]);
+
+  const handleAddAddress = async (data: AddressInput) => {
+    setAddressSaving(true);
+    try {
+      const newAddr = await createAddress(data);
+      await loadAddresses();
+      setSelectedAddress(newAddr.id);
+      setAddressDialogOpen(false);
+    } catch {
+      // error handled by API layer
+    } finally {
+      setAddressSaving(false);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -87,37 +127,59 @@ const CheckoutPage = () => {
                   <Link to="/login" className="text-primary font-semibold hover:underline">Log in</Link> to use your saved addresses, or continue as guest.
                 </p>
               )}
-              <div className="space-y-3">
-                {mockAddresses.map((addr) => (
-                  <label
-                    key={addr.id}
-                    className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition ${
-                      selectedAddress === addr.id
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/30"
-                    }`}
+              {addressLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : addresses.length === 0 ? (
+                <div className="text-center py-6 border border-dashed border-border rounded-lg">
+                  <MapPin className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground mb-3">No saved addresses</p>
+                  <button onClick={() => setAddressDialogOpen(true)} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
+                    <Plus className="w-4 h-4" /> Add Address
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-3">
+                    {addresses.map((addr) => (
+                      <label
+                        key={addr.id}
+                        className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition ${
+                          selectedAddress === addr.id
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:border-primary/30"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="address"
+                          className="mt-0.5 accent-primary"
+                          checked={selectedAddress === addr.id}
+                          onChange={() => setSelectedAddress(addr.id)}
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold">{addr.label}</span>
+                            {addr.is_default && (
+                              <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">Default</span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            {addr.street}, {addr.district}, {addr.city}
+                          </p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setAddressDialogOpen(true)}
+                    className="mt-3 inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline"
                   >
-                    <input
-                      type="radio"
-                      name="address"
-                      className="mt-0.5 accent-primary"
-                      checked={selectedAddress === addr.id}
-                      onChange={() => setSelectedAddress(addr.id)}
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold">{addr.label}</span>
-                        {addr.is_default && (
-                          <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-semibold">Default</span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-0.5">
-                        {addr.street}, {addr.district}, {addr.city}
-                      </p>
-                    </div>
-                  </label>
-                ))}
-              </div>
+                    <Plus className="w-4 h-4" /> Add new address
+                  </button>
+                </>
+              )}
             </motion.section>
 
             {/* Payment Method */}
@@ -254,6 +316,13 @@ const CheckoutPage = () => {
         </div>
       </div>
 
+      <AddressFormDialog
+        open={addressDialogOpen}
+        onOpenChange={setAddressDialogOpen}
+        address={null}
+        saving={addressSaving}
+        onSubmit={handleAddAddress}
+      />
       <Footer />
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Search, Menu, X, MapPin, User, LogOut, Package, ChevronDown } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, MapPin, User, LogOut, Package, ChevronDown, Settings } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
@@ -90,6 +90,10 @@ const Navbar = () => {
                   {user?.email}
                 </div>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/account")}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  My Account
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/orders")}>
                   <Package className="w-4 h-4 mr-2" />
                   My Orders
@@ -157,6 +161,9 @@ const Navbar = () => {
                     <div className="px-3 py-2 text-xs text-muted-foreground">
                       Signed in as <span className="font-semibold text-foreground">{user?.first_name}</span>
                     </div>
+                    <Link to="/account" onClick={() => setMobileOpen(false)} className="py-2.5 px-3 rounded-lg text-foreground/80 hover:text-primary hover:bg-primary/5 font-medium text-sm flex items-center gap-2">
+                      <Settings className="w-4 h-4" /> My Account
+                    </Link>
                     <Link to="/orders" onClick={() => setMobileOpen(false)} className="py-2.5 px-3 rounded-lg text-foreground/80 hover:text-primary hover:bg-primary/5 font-medium text-sm flex items-center gap-2">
                       <Package className="w-4 h-4" /> My Orders
                     </Link>
