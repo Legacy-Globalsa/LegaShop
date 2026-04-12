@@ -20,6 +20,8 @@ import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import OrdersPage from "./pages/OrdersPage";
 import OrderDetailPage from "./pages/OrderDetailPage";
 import AccountPage from "./pages/AccountPage";
+import SearchResults from "./pages/SearchResults";
+import StorePage from "./pages/StorePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +46,8 @@ const App = () => (
                 <Route path="/deals/5-sar" element={<FiveSarDeals />} />
                 <Route path="/categories" element={<CategoriesPage />} />
                 <Route path="/stores" element={<StoresPage />} />
+                <Route path="/stores/:id" element={<StorePage />} />
+                <Route path="/search" element={<SearchResults />} />
                 <Route path="/remittance" element={<RemittancePage />} />
                 <Route path="/products/:id" element={<ProductPage />} />
                 <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />

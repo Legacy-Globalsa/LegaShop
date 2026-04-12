@@ -228,3 +228,45 @@ export const mockStores: Store[] = [
   { id: 7, owner: 7, owner_name: "Samir", name: "Al Rashid Grocery", name_ar: "بقالة الراشد", description: "Serving Al Murabba since 2015", phone: "+966507890123", latitude: 24.6600, longitude: 46.7250, delivery_zone: 3.5, avg_delivery_min: 40, rating: 4.4, is_active: true, image_url: null, district: "Al Murabba", created_at: "2026-01-01T00:00:00Z" },
   { id: 8, owner: 8, owner_name: "Dong", name: "Kabayan Store", name_ar: "متجر كبايان", description: "For our fellow Kabayans in Riyadh", phone: "+966508901234", latitude: 24.6360, longitude: 46.7090, delivery_zone: 3.0, avg_delivery_min: 18, rating: 4.7, is_active: true, image_url: null, district: "Al Batha", created_at: "2026-01-01T00:00:00Z" },
 ];
+
+export interface MockReview {
+  id: number;
+  user: number;
+  reviewer_name: string;
+  store: number;
+  product: number | null;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
+
+export const mockReviews: MockReview[] = [
+  // Product reviews
+  { id: 1, user: 10, reviewer_name: "Maria Santos", store: 1, product: 1, rating: 5, comment: "Best jasmine rice at this price! Sulit na sulit.", created_at: "2026-03-15T10:00:00Z" },
+  { id: 2, user: 11, reviewer_name: "Jun Reyes", store: 1, product: 1, rating: 4, comment: "Good quality for 1 SAR. Will buy again.", created_at: "2026-03-18T14:30:00Z" },
+  { id: 3, user: 12, reviewer_name: "Elena Cruz", store: 1, product: 2, rating: 5, comment: "Century Tuna never disappoints. Great deal!", created_at: "2026-03-20T09:15:00Z" },
+  { id: 4, user: 13, reviewer_name: "Ahmed Ali", store: 2, product: 3, rating: 4, comment: "Skyflakes is a staple, happy to find it here.", created_at: "2026-03-22T16:00:00Z" },
+  { id: 5, user: 14, reviewer_name: "Dong Villanueva", store: 1, product: 4, rating: 5, comment: "Perfect for sinigang! Lasa ng bahay.", created_at: "2026-03-25T11:45:00Z" },
+  { id: 6, user: 15, reviewer_name: "Rey Magno", store: 3, product: 5, rating: 4, comment: "Crunchy and tasty. My kids love it.", created_at: "2026-03-28T08:20:00Z" },
+  { id: 7, user: 10, reviewer_name: "Maria Santos", store: 1, product: 9, rating: 5, comment: "Pancit Canton is life! Best instant noodle.", created_at: "2026-04-01T12:00:00Z" },
+  { id: 8, user: 11, reviewer_name: "Jun Reyes", store: 2, product: 10, rating: 5, comment: "Silver Swan is the only soy sauce for Filipino cooking.", created_at: "2026-04-02T15:30:00Z" },
+  { id: 9, user: 16, reviewer_name: "Carlo Mendoza", store: 1, product: 11, rating: 4, comment: "Milo for energy! Good price.", created_at: "2026-04-03T09:00:00Z" },
+  { id: 10, user: 12, reviewer_name: "Elena Cruz", store: 3, product: 12, rating: 5, comment: "Argentina corned beef is the best. Perfect for sinangag.", created_at: "2026-04-04T13:15:00Z" },
+  { id: 11, user: 17, reviewer_name: "Grace Tan", store: 1, product: 13, rating: 4, comment: "Bear Brand for my daily milk. Affordable here.", created_at: "2026-04-05T07:45:00Z" },
+  { id: 12, user: 13, reviewer_name: "Ahmed Ali", store: 2, product: 14, rating: 5, comment: "Perfect coffee for morning shift. Strong flavor.", created_at: "2026-04-06T06:30:00Z" },
+  { id: 13, user: 14, reviewer_name: "Dong Villanueva", store: 2, product: 7, rating: 4, comment: "Boy Bawang is addictive!", created_at: "2026-04-07T18:00:00Z" },
+  { id: 14, user: 15, reviewer_name: "Rey Magno", store: 3, product: 8, rating: 5, comment: "Ligo sardines reminds me of home. Masarap!", created_at: "2026-04-08T10:30:00Z" },
+  { id: 15, user: 18, reviewer_name: "Mario de Leon", store: 1, product: 6, rating: 5, comment: "Magic Sarap makes everything taste better.", created_at: "2026-04-09T14:00:00Z" },
+  // Store-only reviews (no product)
+  { id: 16, user: 10, reviewer_name: "Maria Santos", store: 1, product: null, rating: 5, comment: "Abu Khalid always has fresh Filipino products. Fast delivery!", created_at: "2026-03-10T09:00:00Z" },
+  { id: 17, user: 11, reviewer_name: "Jun Reyes", store: 1, product: null, rating: 4, comment: "Good selection, fair prices. My go-to baqala.", created_at: "2026-03-12T11:30:00Z" },
+  { id: 18, user: 12, reviewer_name: "Elena Cruz", store: 2, product: null, rating: 4, comment: "Al Noor has nice variety. Delivery could be faster.", created_at: "2026-03-14T08:45:00Z" },
+  { id: 19, user: 13, reviewer_name: "Ahmed Ali", store: 2, product: null, rating: 5, comment: "Great store with helpful staff. Always a pleasant experience.", created_at: "2026-03-16T14:00:00Z" },
+  { id: 20, user: 14, reviewer_name: "Dong Villanueva", store: 3, product: null, rating: 5, comment: "Pinoy Corner is the best for Filipino products! Parang nasa Pilipinas.", created_at: "2026-03-18T10:15:00Z" },
+  { id: 21, user: 15, reviewer_name: "Rey Magno", store: 3, product: null, rating: 5, comment: "Amazing store! Everything a Kabayan needs.", created_at: "2026-03-20T16:30:00Z" },
+  { id: 22, user: 16, reviewer_name: "Carlo Mendoza", store: 4, product: null, rating: 4, comment: "Riyadh Sari-Sari has that authentic feel. Love it.", created_at: "2026-03-22T12:00:00Z" },
+  { id: 23, user: 17, reviewer_name: "Grace Tan", store: 5, product: null, rating: 4, comment: "King Baqala has good prices. Decent selection.", created_at: "2026-03-24T09:45:00Z" },
+  { id: 24, user: 18, reviewer_name: "Mario de Leon", store: 6, product: null, rating: 5, comment: "Manila Market is like being back in Manila. So many choices!", created_at: "2026-03-26T15:00:00Z" },
+  { id: 25, user: 10, reviewer_name: "Maria Santos", store: 7, product: null, rating: 4, comment: "Al Rashid is reliable. A bit far but worth it.", created_at: "2026-03-28T08:00:00Z" },
+  { id: 26, user: 11, reviewer_name: "Jun Reyes", store: 8, product: null, rating: 5, comment: "Kabayan Store delivers quick. Great for emergencies.", created_at: "2026-03-30T11:00:00Z" },
+];

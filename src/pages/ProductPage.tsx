@@ -132,10 +132,10 @@ const ProductPage = () => {
                 <Tag className="w-3 h-3" />
                 {product.category_name}
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-muted text-muted-foreground text-xs font-semibold">
+              <Link to={`/stores/${product.store}`} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-muted text-muted-foreground text-xs font-semibold hover:bg-muted/80 transition">
                 <Store className="w-3 h-3" />
                 {product.store_name}
-              </span>
+              </Link>
             </div>
 
             <h1 className="text-2xl md:text-3xl font-extrabold text-foreground mb-1">
@@ -245,11 +245,40 @@ const ProductPage = () => {
                 {review.comment && (
                   <p className="text-sm text-muted-foreground">{review.comment}</p>
                 )}
+                <p className="text-[10px] text-muted-foreground/60 mt-2">
+                  {new Date(review.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                </p>
               </div>
             ))}
           </div>
         </section>
       )}
+
+      {/* Write a Review (stub form) */}
+      <section className="container pb-12">
+        <div className="p-6 rounded-xl border border-border bg-card">
+          <h3 className="font-bold text-base mb-3">Write a Review</h3>
+          <div className="flex items-center gap-1 mb-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className="w-5 h-5 text-muted-foreground/30 cursor-pointer hover:text-accent transition"
+              />
+            ))}
+          </div>
+          <textarea
+            placeholder="Share your experience with this product..."
+            className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+            rows={3}
+          />
+          <button
+            className="mt-2 px-5 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition"
+            onClick={() => toast({ title: "Review submitted!", description: "Thank you for your feedback." })}
+          >
+            Submit Review
+          </button>
+        </div>
+      </section>
 
       <Footer />
     </div>

@@ -233,7 +233,9 @@ export async function fetchProducts(params?: Record<string, string>): Promise<Pr
     const query = params ? `?${new URLSearchParams(params).toString()}` : "";
     const res = await fetch(`${API_BASE_URL}/products/${query}`);
     if (!res.ok) throw new Error();
-    return await res.json();
+    const data = await res.json();
+    if (data.length > 0) return data;
+    throw new Error("empty");
   } catch {
     const { mockProducts } = await import("./mock-data");
     return mockProducts;
@@ -255,7 +257,9 @@ export async function fetchDeals(dealType: string): Promise<Product[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/products/deals/?deal_type=${dealType}`);
     if (!res.ok) throw new Error();
-    return await res.json();
+    const data = await res.json();
+    if (data.length > 0) return data;
+    throw new Error("empty");
   } catch {
     const { mockProducts } = await import("./mock-data");
     return mockProducts.filter((p) => p.is_deal && p.deal_type === dealType);
@@ -270,7 +274,9 @@ export async function fetchCategories(): Promise<Category[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/categories/`);
     if (!res.ok) throw new Error();
-    return await res.json();
+    const data = await res.json();
+    if (data.length > 0) return data;
+    throw new Error("empty");
   } catch {
     const { mockCategories } = await import("./mock-data");
     return mockCategories;
@@ -285,7 +291,9 @@ export async function fetchStores(): Promise<Store[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/stores/`);
     if (!res.ok) throw new Error();
-    return await res.json();
+    const data = await res.json();
+    if (data.length > 0) return data;
+    throw new Error("empty");
   } catch {
     const { mockStores } = await import("./mock-data");
     return mockStores;
@@ -303,6 +311,19 @@ export async function fetchStoreById(id: number): Promise<Store | null> {
   }
 }
 
+export async function fetchStoreProducts(storeId: number): Promise<Product[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/products/?store=${storeId}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    if (data.length > 0) return data;
+    throw new Error("empty");
+  } catch {
+    const { mockProducts } = await import("./mock-data");
+    return mockProducts.filter((p) => p.store === storeId);
+  }
+}
+
 // ──────────────────────────────────────
 // Public API — Reviews
 // ──────────────────────────────────────
@@ -311,9 +332,12 @@ export async function fetchProductReviews(productId: number): Promise<Review[]> 
   try {
     const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews/`);
     if (!res.ok) throw new Error();
-    return await res.json();
+    const data = await res.json();
+    if (data.length > 0) return data;
+    throw new Error("empty");
   } catch {
-    return [];
+    const { mockReviews } = await import("./mock-data");
+    return mockReviews.filter((r) => r.product === productId);
   }
 }
 
@@ -321,9 +345,12 @@ export async function fetchStoreReviews(storeId: number): Promise<Review[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/stores/${storeId}/reviews/`);
     if (!res.ok) throw new Error();
-    return await res.json();
+    const data = await res.json();
+    if (data.length > 0) return data;
+    throw new Error("empty");
   } catch {
-    return [];
+    const { mockReviews } = await import("./mock-data");
+    return mockReviews.filter((r) => r.store === storeId);
   }
 }
 

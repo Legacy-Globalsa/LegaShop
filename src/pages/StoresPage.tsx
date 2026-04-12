@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { MapPin, Clock, Star, Search } from "lucide-react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import baqalaImg from "@/assets/baqala-store.jpg";
@@ -16,6 +18,13 @@ const stores = [
 ];
 
 const StoresPage = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredStores = stores.filter((store) =>
+    store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    store.district.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -50,6 +59,8 @@ const StoresPage = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search stores..."
               className="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
@@ -61,10 +72,11 @@ const StoresPage = () => {
       <section className="py-8">
         <div className="container">
           <p className="text-sm text-muted-foreground mb-4">
-            <span className="font-bold text-foreground">{stores.length}</span> stores near you
+            <span className="font-bold text-foreground">{filteredStores.length}</span> stores near you
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stores.map((store, i) => (
+            {filteredStores.map((store, i) => (
+              <Link to={`/stores/${i + 1}`} key={store.name}>
               <motion.div
                 key={store.name}
                 initial={{ opacity: 0, y: 30 }}
@@ -98,11 +110,12 @@ const StoresPage = () => {
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground">{store.products} products</div>
-                  <button className="w-full py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 transition-opacity">
+                  <span className="block w-full py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold text-center hover:opacity-90 transition-opacity">
                     Browse Store
-                  </button>
+                  </span>
                 </div>
               </motion.div>
+              </Link>
             ))}
           </div>
         </div>

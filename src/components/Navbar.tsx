@@ -17,6 +17,7 @@ import logo from "@/assets/legashop-logo1.png";
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { user, isAuthenticated, logout } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
@@ -47,14 +48,25 @@ const Navbar = () => {
 
         {/* Search Bar - Desktop */}
         <div className="hidden md:flex flex-1 max-w-xl mx-6">
-          <div className="relative w-full">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                setSearchQuery("");
+              }
+            }}
+            className="relative w-full"
+          >
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search for products, brands, and stores..."
               className="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
             />
-          </div>
+          </form>
         </div>
 
         {/* Actions */}
@@ -63,7 +75,7 @@ const Navbar = () => {
             <MapPin className="w-3.5 h-3.5" />
             <span>Al Batha, Riyadh</span>
           </button>
-          <button className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition">
+          <button className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition" onClick={() => navigate("/search")}>
             <Search className="w-5 h-5 text-foreground/70" />
           </button>
           <button onClick={() => setCartOpen(true)} className="relative p-2 rounded-lg hover:bg-slate-100 transition">
