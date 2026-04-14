@@ -1,10 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Package, Clock, CheckCircle, Truck, XCircle, MapPin, CreditCard, Store } from "lucide-react";
+import { ArrowLeft, Package, Clock, CheckCircle, Truck, XCircle, MapPin, CreditCard, Store, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { mockOrders } from "@/lib/mock-data";
+import { useOrder, useCancelOrder } from "@/hooks/use-api";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 const statusSteps = [
   { key: "PENDING", label: "Pending", icon: Clock },
@@ -18,9 +19,37 @@ const statusOrder = ["PENDING", "CONFIRMED", "PREPARING", "OUT_FOR_DELIVERY", "D
 
 const OrderDetailPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const order = mockOrders.find((o) => o.id === Number(orderId));
+  const { data: order, isLoading, error } = useOrder(Number(orderId));
+  const cancelMutation = useCancelOrder();
+  const { toast } = useToast();
 
-  if (!order) {
+  const handleCancel = async () => {
+    if (!order) return;
+    try {
+      await cancelMutation.mutateAsync(order.id);
+      toast({ title: "Order cancelled", description: `Order #${order.id} has been cancelled.` });
+    } catch (err) {
+      toast({
+        title: "Cancel failed",
+        description: err instanceof Error ? err.message : "Could not cancel order.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container py-20 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !order) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -68,8 +97,12 @@ const OrderDetailPage = () => {
             </p>
           </div>
           {order.status === "PENDING" && (
-            <button className="px-4 py-2 text-sm font-semibold text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/5 transition">
-              Cancel Order
+            <button
+              onClick={handleCancel}
+              disabled={cancelMutation.isPending}
+              className="px-4 py-2 text-sm font-semibold text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/5 transition disabled:opacity-60"
+            >
+              {cancelMutation.isPending ? "Cancelling..." : "Cancel Order"}
             </button>
           )}
         </div>
@@ -156,11 +189,11 @@ const OrderDetailPage = () => {
               <CreditCard className="w-4 h-4 text-primary" />
               Payment
             </h2>
-            <p className="text-sm">{order.payment.method}</p>
+            <p className="text-sm">{order.payment?.method ?? "—"}</p>
             <p className="text-xs text-muted-foreground">
-              Status: <span className={order.payment.status === "PAID" ? "text-green-600 font-semibold" : "text-yellow-600 font-semibold"}>{order.payment.status}</span>
+              Status: <span className={order.payment?.status === "PAID" ? "text-green-600 font-semibold" : "text-yellow-600 font-semibold"}>{order.payment?.status ?? "—"}</span>
             </p>
-            {order.payment.reference && (
+            {order.payment?.reference && (
               <p className="text-[10px] text-muted-foreground mt-1">Ref: {order.payment.reference}</p>
             )}
           </motion.section>
@@ -190,10 +223,10 @@ const OrderDetailPage = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{item.product_name}</p>
-                  <p className="text-xs text-muted-foreground">{item.quantity} × {item.price} SAR</p>
+                  <p className="text-xs text-muted-foreground">{item.quantity} × {item.price_at_order} SAR</p>
                 </div>
                 <span className="text-sm font-bold">
-                  {(item.quantity * parseFloat(item.price)).toFixed(2)} SAR
+                  {item.line_total} SAR
                 </span>
               </div>
             ))}
@@ -217,12 +250,12 @@ const OrderDetailPage = () => {
             </div>
           </div>
 
-          {order.notes && (
+          {order.note && (
             <>
               <Separator className="my-4" />
               <div>
                 <h3 className="text-xs font-semibold text-muted-foreground mb-1">Order Notes</h3>
-                <p className="text-sm">{order.notes}</p>
+                <p className="text-sm">{order.note}</p>
               </div>
             </>
           )}

@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { fetchProductById, fetchProductReviews, type Product, type Review } from "@/lib/api";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 const ProductPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,7 @@ const ProductPage = () => {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { requireAuth } = useRequireAuth();
 
   useEffect(() => {
     if (!id) return;
@@ -205,6 +207,7 @@ const ProductPage = () => {
               <button
                 disabled={!inStock}
                 onClick={() => {
+                  if (!requireAuth()) return;
                   addItem(product, quantity);
                   toast({ title: "Added to cart", description: `${quantity}× ${product.name}` });
                   setQuantity(1);

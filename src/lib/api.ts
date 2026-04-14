@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
 interface ApiResponse<T> {
   data?: T;
@@ -141,10 +141,31 @@ export async function apiGoogleLogin(idToken: string): Promise<ApiResponse<AuthR
 }
 
 // ──────────────────────────────────────
-// Authenticated fetch helper
+// Authenticated fetch helper with token refresh
 // ──────────────────────────────────────
 
-async function authFetch(url: string, options: RequestInit = {}) {
+let refreshPromise: Promise<boolean> | null = null;
+
+async function tryRefreshToken(): Promise<boolean> {
+  const refreshToken = localStorage.getItem("refresh_token");
+  if (!refreshToken) return false;
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/token/refresh/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    localStorage.setItem("access_token", data.access);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -153,7 +174,25 @@ async function authFetch(url: string, options: RequestInit = {}) {
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-  return fetch(url, { ...options, headers });
+
+  let res = await fetch(url, { ...options, headers });
+
+  // If 401, try refreshing the token once
+  if (res.status === 401 && token) {
+    if (!refreshPromise) {
+      refreshPromise = tryRefreshToken().finally(() => { refreshPromise = null; });
+    }
+    const refreshed = await refreshPromise;
+    if (refreshed) {
+      headers["Authorization"] = `Bearer ${getAccessToken()}`;
+      res = await fetch(url, { ...options, headers });
+    } else {
+      // Refresh failed — force logout
+      logout();
+    }
+  }
+
+  return res;
 }
 
 // ──────────────────────────────────────
@@ -253,16 +292,21 @@ export async function fetchProductById(id: number): Promise<Product | null> {
   }
 }
 
-export async function fetchDeals(dealType: string): Promise<Product[]> {
+export async function fetchDeals(dealType?: string): Promise<Product[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/products/deals/?deal_type=${dealType}`);
+    const url = dealType
+      ? `${API_BASE_URL}/products/deals/?deal_type=${dealType}`
+      : `${API_BASE_URL}/products/deals/`;
+    const res = await fetch(url);
     if (!res.ok) throw new Error();
     const data = await res.json();
     if (data.length > 0) return data;
     throw new Error("empty");
   } catch {
     const { mockProducts } = await import("./mock-data");
-    return mockProducts.filter((p) => p.is_deal && p.deal_type === dealType);
+    return dealType
+      ? mockProducts.filter((p) => p.is_deal && p.deal_type === dealType)
+      : mockProducts.filter((p) => p.is_deal);
   }
 }
 
@@ -358,15 +402,116 @@ export async function fetchStoreReviews(storeId: number): Promise<Review[]> {
 // Authenticated API — Orders
 // ──────────────────────────────────────
 
-export async function fetchOrders() {
-  const res = await authFetch(`${API_BASE_URL}/orders/`);
-  if (!res.ok) throw new Error("Failed to fetch orders");
+export interface Order {
+  id: number;
+  user: number;
+  store: number;
+  store_name: string;
+  delivery_address: number;
+  order_type: "LOCAL_RIYADH" | "PH_REMITTANCE";
+  status: "PENDING" | "CONFIRMED" | "PREPARING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
+  subtotal: string;
+  delivery_fee: string;
+  total: string;
+  currency: string;
+  note: string;
+  items: OrderItem[];
+  payment: OrderPayment;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrderItem {
+  id: number;
+  product: number;
+  product_name: string;
+  product_image: string | null;
+  quantity: number;
+  price_at_order: string;
+  line_total: string;
+}
+
+export interface OrderPayment {
+  id: number;
+  method: "COD" | "MADA" | "VISA" | "APPLE_PAY";
+  status: "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+  amount: string;
+  currency: string;
+  reference: string;
+  paid_at: string | null;
+  created_at: string;
+}
+
+export interface CreateOrderData {
+  store: number;
+  delivery_address: number;
+  order_type?: string;
+  payment_method?: string;
+  note?: string;
+  items: { product: number; quantity: number }[];
+}
+
+export async function fetchOrders(): Promise<Order[]> {
+  try {
+    const res = await authFetch(`${API_BASE_URL}/orders/`);
+    if (!res.ok) throw new Error("Failed to fetch orders");
+    return await res.json();
+  } catch {
+    const { mockOrders } = await import("./mock-data");
+    return mockOrders as unknown as Order[];
+  }
+}
+
+export async function fetchOrderById(id: number): Promise<Order> {
+  const res = await authFetch(`${API_BASE_URL}/orders/${id}/`);
+  if (!res.ok) throw new Error("Failed to fetch order");
   return await res.json();
 }
 
-export async function fetchOrderById(id: number) {
-  const res = await authFetch(`${API_BASE_URL}/orders/${id}/`);
-  if (!res.ok) throw new Error("Failed to fetch order");
+export async function createOrder(data: CreateOrderData): Promise<Order> {
+  const res = await authFetch(`${API_BASE_URL}/orders/create/`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(typeof err === "object" ? (err.error || Object.values(err).flat().join(" ")) : "Failed to create order");
+  }
+  return await res.json();
+}
+
+export async function cancelOrder(id: number): Promise<Order> {
+  const res = await authFetch(`${API_BASE_URL}/orders/${id}/cancel/`, {
+    method: "PUT",
+    body: JSON.stringify({ status: "CANCELLED" }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(typeof err === "object" ? Object.values(err).flat().join(" ") : "Failed to cancel order");
+  }
+  return await res.json();
+}
+
+// ──────────────────────────────────────
+// Authenticated API — Reviews
+// ──────────────────────────────────────
+
+export interface CreateReviewData {
+  store: number;
+  product?: number;
+  rating: number;
+  comment: string;
+}
+
+export async function createReview(data: CreateReviewData): Promise<Review> {
+  const res = await authFetch(`${API_BASE_URL}/reviews/`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(typeof err === "object" ? Object.values(err).flat().join(" ") : "Failed to submit review");
+  }
   return await res.json();
 }
 

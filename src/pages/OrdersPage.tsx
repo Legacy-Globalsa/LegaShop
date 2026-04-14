@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle, ShoppingBag } from "lucide-react";
+import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle, ShoppingBag, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { mockOrders } from "@/lib/mock-data";
+import { useOrders } from "@/hooks/use-api";
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   PENDING: { label: "Pending", color: "bg-yellow-100 text-yellow-700", icon: Clock },
@@ -15,7 +15,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.E
 };
 
 const OrdersPage = () => {
-  const orders = mockOrders;
+  const { data: orders = [], isLoading, error } = useOrders();
 
   return (
     <div className="min-h-screen bg-background">
@@ -27,7 +27,17 @@ const OrdersPage = () => {
           My Orders
         </h1>
 
-        {orders.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <span className="text-6xl block mb-4">😕</span>
+            <h2 className="text-xl font-bold mb-2">Could not load orders</h2>
+            <p className="text-muted-foreground mb-6">Please try again later or check your connection.</p>
+          </div>
+        ) : orders.length === 0 ? (
           <div className="text-center py-20">
             <span className="text-6xl block mb-4">📦</span>
             <h2 className="text-xl font-bold mb-2">No orders yet</h2>
@@ -94,7 +104,7 @@ const OrdersPage = () => {
 
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground">
-                        {order.items.reduce((s, i) => s + i.quantity, 0)} items · {order.payment.method}
+                        {order.items.reduce((s, i) => s + i.quantity, 0)} items · {order.payment?.method ?? "COD"}
                       </span>
                       <span className="text-sm font-bold text-destructive">{order.total} SAR</span>
                     </div>

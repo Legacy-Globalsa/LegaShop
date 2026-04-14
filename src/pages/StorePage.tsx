@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { fetchStoreById, fetchStoreProducts, fetchStoreReviews, type Store, type Product, type Review } from "@/lib/api";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 type SortOption = "relevance" | "price-low" | "price-high" | "deals";
 
@@ -51,9 +52,12 @@ const StorePage = () => {
     }
   })();
 
+  const { requireAuth } = useRequireAuth();
+
   const handleQuickAdd = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!requireAuth()) return;
     addItem(product);
     toast({ title: "Added to cart", description: `1× ${product.name}` });
   };

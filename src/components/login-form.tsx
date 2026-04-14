@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,7 +25,10 @@ export function LoginForm({
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const { toast } = useToast()
+
+  const redirectTo = (location.state as { from?: string })?.from || "/"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,7 +52,7 @@ export function LoginForm({
         title: "Welcome back!",
         description: `Logged in as ${result.data.user.first_name}`,
       })
-      navigate("/")
+      navigate(redirectTo)
     }
 
     setLoading(false)
@@ -127,7 +130,7 @@ export function LoginForm({
                         title: "Welcome!",
                         description: `Logged in as ${result.data.user.first_name}`,
                       })
-                      navigate("/")
+                      navigate(redirectTo)
                     }
                     setLoading(false)
                   }}

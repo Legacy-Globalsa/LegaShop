@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, CreditCard, Banknote, Smartphone, Check, Plus, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, CreditCard, Banknote, Smartphone, Check, Plus, Loader2, AlertTriangle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
-import { Address, AddressInput, fetchAddresses, createAddress } from "@/lib/api";
+import { Address, AddressInput, fetchAddresses, createAddress, createOrder } from "@/lib/api";
 import AddressFormDialog from "@/components/account/AddressFormDialog";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 type PaymentMethod = "COD" | "MADA" | "VISA";
 
@@ -22,6 +23,7 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const { items, subtotal, deliveryFee, total, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressLoading, setAddressLoading] = useState(true);
   const [selectedAddress, setSelectedAddress] = useState<number | undefined>();
@@ -87,12 +89,44 @@ const CheckoutPage = () => {
   }
 
   const handlePlaceOrder = async () => {
+    if (!selectedAddress) {
+      toast({ title: "No address selected", description: "Please select or add a delivery address.", variant: "destructive" });
+      return;
+    }
+    if (!isAuthenticated) {
+      toast({ title: "Login required", description: "Please log in to place an order.", variant: "destructive" });
+      return;
+    }
+
+    // All cart items must be from the same store
+    const storeId = items[0]?.product.store;
+    const mixedStores = items.some((i) => i.product.store !== storeId);
+    if (mixedStores) {
+      toast({ title: "Multiple stores", description: "Your cart contains items from different stores. Please remove items so all are from the same store.", variant: "destructive" });
+      return;
+    }
+
     setSubmitting(true);
-    // Simulate order creation (replace with real API in Phase 4)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    const orderId = Math.floor(1000 + Math.random() * 9000);
-    clearCart();
-    navigate(`/order-confirmation/${orderId}`);
+    try {
+      const order = await createOrder({
+        store: storeId,
+        delivery_address: selectedAddress,
+        order_type: "LOCAL_RIYADH",
+        payment_method: selectedPayment,
+        note: notes,
+        items: items.map((i) => ({ product: i.product.id, quantity: i.quantity })),
+      });
+      clearCart();
+      navigate(`/order-confirmation/${order.id}`);
+    } catch (err) {
+      toast({
+        title: "Order failed",
+        description: err instanceof Error ? err.message : "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -108,6 +142,17 @@ const CheckoutPage = () => {
         </nav>
 
         <h1 className="text-2xl font-extrabold mb-6">Checkout</h1>
+
+        {/* Multi-store warning */}
+        {items.length > 0 && new Set(items.map((i) => i.product.store)).size > 1 && (
+          <div className="flex items-start gap-3 p-4 mb-6 rounded-lg border border-yellow-300 bg-yellow-50 text-yellow-800">
+            <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold">Items from multiple stores</p>
+              <p className="text-xs mt-0.5">Your cart contains items from different stores. Orders can only be placed with a single store. Please remove some items from your cart.</p>
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left: Address + Payment */}

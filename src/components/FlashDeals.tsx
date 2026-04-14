@@ -1,19 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Flame, Plus, Star, ChevronRight } from "lucide-react";
+import { Flame, Plus, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
-import { mockProducts } from "@/lib/mock-data";
-
-const flashDeals = [
-  { id: 1, name: "Jasmine Rice 1kg", price: "1", oldPrice: "3", image: "https://m.media-amazon.com/images/I/81x%2BQ20uX6L._AC_UL320_.jpg", tag: "1 SAR", discount: "-67%" },
-  { id: 9, name: "Lucky Me Pancit Canton x3", price: "5", oldPrice: "8", image: "https://luckyme.ph/static/uploads/products/product_12_4e90b3e9.webp", tag: "5 SAR", discount: "-38%" },
-  { id: 2, name: "Century Tuna 155g", price: "1", oldPrice: "2.5", image: "https://images.openfoodfacts.org/images/products/074/848/510/0401/front_en.54.400.jpg", tag: "1 SAR", discount: "-60%" },
-  { id: 10, name: "Silver Swan Soy Sauce", price: "5", oldPrice: "7", image: "https://kwalityphilfoodinc.com/wp-content/uploads/2023/12/Silver-Swan-Soy-Sauce.png", tag: "5 SAR", discount: "-29%" },
-  { id: 11, name: "Milo Sachet x10", price: "5", oldPrice: "9", image: "https://images.openfoodfacts.org/images/products/885/001/105/5375/front_en.3.400.jpg", tag: "5 SAR", discount: "-44%" },
-  { id: 3, name: "Skyflakes Crackers", price: "1", oldPrice: "2", image: "https://down-my.img.susercontent.com/file/f41385d87567b769131b8b1db3e25878", tag: "1 SAR", discount: "-50%" },
-];
+import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useDeals } from "@/hooks/use-api";
+import type { Product } from "@/lib/api";
 
 const useCountdown = () => {
   const [time, setTime] = useState({ hours: 0, minutes: 0, seconds: 0 });
@@ -47,15 +40,15 @@ const FlashDeals = () => {
   const countdown = useCountdown();
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { requireAuth } = useRequireAuth();
+  const { data: deals = [], isLoading } = useDeals();
 
-  const handleQuickAdd = (e: React.MouseEvent, dealId: number, dealName: string) => {
+  const handleQuickAdd = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-    const product = mockProducts.find((p) => p.id === dealId);
-    if (product) {
-      addItem(product);
-      toast({ title: "Added to cart", description: `1× ${dealName}` });
-    }
+    if (!requireAuth()) return;
+    addItem(product);
+    toast({ title: "Added to cart", description: `1× ${product.name}` });
   };
 
   return (
@@ -93,8 +86,19 @@ const FlashDeals = () => {
         </div>
 
         {/* Product scroll */}
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        ) : deals.length === 0 ? (
+          <p className="text-center text-muted-foreground py-12">No flash deals right now.</p>
+        ) : (
         <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide md:grid md:grid-cols-6 md:overflow-visible">
-          {flashDeals.map((deal, i) => (
+          {deals.slice(0, 6).map((deal, i) => {
+            const salePrice = deal.sale_price ? parseFloat(deal.sale_price) : null;
+            const originalPrice = parseFloat(deal.price);
+            const discount = salePrice ? Math.round(((originalPrice - salePrice) / originalPrice) * 100) : 0;
+            return (
             <Link to={`/products/${deal.id}`} key={deal.id}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -105,13 +109,15 @@ const FlashDeals = () => {
             >
               <div className="relative mb-3">
                 <div className="w-full aspect-square rounded-lg bg-slate-50 overflow-hidden">
-                  <img src={deal.image} alt={deal.name} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
+                  <img src={deal.image_url || ""} alt={deal.name} className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300" />
                 </div>
+                {discount > 0 && (
                 <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-destructive text-white">
-                  {deal.discount}
+                  -{discount}%
                 </span>
+                )}
                 <button
-                  onClick={(e) => handleQuickAdd(e, deal.id, deal.name)}
+                  onClick={(e) => handleQuickAdd(e, deal)}
                   className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary z-10 text-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all opacity-0 group-hover:opacity-100 duration-200"
                 >
                   <Plus className="w-4 h-4" />
@@ -121,25 +127,22 @@ const FlashDeals = () => {
                 <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
                   {deal.name}
                 </h3>
-                <div className="flex items-center gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-2.5 h-2.5 text-accent" fill="currentColor" />
-                  ))}
-                </div>
                 <div className="pt-1 mt-auto">
                   <span className="font-extrabold text-lg text-destructive leading-none">
-                    {deal.price} <span className="text-xs font-bold">SAR</span>
+                    {salePrice ?? originalPrice} <span className="text-xs font-bold">SAR</span>
                   </span>
+                  {salePrice && (
                   <span className="text-[10px] text-muted-foreground line-through font-medium ml-1.5">
-                    {deal.oldPrice} SAR
+                    {originalPrice} SAR
                   </span>
+                  )}
                 </div>
                 {/* Progress bar */}
                 <div className="mt-1.5">
                   <div className="h-1.5 rounded-full bg-red-100 overflow-hidden">
                     <div
                       className="h-full rounded-full bg-destructive"
-                      style={{ width: `${60 + Math.random() * 30}%` }}
+                      style={{ width: `${60 + ((deal.id * 17) % 30)}%` }}
                     />
                   </div>
                   <p className="text-[9px] text-muted-foreground mt-0.5">Selling fast!</p>
@@ -147,8 +150,10 @@ const FlashDeals = () => {
               </div>
             </motion.div>
             </Link>
-          ))}
+            );
+          })}
         </div>
+        )}
 
         {/* Mobile see all */}
         <Link

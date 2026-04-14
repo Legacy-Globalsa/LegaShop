@@ -1,37 +1,24 @@
 import { motion } from "framer-motion";
-import { Star, Plus, ChevronRight } from "lucide-react";
+import { Plus, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
-import { mockProducts } from "@/lib/mock-data";
-
-const products = [
-  { id: 16, name: "CDO Karne Norte 150g", price: "3", oldPrice: "5", image: "https://images.freshop.ncrcloud.com/1564405684702539926/6104e49b211569587b50b3bd5f32d422_large.png", rating: 4.8, sold: 1240, tag: "Best Seller" },
-  { id: 12, name: "Argentina Corned Beef 260g", price: "5", oldPrice: "8", image: "https://sdcglobalchoice.com/wp-content/uploads/2021/07/arg-corned-beef-260g-e1626175755764.jpg", rating: 4.7, sold: 980, tag: "Popular" },
-  { id: 4, name: "Knorr Sinigang Mix", price: "1", oldPrice: "2.5", image: "https://pinoywarehouse.com.au/wp-content/uploads/2023/12/knorr-sinigang-sa-sampalok-mix-gabi-tamarind-soup-mix-with-taro-44g-600x600.jpg", rating: 4.9, sold: 2100, tag: "Top Pick" },
-  { id: 17, name: "Del Monte Tomato Sauce", price: "3", oldPrice: "4.5", image: "https://filipino.is/wp-content/uploads/2022/07/450540_7727140b-f115-44e5-8315-acff0e708571.jpg", rating: 4.6, sold: 756, tag: "" },
-  { id: 13, name: "Bear Brand Milk 300g", price: "5", oldPrice: "8", image: "http://cdn.shopify.com/s/files/1/0358/1335/9748/products/4800361410892_7a524b56-0e5c-480d-a2b3-8247103d881c_1024x.jpg?v=1678679069", rating: 4.8, sold: 1580, tag: "Popular" },
-  { id: 18, name: "UFC Banana Ketchup", price: "3", oldPrice: "5", image: "https://images.openfoodfacts.org/images/products/480/777/012/2194/front_en.16.400.jpg", rating: 4.5, sold: 892, tag: "" },
-  { id: 19, name: "Joy Dishwashing Liquid", price: "2", oldPrice: "3.5", image: "https://medias.watsons.com.ph/publishing/WTCPH-50050841-front-zoom.jpg?version=1734338211", rating: 4.4, sold: 1340, tag: "" },
-  { id: 14, name: "Nescafe 3-in-1 x10", price: "5", oldPrice: "9", image: "https://shopmetro.ph/itpark-supermarket/wp-content/uploads/2023/05/SM102724911-8.jpg", rating: 4.7, sold: 2340, tag: "Best Seller" },
-  { id: 6, name: "Magic Sarap 8g x12", price: "2", oldPrice: "3", image: "https://d11qgm9a5k858y.cloudfront.net/maut2sfax6i57sab5fva8lxqbipa", rating: 4.9, sold: 3200, tag: "Top Pick" },
-  { id: 5, name: "Oishi Prawn Crackers", price: "1", oldPrice: "2", image: "https://www.oishi.com.ph/wp-content/uploads/2017/04/oishi-prawn-crackers-100g-copy.png", rating: 4.3, sold: 670, tag: "" },
-  { id: 20, name: "Coconut Cream 400ml", price: "3", oldPrice: "5", image: "http://acemarket.ph/cdn/shop/products/E-comm-JollyCoconutCream-400ml_38ec17b8-d0c3-4d82-9041-d68f4a9baf6d.jpg?v=1740979531", rating: 4.6, sold: 445, tag: "" },
-  { id: 15, name: "Purefoods Hotdog 500g", price: "5", oldPrice: "8", image: "https://smmarkets.ph/media/catalog/product/h/t/httpsshop.smmarkets.phpubmediawysiwygro_photos10262010220455002-1.png", rating: 4.7, sold: 1120, tag: "Popular" },
-];
+import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useProducts } from "@/hooks/use-api";
+import type { Product } from "@/lib/api";
 
 const FeaturedProducts = () => {
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { requireAuth } = useRequireAuth();
+  const { data: products = [], isLoading } = useProducts();
 
-  const handleQuickAdd = (e: React.MouseEvent, productId: number, productName: string) => {
+  const handleQuickAdd = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-    const product = mockProducts.find((p) => p.id === productId);
-    if (product) {
-      addItem(product);
-      toast({ title: "Added to cart", description: `1× ${productName}` });
-    }
+    if (!requireAuth()) return;
+    addItem(product);
+    toast({ title: "Added to cart", description: `1× ${product.name}` });
   };
 
   return (
@@ -47,8 +34,17 @@ const FeaturedProducts = () => {
           </Link>
         </div>
 
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          </div>
+        ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          {products.map((product, i) => (
+          {products.slice(0, 12).map((product, i) => {
+            const salePrice = product.sale_price ? parseFloat(product.sale_price) : null;
+            const originalPrice = parseFloat(product.price);
+            const discount = salePrice ? Math.round(((originalPrice - salePrice) / originalPrice) * 100) : 0;
+            return (
             <Link to={`/products/${product.id}`} key={product.id}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -59,15 +55,15 @@ const FeaturedProducts = () => {
             >
               <div className="relative">
                 <div className="w-full aspect-square bg-white flex items-center justify-center overflow-hidden p-4 group-hover:bg-slate-50 transition-colors duration-300">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                  <img src={product.image_url || ""} alt={product.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                {product.tag && (
+                {discount > 0 && (
                   <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold bg-destructive text-white">
-                    {product.tag}
+                    -{discount}%
                   </span>
                 )}
                 <button
-                  onClick={(e) => handleQuickAdd(e, product.id, product.name)}
+                  onClick={(e) => handleQuickAdd(e, product)}
                   className="absolute bottom-2 right-2 w-8 h-8 bg-primary z-10 text-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-all opacity-0 group-hover:opacity-100 duration-200"
                 >
                   <Plus className="w-4 h-4" />
@@ -80,24 +76,27 @@ const FeaturedProducts = () => {
                 <div className="pt-1 mt-auto">
                   <div className="flex items-baseline gap-1.5">
                     <span className="font-extrabold text-base text-destructive leading-none">
-                      {product.price} <span className="text-[10px] font-bold">SAR</span>
+                      {salePrice ?? originalPrice} <span className="text-[10px] font-bold">SAR</span>
                     </span>
+                    {salePrice && (
                     <span className="text-[10px] text-muted-foreground line-through">
-                      {product.oldPrice}
+                      {originalPrice} SAR
                     </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Star className="w-2.5 h-2.5 text-accent" fill="currentColor" />
-                    <span className="text-[10px] text-muted-foreground font-medium">
-                      {product.rating} | {product.sold.toLocaleString()} sold
-                    </span>
-                  </div>
+                  {product.store_name && (
+                  <p className="text-[10px] text-muted-foreground mt-1 truncate">
+                    {product.store_name}
+                  </p>
+                  )}
                 </div>
               </div>
             </motion.div>
             </Link>
-          ))}
+            );
+          })}
         </div>
+        )}
       </div>
     </section>
   );
