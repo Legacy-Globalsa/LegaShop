@@ -26,11 +26,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     saveTokens(authResponse.tokens);
     saveUser(authResponse.user);
     setUser(authResponse.user);
+    window.dispatchEvent(new Event("auth-change"));
   };
 
   const logout = () => {
     apiLogout();
     setUser(null);
+    window.dispatchEvent(new Event("auth-change"));
   };
 
   const updateUser = (updatedUser: User) => {

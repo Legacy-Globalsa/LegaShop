@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Search, Star, Plus, MapPin, Clock, ArrowUpDown, SlidersHorizontal, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { fetchProducts, fetchStores, fetchCategories, type Product, type Store, type Category } from "@/lib/api";
+import { searchAll, type Product, type Store, type Category } from "@/lib/api";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useRequireAuth } from "@/hooks/use-require-auth";
@@ -40,26 +40,11 @@ const SearchResults = () => {
     }
 
     setLoading(true);
-    Promise.all([fetchProducts(), fetchStores(), fetchCategories()])
-      .then(([allProducts, allStores, allCategories]) => {
-        const q = query.toLowerCase();
-        setProducts(allProducts.filter((p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.name_tl.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.category_name.toLowerCase().includes(q) ||
-          p.store_name.toLowerCase().includes(q)
-        ));
-        setStores(allStores.filter((s) =>
-          s.name.toLowerCase().includes(q) ||
-          s.name_ar.toLowerCase().includes(q) ||
-          s.description.toLowerCase().includes(q) ||
-          s.district.toLowerCase().includes(q)
-        ));
-        setCategories(allCategories.filter((c) =>
-          c.name.toLowerCase().includes(q) ||
-          c.name_tl.toLowerCase().includes(q)
-        ));
+    searchAll(query)
+      .then((results) => {
+        setProducts(results.products);
+        setStores(results.stores);
+        setCategories(results.categories);
       })
       .finally(() => setLoading(false));
   }, [query]);

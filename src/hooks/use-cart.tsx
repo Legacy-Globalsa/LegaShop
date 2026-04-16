@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { Product } from "@/lib/api";
+import { getUser } from "@/lib/api";
 
 export interface CartItem {
   product: Product;
@@ -18,11 +19,18 @@ interface CartContextType {
   total: number;
 }
 
-const CART_KEY = "legashop_cart";
+const CART_PREFIX = "legashop_cart";
+
+/** Get a user-scoped cart key. Guest users share a "guest" key. */
+function getCartKey(): string {
+  const user = getUser();
+  const userId = user?.id ?? "guest";
+  return `${CART_PREFIX}_${userId}`;
+}
 
 function loadCart(): CartItem[] {
   try {
-    const raw = localStorage.getItem(CART_KEY);
+    const raw = localStorage.getItem(getCartKey());
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
@@ -30,13 +38,30 @@ function loadCart(): CartItem[] {
 }
 
 function saveCart(items: CartItem[]) {
-  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  localStorage.setItem(getCartKey(), JSON.stringify(items));
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadCart);
+
+  // Re-load cart when user changes (login/logout)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setItems(loadCart());
+    };
+    // Listen for login/logout (our auth code sets "legashop_user" in localStorage)
+    window.addEventListener("storage", handleStorageChange);
+
+    // Also poll on user change via custom event
+    window.addEventListener("auth-change", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth-change", handleStorageChange);
+    };
+  }, []);
 
   useEffect(() => {
     saveCart(items);

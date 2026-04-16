@@ -21,6 +21,7 @@ import {
   updateProfile,
   changePassword,
   createReview,
+  searchAll,
   type CreateOrderData,
   type AddressInput,
   type CreateReviewData,
@@ -234,5 +235,18 @@ export function useChangePassword() {
   return useMutation({
     mutationFn: (data: { current_password: string; new_password: string; confirm_new_password: string }) =>
       changePassword(data),
+  });
+}
+
+// ──────────────────────────────────────
+// Search
+// ──────────────────────────────────────
+
+export function useSearch(query: string) {
+  return useQuery({
+    queryKey: ["search", query],
+    queryFn: () => searchAll(query),
+    enabled: !!query.trim(),
+    staleTime: 60 * 1000,
   });
 }

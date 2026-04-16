@@ -264,6 +264,24 @@ export interface Review {
 }
 
 // ──────────────────────────────────────
+// Pagination helper
+// ──────────────────────────────────────
+
+interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+/** Extract items from a paginated or plain array response */
+function unwrapResults<T>(data: PaginatedResponse<T> | T[]): T[] {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object' && 'results' in data) return data.results;
+  return [];
+}
+
+// ──────────────────────────────────────
 // Public API — Products
 // ──────────────────────────────────────
 
@@ -273,7 +291,8 @@ export async function fetchProducts(params?: Record<string, string>): Promise<Pr
     const res = await fetch(`${API_BASE_URL}/products/${query}`);
     if (!res.ok) throw new Error();
     const data = await res.json();
-    if (data.length > 0) return data;
+    const items = unwrapResults<Product>(data);
+    if (items.length > 0) return items;
     throw new Error("empty");
   } catch {
     const { mockProducts } = await import("./mock-data");
@@ -300,7 +319,8 @@ export async function fetchDeals(dealType?: string): Promise<Product[]> {
     const res = await fetch(url);
     if (!res.ok) throw new Error();
     const data = await res.json();
-    if (data.length > 0) return data;
+    const items = unwrapResults<Product>(data);
+    if (items.length > 0) return items;
     throw new Error("empty");
   } catch {
     const { mockProducts } = await import("./mock-data");
@@ -336,7 +356,8 @@ export async function fetchStores(): Promise<Store[]> {
     const res = await fetch(`${API_BASE_URL}/stores/`);
     if (!res.ok) throw new Error();
     const data = await res.json();
-    if (data.length > 0) return data;
+    const items = unwrapResults<Store>(data);
+    if (items.length > 0) return items;
     throw new Error("empty");
   } catch {
     const { mockStores } = await import("./mock-data");
@@ -360,7 +381,8 @@ export async function fetchStoreProducts(storeId: number): Promise<Product[]> {
     const res = await fetch(`${API_BASE_URL}/products/?store=${storeId}`);
     if (!res.ok) throw new Error();
     const data = await res.json();
-    if (data.length > 0) return data;
+    const items = unwrapResults<Product>(data);
+    if (items.length > 0) return items;
     throw new Error("empty");
   } catch {
     const { mockProducts } = await import("./mock-data");
@@ -377,7 +399,8 @@ export async function fetchProductReviews(productId: number): Promise<Review[]> 
     const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews/`);
     if (!res.ok) throw new Error();
     const data = await res.json();
-    if (data.length > 0) return data;
+    const items = unwrapResults<Review>(data);
+    if (items.length > 0) return items;
     throw new Error("empty");
   } catch {
     const { mockReviews } = await import("./mock-data");
@@ -390,7 +413,8 @@ export async function fetchStoreReviews(storeId: number): Promise<Review[]> {
     const res = await fetch(`${API_BASE_URL}/stores/${storeId}/reviews/`);
     if (!res.ok) throw new Error();
     const data = await res.json();
-    if (data.length > 0) return data;
+    const items = unwrapResults<Review>(data);
+    if (items.length > 0) return items;
     throw new Error("empty");
   } catch {
     const { mockReviews } = await import("./mock-data");
@@ -455,7 +479,8 @@ export async function fetchOrders(): Promise<Order[]> {
   try {
     const res = await authFetch(`${API_BASE_URL}/orders/`);
     if (!res.ok) throw new Error("Failed to fetch orders");
-    return await res.json();
+    const data = await res.json();
+    return unwrapResults<Order>(data);
   } catch {
     const { mockOrders } = await import("./mock-data");
     return mockOrders as unknown as Order[];
@@ -615,3 +640,38 @@ export async function changePassword(data: {
 
 export type { User, AuthTokens, AuthResponse, SignupData, LoginData };
 
+// ──────────────────────────────────────
+// Search API (combined backend search)
+// ──────────────────────────────────────
+
+export interface SearchResults {
+  products: Product[];
+  stores: Store[];
+  categories: Category[];
+}
+
+export async function searchAll(query: string): Promise<SearchResults> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/search/?q=${encodeURIComponent(query)}`);
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    // Fallback: client-side filter of mock data
+    const { mockProducts, mockStores, mockCategories } = await import("./mock-data");
+    const q = query.toLowerCase();
+    return {
+      products: mockProducts.filter((p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q)
+      ),
+      stores: mockStores.filter((s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.district.toLowerCase().includes(q)
+      ),
+      categories: mockCategories.filter((c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.name_tl.toLowerCase().includes(q)
+      ),
+    };
+  }
+}
