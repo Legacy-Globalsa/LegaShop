@@ -1,6 +1,6 @@
 # LegaShop — API Integration Map
 
-> Last updated: April 14, 2026
+> Last updated: April 16, 2026
 > Base URL: `http://127.0.0.1:8000/api`
 
 ---
@@ -17,8 +17,10 @@
 8. [Stores](#8-stores)
 9. [Orders (Customer)](#9-orders-customer)
 10. [Orders (Vendor)](#10-orders-vendor)
-11. [Integration Summary](#11-integration-summary)
-12. [Known Issues & Gaps](#12-known-issues--gaps)
+11. [Search](#11-search)
+12. [Integration Summary](#12-integration-summary)
+13. [Known Issues & Gaps](#13-known-issues--gaps)
+14. [Suggested Improvements](#14-suggested-improvements)
 
 ---
 
@@ -58,6 +60,18 @@
 | **Response** | `{ user, tokens }` |
 | **Frontend function** | `apiGoogleLogin()` → `api.ts` |
 | **Used in** | `login-form.tsx`, `signup-form.tsx` |
+| **Status** | ✅ Fully connected |
+
+### `POST /api/token/refresh/` — Refresh JWT access token
+
+| | |
+|---|---|
+| **Backend** | `TokenRefreshView` (simplejwt built-in) → `users/urls.py` |
+| **Permission** | `AllowAny` |
+| **Request** | `{ refresh }` |
+| **Response** | `{ access, refresh }` (rotated) |
+| **Frontend function** | `tryRefreshToken()` → `api.ts` (auto-called by `authFetch` on 401) |
+| **Features** | Rotate refresh tokens on use, blacklist old tokens |
 | **Status** | ✅ Fully connected |
 
 ---
@@ -164,11 +178,12 @@
 |---|---|
 | **Backend** | `CategoryListView` → `products/views.py` |
 | **Permission** | `AllowAny` |
-| **Response** | `[{ id, name, name_tl, name_ar, parent, image_url, is_active, subcategories, created_at }]` |
+| **Response** | Paginated: `{ count, next, results: [{ id, name, name_tl, name_ar, parent, image_url, image, is_active, subcategories, created_at }] }` |
+| **Search fields** | `?search=rice` searches `name`, `name_tl`, `name_ar` |
 | **Frontend function** | `fetchCategories()` → `api.ts` |
 | **React Query hook** | `useCategories()` → `use-api.ts` |
-| **Used in** | `CategoriesPage.tsx` (via hook), `SearchResults.tsx` (direct call) |
-| **Status** | ✅ Connected (mock fallback) |
+| **Used in** | `CategoriesPage.tsx` (via hook) |
+| **Status** | ✅ Connected (mock fallback, pagination handled) |
 
 ### `GET /api/categories/:id/` — Get single category
 
@@ -218,12 +233,12 @@
 |---|---|
 | **Backend** | `ProductListView` → `products/views.py` |
 | **Permission** | `AllowAny` |
-| **Query params** | `?category=ID`, `?store=ID`, `?deal_type=ONE_RIYAL|FIVE_RIYAL` |
-| **Response** | `[{ id, store, store_name, category, category_name, name, name_tl, name_ar, description, price, sale_price, currency, stock, unit, image_url, is_deal, deal_type, is_active, created_at }]` |
+| **Query params** | `?category=ID`, `?store=ID`, `?deal_type=ONE_RIYAL|FIVE_RIYAL`, `?search=term`, `?ordering=price|-price|created_at` |
+| **Response** | Paginated: `{ count, next, results: [{ id, store, store_name, category, category_name, name, name_tl, name_ar, description, price, sale_price, currency, stock, unit, image_url, image, is_deal, deal_type, is_active, created_at }] }` |
 | **Frontend function** | `fetchProducts(params?)` → `api.ts` |
 | **React Query hook** | `useProducts(params?)` → `use-api.ts` |
-| **Used in** | `FeaturedProducts.tsx` (hook), `CategoriesPage.tsx` (hook), `SearchResults.tsx` (direct call) |
-| **Status** | ✅ Connected (mock fallback) |
+| **Used in** | `FeaturedProducts.tsx` (hook), `CategoriesPage.tsx` (hook) |
+| **Status** | ✅ Connected (mock fallback, pagination handled via `unwrapResults`) |
 
 ### `GET /api/products/:id/` — Get single product
 
@@ -243,10 +258,11 @@
 | **Backend** | `ProductDealsView` → `products/views.py` |
 | **Permission** | `AllowAny` |
 | **Query params** | `?deal_type=ONE_RIYAL|FIVE_RIYAL` (optional — omit for all deals) |
+| **Response** | Paginated: `{ count, next, results: [...] }` |
 | **Frontend function** | `fetchDeals(dealType?)` → `api.ts` |
 | **React Query hook** | `useDeals(dealType?)` → `use-api.ts` |
 | **Used in** | `OneSarDeals.tsx` (hook), `FiveSarDeals.tsx` (hook), `FlashDeals.tsx` (hook, no filter) |
-| **Status** | ✅ Connected (mock fallback) |
+| **Status** | ✅ Connected (mock fallback, pagination handled) |
 
 ---
 
@@ -258,7 +274,7 @@
 |---|---|
 | **Backend** | `VendorProductCreateView` → `products/views.py` |
 | **Permission** | `IsVendor` |
-| **Request** | `{ category, name, description?, price, sale_price?, stock, unit?, image_url?, is_deal, deal_type? }` |
+| **Request** | `{ category, name, description?, price, sale_price?, stock, unit?, image_url?, image?, is_deal, deal_type? }` |
 | **Frontend function** | ❌ None |
 | **Status** | 🔵 Vendor-only — no vendor dashboard in frontend yet |
 
@@ -290,11 +306,11 @@
 |---|---|
 | **Backend** | `ProductReviewListView` → `products/views.py` |
 | **Permission** | `AllowAny` |
-| **Response** | `[{ id, user, reviewer_name, store, product, rating, comment, created_at }]` |
+| **Response** | Paginated: `{ count, next, results: [{ id, user, reviewer_name, store, product, rating, comment, created_at }] }` |
 | **Frontend function** | `fetchProductReviews(productId)` → `api.ts` |
 | **React Query hook** | `useProductReviews(productId)` → `use-api.ts` |
 | **Used in** | `ProductPage.tsx` (direct call in useEffect) |
-| **Status** | ✅ Connected (mock fallback, bypasses RQ hook) |
+| **Status** | ✅ Connected (mock fallback, pagination handled, bypasses RQ hook) |
 
 ### `GET /api/stores/:id/reviews/` — Store reviews
 
@@ -305,7 +321,7 @@
 | **Frontend function** | `fetchStoreReviews(storeId)` → `api.ts` |
 | **React Query hook** | `useStoreReviews(storeId)` → `use-api.ts` |
 | **Used in** | `StorePage.tsx` (direct call in useEffect) |
-| **Status** | ✅ Connected (mock fallback, bypasses RQ hook) |
+| **Status** | ✅ Connected (mock fallback, pagination handled, bypasses RQ hook) |
 
 ### `POST /api/reviews/` — Submit a review
 
@@ -329,12 +345,13 @@
 |---|---|
 | **Backend** | `StoreListView` → `stores/views.py` |
 | **Permission** | `AllowAny` |
-| **Response** | `[{ id, owner, owner_name, name, name_ar, description, phone, latitude, longitude, delivery_zone, avg_delivery_min, rating, is_active, image_url, district, created_at }]` |
+| **Response** | Paginated: `{ count, next, results: [{ id, owner, owner_name, name, name_ar, description, phone, latitude, longitude, delivery_zone, avg_delivery_min, rating, is_active, image_url, image, district, created_at }] }` |
+| **Search fields** | `?search=term` searches `name`, `name_ar`, `description`, `district` |
 | **Frontend function** | `fetchStores()` → `api.ts` |
 | **React Query hook** | `useStores()` → `use-api.ts` |
-| **Used in** | `SearchResults.tsx` (direct call) |
+| **Used in** | Not used by `StoresPage.tsx` (still hardcoded) |
 | **⚠️ NOT used in** | **`StoresPage.tsx`** — this page is 100% hardcoded |
-| **Status** | 🔴 **StoresPage is NOT connected** — uses hardcoded array of 8 fake stores |
+| **Status** | 🔴 **StoresPage is NOT connected** — uses hardcoded array of fake stores |
 
 ### `GET /api/stores/:id/` — Get single store
 
@@ -354,7 +371,7 @@
 | **Frontend function** | `fetchStoreProducts(storeId)` → `api.ts` |
 | **React Query hook** | `useStoreProducts(storeId)` → `use-api.ts` |
 | **Used in** | `StorePage.tsx` (direct call in useEffect) |
-| **Status** | ✅ Connected (mock fallback) |
+| **Status** | ✅ Connected (mock fallback, pagination handled) |
 
 ### `POST /api/stores/create/` — Vendor create store
 
@@ -393,11 +410,11 @@
 |---|---|
 | **Backend** | `OrderListView` → `orders/views.py` |
 | **Permission** | `IsAuthenticated` |
-| **Response** | `[{ id, user, store, store_name, delivery_address, order_type, status, subtotal, delivery_fee, total, currency, note, items: [...], payment: {...}, created_at, updated_at }]` |
+| **Response** | Paginated: `{ count, next, results: [{ id, user, store, store_name, delivery_address, order_type, status, subtotal, delivery_fee, total, currency, note, items: [...], payment: {...}, created_at, updated_at }] }` |
 | **Frontend function** | `fetchOrders()` → `api.ts` |
 | **React Query hook** | `useOrders()` → `use-api.ts` |
 | **Used in** | `OrdersPage.tsx` (via hook) |
-| **Status** | ✅ Connected (mock fallback) |
+| **Status** | ✅ Connected (mock fallback, pagination handled) |
 
 ### `GET /api/orders/:id/` — Get single order
 
@@ -435,6 +452,7 @@
 | **React Query hook** | `useCancelOrder()` → `use-api.ts` |
 | **Used in** | `OrderDetailPage.tsx` (via hook) |
 | **Status** | ✅ Connected |
+| **Bug** | ⚠️ Cancelled orders do not restore product stock |
 
 ---
 
@@ -461,13 +479,30 @@
 
 ---
 
-## 11. Integration Summary
+## 11. Search
+
+### `GET /api/search/?q=term` — Combined search (products + stores + categories)
+
+| | |
+|---|---|
+| **Backend** | `search_view` → `products/views.py` |
+| **Permission** | `AllowAny` |
+| **Query params** | `?q=search term` (required) |
+| **Response** | `{ products: [...], stores: [...], categories: [...] }` |
+| **Frontend function** | `searchAll(query)` → `api.ts` |
+| **React Query hook** | `useSearch(query)` → `use-api.ts` |
+| **Used in** | `SearchResults.tsx` (direct call via `searchAll`) |
+| **Status** | ✅ Fully connected (mock fallback, server-side search) |
+
+---
+
+## 12. Integration Summary
 
 ### By Status
 
 | Status | Count | Meaning |
 |--------|-------|---------|
-| ✅ Fully connected | 20 | Frontend calls the real API |
+| ✅ Fully connected | 22 | Frontend calls the real API with pagination support |
 | 🔴 Gap / broken | 3 | Backend exists but frontend is missing or non-functional |
 | 🔵 Admin/Vendor only | 9 | No customer-facing frontend needed (yet) |
 
@@ -485,7 +520,7 @@
 | `ProductPage.tsx` | `fetchProductById` + `fetchProductReviews` | ❌ direct | Yes | ✅ |
 | **`StoresPage.tsx`** | **NONE — 100% hardcoded** | ❌ | N/A | ❌ |
 | `StorePage.tsx` | `fetchStoreById` + `fetchStoreProducts` + `fetchStoreReviews` | ❌ direct | Yes | ✅ |
-| `SearchResults.tsx` | `fetchProducts` + `fetchStores` + `fetchCategories` | ❌ direct | Yes | ✅ |
+| `SearchResults.tsx` | `searchAll(query)` — backend server-side search | ❌ direct | Yes (client filter) | ✅ |
 | `CheckoutPage.tsx` | `fetchAddresses` + `createAddress` + `createOrder` | ❌ direct | Partial | ProtectedRoute |
 | `OrdersPage.tsx` | `useOrders()` | ✅ | Yes | ProtectedRoute |
 | `OrderDetailPage.tsx` | `useOrder()` + `useCancelOrder()` | ✅ | No | ProtectedRoute |
@@ -494,50 +529,86 @@
 | `AddressesSection.tsx` | Full CRUD addresses | ❌ direct | Partial | ProtectedRoute |
 | `SecuritySection.tsx` | `changePassword` | ❌ direct | No | ProtectedRoute |
 
+### Infrastructure Status
+
+| Feature | Status |
+|---|---|
+| JWT token refresh | ✅ `POST /api/token/refresh/` — auto-refresh on 401, tokens rotate, old ones blacklisted |
+| Pagination | ✅ Global PAGE_SIZE=20, all list endpoints return `{count, next, results}` |
+| Server-side search | ✅ `GET /api/search/?q=` — searches products, stores, categories with SQL `icontains` |
+| Image storage | ✅ Cloudinary via `STORAGES` dict (Django 6.0), `ImageField` on Product, Store, Category |
+| Per-user cart | ✅ Cart scoped to user ID in localStorage (`legashop_cart_{userId}`) |
+| Seed data | ✅ `python manage.py seed_data` — 35 products, 3 stores, 8 categories, 4 test accounts |
+
 ---
 
-## 12. Known Issues & Gaps
+## 13. Known Issues & Gaps
 
 ### 🔴 Critical — Must Fix
 
 | # | Issue | Location | Fix |
 |---|---|---|---|
-| 1 | **StoresPage is 100% hardcoded** — doesn't call any API, shows 8 fake stores | `StoresPage.tsx` | Replace with `useStores()` hook |
+| 1 | **StoresPage is 100% hardcoded** — doesn't call any API, shows fake stores | `StoresPage.tsx` | Replace with `useStores()` hook |
 | 2 | **Review form is non-functional** — "Write a Review" on ProductPage shows a toast but doesn't submit anything | `ProductPage.tsx` | Wire up to `createReview()` / `useCreateReview()` |
 | 3 | **Delivery fee mismatch** — Cart context hardcodes 3 SAR, backend charges 5 SAR | `use-cart.tsx` vs `orders/views.py` | Sync to a single source of truth |
+| 4 | **Cancelled orders don't restore stock** — product stock is decremented on order creation but never restored on cancel | `orders/views.py` | Add stock restoration logic in `OrderCancelView` |
 
 ### ⚠️ Important — Should Fix
 
 | # | Issue | Location | Fix |
 |---|---|---|---|
-| 4 | **6 pages bypass React Query hooks** — lose caching, dedup, background refetch | ProductPage, StorePage, SearchResults, CheckoutPage, AddressesSection, ProfileSection | Migrate to `use-api.ts` hooks |
-| 5 | **SearchResults does client-side filtering** — fetches ALL data then filters in browser | `SearchResults.tsx` | Add `?search=` query param to backend products endpoint, or use existing `?category=` / `?store=` filters |
+| 5 | **6 pages bypass React Query hooks** — lose caching, dedup, background refetch | ProductPage, StorePage, CheckoutPage, AddressesSection, ProfileSection | Migrate to `use-api.ts` hooks |
 | 6 | **OrderDetailPage address display** — shows hardcoded "Riyadh, Saudi Arabia" instead of actual delivery address | `OrderDetailPage.tsx` | Read `order.delivery_address` data or nest address in order serializer |
 | 7 | **ProfileSection doesn't fetch fresh data** — reads from auth context (localStorage) on mount | `ProfileSection.tsx` | Use `useProfile()` hook to fetch fresh data |
-| 8 | **No backend search endpoint** — no full-text search across products/stores | `products/views.py` | Add `?search=term` queryset filter with `icontains` |
+| 8 | **Product images are empty** — seed data has no image URLs, products show blank placeholders | Seed data / admin | Add product image URLs or upload images via vendor dashboard |
 
-### 🔵 Nice to Have — Future
+---
 
-| # | Feature | Notes |
-|---|---|---|
-| 9 | Vendor dashboard (product CRUD, order management) | Backend is ready (7 vendor endpoints), no frontend |
-| 10 | Admin panel (category CRUD, store approval) | Backend is ready (5 admin endpoints), no frontend |
-| 11 | Token refresh endpoint (`POST /api/token/refresh/`) | `tryRefreshToken()` exists in `api.ts` — verify endpoint exists in backend URL config |
-| 12 | Remove mock data fallbacks once backend is seeded | All `catch` blocks in `api.ts` fall back to mock data silently |
+## 14. Suggested Improvements
 
-### Token Refresh — MISSING from Backend
+### 🏗️ High Priority — Core Features
 
-The frontend's `tryRefreshToken()` in `api.ts` calls `POST /api/token/refresh/` but **this endpoint does NOT exist** in the backend URL config. The route is not registered anywhere in `config/urls.py` or `users/urls.py`. This means:
+| # | Suggestion | Impact | Effort | Details |
+|---|---|---|---|---|
+| 1 | **Vendor Dashboard** | 🔥🔥🔥 | 2-3 hrs | Build a `/vendor` dashboard with product CRUD, image upload (Cloudinary), order management, and store settings. Backend has 7 vendor endpoints ready. |
+| 2 | **Connect StoresPage to API** | 🔥🔥 | 20 min | Replace hardcoded stores in `StoresPage.tsx` with `useStores()` hook and add actual map/distance sorting using store `latitude`/`longitude`. |
+| 3 | **Wire up review submission form** | 🔥🔥 | 30 min | Complete the "Write a Review" modal on `ProductPage.tsx` to actually POST to `/api/reviews/`. Add star rating selector and confirmation feedback. |
+| 4 | **Stock restoration on cancel** | 🔥🔥 | 10 min | When `OrderCancelView` updates status to CANCELLED, loop through `order.items` and add quantities back to `product.stock`. |
 
-- Token refresh silently fails → user gets logged out after access token expires (30 min)
-- The `authFetch` interceptor catches 401, tries refresh, refresh fails, logs out
+### ⚡ Performance & UX
 
-**Fix:** Add to `users/urls.py`:
-```python
-from rest_framework_simplejwt.views import TokenRefreshView
+| # | Suggestion | Impact | Effort | Details |
+|---|---|---|---|---|
+| 5 | **Infinite scroll / "Load More" pagination** | 🔥🔥 | 1 hr | Backend returns `next` URL in paginated responses. Add a "Load More" button or `IntersectionObserver` to fetch the next page. Currently only the first 20 items load. |
+| 6 | **Optimistic cart updates** | 🔥 | 30 min | Cart mutations currently wait for state update. Use optimistic updates in React state for instant UI feedback on add/remove. |
+| 7 | **Search debounce & autocomplete** | 🔥🔥 | 45 min | Add a 300ms debounce to the navbar search input and show a dropdown with live results from `/api/search/?q=` as the user types. |
+| 8 | **Skeleton loading states** | 🔥 | 30 min | Some pages show raw loading spinners. Add skeleton cards (like SearchResults already has) to all product/store listing pages. |
 
-urlpatterns = [
-    # ... existing paths ...
-    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
-]
-```
+### 🔒 Security & Reliability
+
+| # | Suggestion | Impact | Effort | Details |
+|---|---|---|---|---|
+| 9 | **Rate limiting on auth endpoints** | 🔥🔥 | 15 min | Add `django-ratelimit` or DRF throttling to `/login/`, `/signup/`, `/token/refresh/` to prevent brute force attacks. |
+| 10 | **Email verification on signup** | 🔥 | 1.5 hrs | Users can sign up with any email without verification. Add email verification flow with a confirmation link. |
+| 11 | **CORS lockdown for production** | 🔥🔥 | 5 min | `CORS_ALLOW_ALL_ORIGINS = True` is set. Before deploying, restrict to the actual frontend domain. |
+| 12 | **Remove mock data fallbacks** | 🔥 | 20 min | All `catch` blocks in `api.ts` silently fall back to mock data, masking real API errors. Add proper error handling/display and remove mocks. |
+
+### 📦 Business Features
+
+| # | Suggestion | Impact | Effort | Details |
+|---|---|---|---|---|
+| 13 | **Order tracking / status timeline** | 🔥🔥 | 1 hr | Show a visual timeline (PENDING→CONFIRMED→PREPARING→OUT_FOR_DELIVERY→DELIVERED) on the order detail page. Backend already has status transitions. |
+| 14 | **Push notifications for order updates** | 🔥 | 2 hrs | Notify customers when order status changes. Options: Firebase Cloud Messaging (web push), or email via SendGrid/SES. |
+| 15 | **Wishlist / Favorites** | 🔥 | 1.5 hrs | Let users save products to a wishlist. Requires new `Wishlist` model + endpoint + frontend UI. |
+| 16 | **Product variant support** | 🔥 | 2 hrs | Some products come in different sizes/weights (e.g., Rice 2kg vs 5kg). Add a `ProductVariant` model linked to `Product`. |
+| 17 | **Coupon / promo code system** | 🔥🔥 | 2 hrs | Create a `Coupon` model with discount type (percentage/fixed), expiry, min order amount. Apply at checkout. |
+| 18 | **Remittance to PH flow** | 🔥 | 3 hrs | The "Send to Philippines" page is a placeholder. Build the actual flow: recipient info, amount, payment, confirmation. |
+
+### 🚀 Deployment
+
+| # | Suggestion | Impact | Effort | Details |
+|---|---|---|---|---|
+| 19 | **Backend deployment** | 🔥🔥🔥 | 1 hr | Deploy Django to Railway or Render with PostgreSQL. Configure `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `DEBUG=False`. |
+| 20 | **Frontend deployment** | 🔥🔥🔥 | 30 min | Deploy React to Vercel or Netlify. Set `VITE_API_BASE_URL` to the production backend URL. |
+| 21 | **CI/CD pipeline** | 🔥 | 1 hr | GitHub Actions: run `tsc --noEmit` + `pytest` on every PR. Auto-deploy on merge to `main`. |
+| 22 | **Database backup strategy** | 🔥🔥 | 30 min | Set up automatic daily PostgreSQL backups (pg_dump to S3 or Cloudinary). |

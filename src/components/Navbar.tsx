@@ -24,6 +24,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    window.dispatchEvent(new Event("auth-change"));
     navigate("/");
   };
 
@@ -81,7 +82,7 @@ const Navbar = () => {
           <button onClick={() => setCartOpen(true)} className="relative p-2 rounded-lg hover:bg-slate-100 transition">
             <ShoppingCart className="w-5 h-5 text-foreground/70" />
             {itemCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 rounded-full bg-destructive text-white text-[10px] flex items-center justify-center font-bold">
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10px] flex items-center justify-center font-bold leading-none">
                 {itemCount > 99 ? "99+" : itemCount}
               </span>
             )}
