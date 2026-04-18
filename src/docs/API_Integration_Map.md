@@ -332,8 +332,8 @@
 | **Request** | `{ store, product?, rating (1-5), comment? }` |
 | **Frontend function** | `createReview()` → `api.ts` |
 | **React Query hook** | `useCreateReview()` → `use-api.ts` |
-| **Used in** | ❌ **NOT WIRED** — `ProductPage.tsx` has a review stub that only shows a toast |
-| **Status** | 🔴 Backend + function + hook exist, but UI form is non-functional |
+| **Used in** | `ProductPage.tsx` (via `ReviewForm` component + `useCreateReview()` hook) |
+| **Status** | ✅ Connected — interactive star rating + comment form, submits to API |
 
 ---
 
@@ -349,9 +349,8 @@
 | **Search fields** | `?search=term` searches `name`, `name_ar`, `description`, `district` |
 | **Frontend function** | `fetchStores()` → `api.ts` |
 | **React Query hook** | `useStores()` → `use-api.ts` |
-| **Used in** | Not used by `StoresPage.tsx` (still hardcoded) |
-| **⚠️ NOT used in** | **`StoresPage.tsx`** — this page is 100% hardcoded |
-| **Status** | 🔴 **StoresPage is NOT connected** — uses hardcoded array of fake stores |
+| **Used in** | `StoresPage.tsx` (via hook), `NearbyStoresSection.tsx` |
+| **Status** | ✅ Connected — `StoresPage` uses `useStores()` hook with search filter + loading skeleton |
 
 ### `GET /api/stores/:id/` — Get single store
 
@@ -439,7 +438,7 @@
 | **React Query hook** | `useCreateOrder()` → `use-api.ts` |
 | **Used in** | `CheckoutPage.tsx` (direct call) |
 | **Status** | ✅ Connected |
-| **Note** | Backend charges 5 SAR delivery fee; frontend cart shows 3 SAR — **mismatch** |
+| **Note** | Delivery fee synced: both frontend and backend use 5 SAR |
 
 ### `PUT /api/orders/:id/cancel/` — Cancel order
 
@@ -452,7 +451,7 @@
 | **React Query hook** | `useCancelOrder()` → `use-api.ts` |
 | **Used in** | `OrderDetailPage.tsx` (via hook) |
 | **Status** | ✅ Connected |
-| **Bug** | ⚠️ Cancelled orders do not restore product stock |
+| **Note** | Stock is restored on cancel via `transaction.atomic` |
 
 ---
 
@@ -502,8 +501,8 @@
 
 | Status | Count | Meaning |
 |--------|-------|---------|
-| ✅ Fully connected | 22 | Frontend calls the real API with pagination support |
-| 🔴 Gap / broken | 3 | Backend exists but frontend is missing or non-functional |
+| ✅ Fully connected | 24 | Frontend calls the real API with pagination support |
+| 🔴 Gap / broken | 1 | Backend exists but frontend is missing or non-functional |
 | 🔵 Admin/Vendor only | 9 | No customer-facing frontend needed (yet) |
 
 ### Page Connection Matrix
@@ -518,7 +517,7 @@
 | `FiveSarDeals.tsx` | `useDeals("FIVE_RIYAL")` | ✅ | Yes | ✅ |
 | `CategoriesPage.tsx` | `useCategories()` + `useProducts()` | ✅ | Yes | ✅ |
 | `ProductPage.tsx` | `fetchProductById` + `fetchProductReviews` | ❌ direct | Yes | ✅ |
-| **`StoresPage.tsx`** | **NONE — 100% hardcoded** | ❌ | N/A | ❌ |
+| `StoresPage.tsx` | `useStores()` | ✅ | No | ✅ |
 | `StorePage.tsx` | `fetchStoreById` + `fetchStoreProducts` + `fetchStoreReviews` | ❌ direct | Yes | ✅ |
 | `SearchResults.tsx` | `searchAll(query)` — backend server-side search | ❌ direct | Yes (client filter) | ✅ |
 | `CheckoutPage.tsx` | `fetchAddresses` + `createAddress` + `createOrder` | ❌ direct | Partial | ProtectedRoute |
@@ -544,14 +543,14 @@
 
 ## 13. Known Issues & Gaps
 
-### 🔴 Critical — Must Fix
+### ~~🔴 Critical — Must Fix~~ ✅ All Resolved (Phase 1)
 
-| # | Issue | Location | Fix |
+| # | Issue | Location | Status |
 |---|---|---|---|
-| 1 | **StoresPage is 100% hardcoded** — doesn't call any API, shows fake stores | `StoresPage.tsx` | Replace with `useStores()` hook |
-| 2 | **Review form is non-functional** — "Write a Review" on ProductPage shows a toast but doesn't submit anything | `ProductPage.tsx` | Wire up to `createReview()` / `useCreateReview()` |
-| 3 | **Delivery fee mismatch** — Cart context hardcodes 3 SAR, backend charges 5 SAR | `use-cart.tsx` vs `orders/views.py` | Sync to a single source of truth |
-| 4 | **Cancelled orders don't restore stock** — product stock is decremented on order creation but never restored on cancel | `orders/views.py` | Add stock restoration logic in `OrderCancelView` |
+| 1 | ~~StoresPage is 100% hardcoded~~ | `StoresPage.tsx` | ✅ Fixed — now uses `useStores()` hook with loading/error/empty states |
+| 2 | ~~Review form is non-functional~~ | `ProductPage.tsx` | ✅ Fixed — wired to `useCreateReview()` with star rating, auth guard, cache invalidation |
+| 3 | ~~Delivery fee mismatch~~ | `use-cart.tsx` + `orders/views.py` | ✅ Fixed — both synced to 5 SAR flat fee |
+| 4 | ~~Cancelled orders don't restore stock~~ | `orders/views.py` | ✅ Fixed — `@transaction.atomic` + stock restoration loop in `OrderCancelView` |
 
 ### ⚠️ Important — Should Fix
 
@@ -571,9 +570,9 @@
 | # | Suggestion | Impact | Effort | Details |
 |---|---|---|---|---|
 | 1 | **Vendor Dashboard** | 🔥🔥🔥 | 2-3 hrs | Build a `/vendor` dashboard with product CRUD, image upload (Cloudinary), order management, and store settings. Backend has 7 vendor endpoints ready. |
-| 2 | **Connect StoresPage to API** | 🔥🔥 | 20 min | Replace hardcoded stores in `StoresPage.tsx` with `useStores()` hook and add actual map/distance sorting using store `latitude`/`longitude`. |
-| 3 | **Wire up review submission form** | 🔥🔥 | 30 min | Complete the "Write a Review" modal on `ProductPage.tsx` to actually POST to `/api/reviews/`. Add star rating selector and confirmation feedback. |
-| 4 | **Stock restoration on cancel** | 🔥🔥 | 10 min | When `OrderCancelView` updates status to CANCELLED, loop through `order.items` and add quantities back to `product.stock`. |
+| 2 | ~~Connect StoresPage to API~~ | ~~🔥🔥~~ | ~~20 min~~ | ✅ Done — Phase 1 |
+| 3 | ~~Wire up review submission form~~ | ~~🔥🔥~~ | ~~30 min~~ | ✅ Done — Phase 1 |
+| 4 | ~~Stock restoration on cancel~~ | ~~🔥🔥~~ | ~~10 min~~ | ✅ Done — Phase 1 |
 
 ### ⚡ Performance & UX
 

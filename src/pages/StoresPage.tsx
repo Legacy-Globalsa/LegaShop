@@ -4,24 +4,17 @@ import { MapPin, Clock, Star, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useStores } from "@/hooks/use-api";
 import baqalaImg from "@/assets/baqala-store.jpg";
-
-const stores = [
-  { name: "Abu Khalid Baqala", district: "Al Batha", distance: "0.3 km", time: "15 min", rating: 4.8, products: 230, featured: true },
-  { name: "Al Noor Mini Mart", district: "Al Batha", distance: "0.5 km", time: "20 min", rating: 4.6, products: 185, featured: false },
-  { name: "Pinoy Corner Store", district: "Al Olaya", distance: "1.2 km", time: "30 min", rating: 4.9, products: 310, featured: true },
-  { name: "Riyadh Sari-Sari", district: "Al Murabba", distance: "1.8 km", time: "35 min", rating: 4.7, products: 275, featured: false },
-  { name: "King Baqala", district: "Al Batha", distance: "0.7 km", time: "22 min", rating: 4.5, products: 195, featured: false },
-  { name: "Manila Market", district: "Al Olaya", distance: "1.5 km", time: "32 min", rating: 4.8, products: 290, featured: true },
-  { name: "Al Rashid Grocery", district: "Al Murabba", distance: "2.0 km", time: "40 min", rating: 4.4, products: 160, featured: false },
-  { name: "Kabayan Store", district: "Al Batha", distance: "0.4 km", time: "18 min", rating: 4.7, products: 245, featured: true },
-];
 
 const StoresPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const { data: stores = [], isLoading, isError } = useStores();
 
   const filteredStores = stores.filter((store) =>
     store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (store.name_ar && store.name_ar.toLowerCase().includes(searchTerm.toLowerCase())) ||
     store.district.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -71,53 +64,78 @@ const StoresPage = () => {
       {/* Store Grid */}
       <section className="py-8">
         <div className="container">
-          <p className="text-sm text-muted-foreground mb-4">
-            <span className="font-bold text-foreground">{filteredStores.length}</span> stores near you
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {filteredStores.map((store, i) => (
-              <Link to={`/stores/${i + 1}`} key={store.name}>
-              <motion.div
-                key={store.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300 cursor-pointer border border-border"
-              >
-                <div className="h-36 overflow-hidden relative">
-                  <img src={baqalaImg} alt={store.name} className="w-full h-full object-cover" />
-                  {store.featured && (
-                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-accent text-foreground">
-                      Featured
-                    </span>
-                  )}
-                </div>
-                <div className="p-4 space-y-3">
-                  <h3 className="font-bold text-foreground">{store.name}</h3>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <MapPin className="w-3.5 h-3.5 text-primary" />
-                    <span>{store.district} · {store.distance}</span>
+          {isLoading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="bg-card rounded-2xl overflow-hidden border border-border">
+                  <Skeleton className="h-36 w-full" />
+                  <div className="p-4 space-y-3">
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-9 w-full rounded-xl" />
                   </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-1 text-muted-foreground">
-                      <Clock className="w-3.5 h-3.5 text-primary" />
-                      {store.time}
-                    </span>
-                    <span className="flex items-center gap-1 font-bold text-foreground">
-                      <Star className="w-3.5 h-3.5 text-accent" fill="currentColor" />
-                      {store.rating}
-                    </span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">{store.products} products</div>
-                  <span className="block w-full py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold text-center hover:opacity-90 transition-opacity">
-                    Browse Store
-                  </span>
                 </div>
-              </motion.div>
-              </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : isError ? (
+            <div className="text-center py-16">
+              <span className="text-5xl block mb-3">😕</span>
+              <h2 className="text-xl font-bold mb-2">Failed to load stores</h2>
+              <p className="text-muted-foreground text-sm">Please check your connection and try again.</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground mb-4">
+                <span className="font-bold text-foreground">{filteredStores.length}</span> stores near you
+              </p>
+              {filteredStores.length === 0 ? (
+                <div className="text-center py-16">
+                  <span className="text-5xl block mb-3">🔍</span>
+                  <h2 className="text-xl font-bold mb-2">No stores found</h2>
+                  <p className="text-muted-foreground text-sm">Try a different search term.</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {filteredStores.map((store, i) => (
+                    <Link to={`/stores/${store.id}`} key={store.id}>
+                      <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.4, delay: i * 0.05 }}
+                        className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow duration-300 cursor-pointer border border-border"
+                      >
+                        <div className="h-36 overflow-hidden relative">
+                          <img src={store.image_url || baqalaImg} alt={store.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="p-4 space-y-3">
+                          <h3 className="font-bold text-foreground">{store.name}</h3>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <MapPin className="w-3.5 h-3.5 text-primary" />
+                            <span>{store.district}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="flex items-center gap-1 text-muted-foreground">
+                              <Clock className="w-3.5 h-3.5 text-primary" />
+                              {store.avg_delivery_min} min
+                            </span>
+                            <span className="flex items-center gap-1 font-bold text-foreground">
+                              <Star className="w-3.5 h-3.5 text-accent" fill="currentColor" />
+                              {store.rating?.toFixed(1) ?? "—"}
+                            </span>
+                          </div>
+                          <span className="block w-full py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold text-center hover:opacity-90 transition-opacity">
+                            Browse Store
+                          </span>
+                        </div>
+                      </motion.div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 

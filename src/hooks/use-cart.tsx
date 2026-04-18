@@ -110,7 +110,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return sum + price * i.quantity;
   }, 0);
 
-  const deliveryFee = subtotal > 0 ? 3 : 0; // 3 SAR flat fee
+  const deliveryFee = subtotal > 0 ? 5 : 0; // 5 SAR flat fee — synced with backend orders/views.py
+  // TODO: fetch from store.delivery_fee when per-store delivery pricing is implemented
 
   const total = subtotal + deliveryFee;
 

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Star, ShoppingCart, Plus, Minus, ArrowLeft, Store, Tag, Package } from "lucide-react";
+import { Star, ShoppingCart, Plus, Minus, ArrowLeft, Store, Tag, Package, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { fetchProductById, fetchProductReviews, type Product, type Review } from "@/lib/api";
+import { useCreateReview } from "@/hooks/use-api";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useRequireAuth } from "@/hooks/use-require-auth";
@@ -257,35 +258,91 @@ const ProductPage = () => {
         </section>
       )}
 
-      {/* Write a Review (stub form) */}
+      {/* Write a Review */}
       <section className="container pb-12">
-        <div className="p-6 rounded-xl border border-border bg-card">
-          <h3 className="font-bold text-base mb-3">Write a Review</h3>
-          <div className="flex items-center gap-1 mb-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className="w-5 h-5 text-muted-foreground/30 cursor-pointer hover:text-accent transition"
-              />
-            ))}
-          </div>
-          <textarea
-            placeholder="Share your experience with this product..."
-            className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
-            rows={3}
-          />
-          <button
-            className="mt-2 px-5 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition"
-            onClick={() => toast({ title: "Review submitted!", description: "Thank you for your feedback." })}
-          >
-            Submit Review
-          </button>
-        </div>
+        <ReviewForm product={product} onSuccess={(newReview) => {
+          setReviews((prev) => [newReview, ...prev]);
+        }} />
       </section>
 
       <Footer />
     </div>
   );
 };
+
+// ──────────────────────────────────────
+// Review Form Component
+// ──────────────────────────────────────
+
+function ReviewForm({ product, onSuccess }: { product: Product; onSuccess: (review: Review) => void }) {
+  const [rating, setRating] = useState(0);
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const { isAuthenticated, requireAuth } = useRequireAuth();
+  const { toast } = useToast();
+  const createReviewMutation = useCreateReview();
+
+  const handleSubmit = () => {
+    if (!requireAuth()) return;
+    if (rating === 0) {
+      toast({ title: "Please select a rating", variant: "destructive" });
+      return;
+    }
+    createReviewMutation.mutate(
+      { store: product.store, product: product.id, rating, comment },
+      {
+        onSuccess: (data) => {
+          toast({ title: "Review submitted!", description: "Thank you for your feedback." });
+          onSuccess(data);
+          setRating(0);
+          setComment("");
+        },
+        onError: (err) => {
+          toast({ title: "Failed to submit review", description: err.message, variant: "destructive" });
+        },
+      }
+    );
+  };
+
+  return (
+    <div className="p-6 rounded-xl border border-border bg-card">
+      <h3 className="font-bold text-base mb-3">Write a Review</h3>
+      {!isAuthenticated && (
+        <p className="text-sm text-muted-foreground mb-3">
+          <button onClick={() => requireAuth()} className="text-primary font-semibold hover:underline">Log in</button> to write a review.
+        </p>
+      )}
+      <div className="flex items-center gap-1 mb-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star
+            key={i}
+            className={`w-5 h-5 cursor-pointer transition ${
+              i < (hoveredRating || rating) ? "text-accent fill-current" : "text-muted-foreground/30"
+            }`}
+            onMouseEnter={() => setHoveredRating(i + 1)}
+            onMouseLeave={() => setHoveredRating(0)}
+            onClick={() => setRating(i + 1)}
+          />
+        ))}
+        {rating > 0 && <span className="text-xs text-muted-foreground ml-2">{rating}/5</span>}
+      </div>
+      <textarea
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        placeholder="Share your experience with this product..."
+        className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+        rows={3}
+      />
+      <button
+        className="mt-2 px-5 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+        onClick={handleSubmit}
+        disabled={createReviewMutation.isPending}
+      >
+        {createReviewMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+        Submit Review
+      </button>
+    </div>
+  );
+}
 
 export default ProductPage;

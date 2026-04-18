@@ -912,7 +912,7 @@ Legend: ✅ Done · 🟡 Partial · ⬜ Not started · (P0/P1/P2 = MVP priority)
 | Phone OTP (Unifonic/Twilio) | ⬜ | **P0** |
 | Categories/Products/Stores/Orders CRUD endpoints | ✅ | Vendor & admin variants present |
 | Nearby-stores endpoint (geo) | ⬜ | **P0** — needs PostGIS + view |
-| Product search endpoint | 🟡 | Basic filter only; no FTS / trigram index (**P1**) |
+| Product search endpoint | ✅ | `GET /api/search/?q=` — server-side `icontains` across products, stores, categories. FTS/trigram index still **P1** |
 | PayTabs integration + webhook | ⬜ | **P0** |
 | Stripe integration + webhook | ⬜ | **P0** |
 | COD confirmation endpoint | ⬜ | **P1** |
@@ -922,8 +922,8 @@ Legend: ✅ Done · 🟡 Partial · ⬜ Not started · (P0/P1/P2 = MVP priority)
 | Django Channels / WebSocket order tracking | ⬜ | **P1** |
 | Notifications (SMS/email templates + dispatch) | ⬜ | **P0** |
 | Rate limiting / `django-axes` / Sentry | ⬜ | **P1** |
-| S3 media storage (`django-storages`) | ⬜ | **P1** |
-| Seed data / fixtures / `seed` management command | ⬜ | **P1** |
+| Image storage (Cloudinary via `STORAGES`) | ✅ | `ImageField` on Product, Store, Category; served via Cloudinary CDN |
+| Seed data / fixtures / `seed` management command | ✅ | `python manage.py seed_data` — 35 products, 3 stores, 8 categories, 4 test accounts |
 | Tests (pytest, factories) | ⬜ | `tests.py` files empty (**P1**) |
 | OpenAPI docs (Swagger) | ✅ | `/api/docs/` via drf-spectacular |
 
@@ -934,16 +934,16 @@ Legend: ✅ Done · 🟡 Partial · ⬜ Not started · (P0/P1/P2 = MVP priority)
 | Homepage (`Index`) | ✅ | Hero, deals, categories, stores, remittance preview |
 | Auth — Login / Signup / Google | ✅ | `LoginPage`, `SignupPage`, `use-auth` context |
 | Categories browse | ✅ | `CategoriesPage` |
-| Product detail | ✅ | `ProductPage` with reviews, add-to-cart |
+| Product detail | ✅ | `ProductPage` with reviews, add-to-cart, **review submission form** wired to `useCreateReview()` |
 | 1-SAR / 5-SAR deals | ✅ | `OneSarDeals`, `FiveSarDeals` |
-| Store list | 🟡 | `StoresPage` loads **mock** 8 stores; no geolocation |
+| Store list | ✅ | `StoresPage` connected to `useStores()` hook → `GET /api/stores/`; loading skeleton + error states; search filters on `name`, `name_ar`, `district` |
 | Store detail | ✅ | `StorePage` |
-| Search | 🟡 | `SearchResults` — client-side filter over fetched results (**P1**: wire to FTS endpoint) |
+| Search | ✅ | `SearchResults` — calls `searchAll(query)` → `GET /api/search/?q=` server-side; client-side tab sort/filter on results |
 | Cart (drawer + context + persistence) | ✅ | `CartDrawer`, `use-cart` context, localStorage |
 | Checkout | 🟡 | `CheckoutPage` — address + payment UI + `POST /orders/`, but **no payment provider** (**P0**) |
 | Order confirmation | ✅ | `OrderConfirmationPage` |
 | Orders list | ✅ | `OrdersPage` |
-| Order detail + tracking | 🟡 | Page file missing (`OrderDetailPage` is stub/placeholder) — **P0** rebuild + live map |
+| Order detail + tracking | ✅ | `OrderDetailPage` — real API via `useOrder()` + `useCancelOrder()`, status timeline, payment display; live map still **P1** |
 | Account — profile / addresses / security | ✅ | `AccountPage` + `account/*` sections; address has lat/lng fields but **no map picker** |
 | Remittance landing | 🟡 | `RemittancePage` static UI only; no backend wiring (**P1**) |
 | Google Maps (nearby, picker, tracking) | ⬜ | **P0** (`@vis.gl/react-google-maps`) |
@@ -973,30 +973,41 @@ Legend: ✅ Done · 🟡 Partial · ⬜ Not started · (P0/P1/P2 = MVP priority)
 ### 19.4 Consolidated "to finish the MVP" checklist
 
 **P0 — blocking launch**
-1. PostGIS migration + `Store.location`, `Store.delivery_radius_km`; `/stores/nearby/` endpoint.
-2. Google Maps provider + `AddressPickerMap` + `NearbyStoresMap`.
-3. PayTabs hosted-checkout integration + webhook + payment return page.
-4. Stripe PaymentIntents fallback for intl cards.
-5. Phone OTP (Unifonic + Twilio) + rate limiting.
-6. Celery + Redis + beat; order-status notification tasks.
-7. Vendor dashboard UI (products CRUD, order queue, accept/reject).
-8. Rebuild `OrderDetailPage` with status timeline + live map.
-9. Docker + docker-compose + GitHub Actions.
+1. ~~Seed data / management command~~ ✅ Done (`seed_data`)
+2. ~~Server-side search endpoint~~ ✅ Done (`GET /api/search/?q=`)
+3. ~~Image storage~~ ✅ Done (Cloudinary via `STORAGES`)
+4. ~~OrderDetailPage rebuild~~ ✅ Done (real API, status timeline, cancel order)
+5. ~~Connect `StoresPage` to real API~~ ✅ Done — replaced hardcoded stores with `useStores()` hook + loading skeleton + error states.
+6. ~~Wire review submission form~~ ✅ Done — `ProductPage.tsx` now has interactive star-rating + comment form wired to `useCreateReview()`.
+7. ~~Fix delivery fee mismatch~~ ✅ Done — frontend cart updated from 3 SAR to 5 SAR to match backend.
+8. ~~Fix cancelled orders stock restoration~~ ✅ Done — `OrderCancelView` now restores `product.stock` within `transaction.atomic`.
+9. PostGIS migration + `Store.location`, `Store.delivery_radius_km`; `/stores/nearby/` endpoint.
+10. Google Maps provider + `AddressPickerMap` + `NearbyStoresMap`.
+11. PayTabs hosted-checkout integration + webhook + payment return page.
+12. Stripe PaymentIntents fallback for intl cards.
+13. Phone OTP (Unifonic + Twilio) + rate limiting.
+14. Celery + Redis + beat; order-status notification tasks.
+15. Vendor dashboard UI (products CRUD, order queue, accept/reject).
+16. Docker + docker-compose + GitHub Actions.
 
 **P1 — before public launch**
-10. i18n (EN/TL/AR, RTL).
-11. PH remittance endpoints + FX cache + Puregold CSV ingest.
-12. Admin console UI.
-13. SMS templates + in-app toasts + Sentry integration.
-14. Postgres FTS with trigram index; `/products/search/` endpoint.
-15. S3 media via django-storages; CloudFront in front.
-16. Seed fixtures + pytest smoke suite.
+17. Migrate 6 pages from direct `useEffect` calls to React Query hooks (ProductPage, StorePage, CheckoutPage, AddressesSection, ProfileSection, SecuritySection).
+18. ProfileSection should fetch fresh data via `useProfile()` instead of reading stale auth context.
+19. OrderDetailPage address display — show real `delivery_address` instead of hardcoded "Riyadh, Saudi Arabia".
+20. Remove mock-data fallbacks in `api.ts` catch blocks — add proper error boundary display.
+21. Add product seed images (currently blank/placeholder).
+22. i18n (EN/TL/AR, RTL).
+23. PH remittance endpoints + FX cache + Puregold CSV ingest.
+24. Admin console UI.
+25. SMS templates + in-app toasts + Sentry integration.
+26. Postgres FTS with trigram index for fuzzy/multilingual search.
+27. Pytest smoke suite.
 
 **P2 — stabilize & grow**
-17. OpenSearch migration for multilingual search.
-18. PWA manifest + offline shell.
-19. Rider app (React Native) + live GPS ping.
-20. BNPL (Tamara/Tabby), STC Pay, Apple Pay via PayTabs.
+28. OpenSearch migration for multilingual search.
+29. PWA manifest + offline shell.
+30. Rider app (React Native) + live GPS ping.
+31. BNPL (Tamara/Tabby), STC Pay, Apple Pay via PayTabs.
 
 ---
 
