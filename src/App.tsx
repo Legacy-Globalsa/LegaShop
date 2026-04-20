@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/use-auth";
 import { CartProvider } from "@/hooks/use-cart";
+import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { toast } from "sonner";
 import Index from "./pages/Index";
@@ -48,6 +49,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
+          <GoogleMapsProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -74,6 +76,7 @@ const App = () => (
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
+          </GoogleMapsProvider>
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>

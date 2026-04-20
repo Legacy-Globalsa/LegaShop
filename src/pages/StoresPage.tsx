@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Clock, Star, Search } from "lucide-react";
+import { MapPin, Clock, Star, Search, Map } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStores } from "@/hooks/use-api";
+import StoreMap from "@/components/maps/StoreMap";
 import baqalaImg from "@/assets/baqala-store.jpg";
 
 const StoresPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [showMap, setShowMap] = useState(true);
   const { data: stores = [], isLoading, isError } = useStores();
 
   const filteredStores = stores.filter((store) =>
@@ -58,8 +60,31 @@ const StoresPage = () => {
               className="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
+          <button
+            onClick={() => setShowMap(!showMap)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              showMap
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
+            }`}
+          >
+            <Map className="w-4 h-4" />
+            <span className="hidden sm:inline">{showMap ? "Hide Map" : "Show Map"}</span>
+          </button>
         </div>
       </div>
+
+      {/* Store Map */}
+      {showMap && !isLoading && !isError && filteredStores.length > 0 && (
+        <section className="py-4">
+          <div className="container">
+            <StoreMap
+              stores={filteredStores}
+              height="350px"
+            />
+          </div>
+        </section>
+      )}
 
       {/* Store Grid */}
       <section className="py-8">

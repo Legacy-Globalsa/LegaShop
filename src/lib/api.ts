@@ -196,6 +196,13 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
 }
 
 // ──────────────────────────────────────
+// Image URL helper — prefers Cloudinary upload over legacy URL
+// ──────────────────────────────────────
+export function getImageUrl(item: { image?: string | null; image_url?: string | null }): string | null {
+  return item.image || item.image_url || null;
+}
+
+// ──────────────────────────────────────
 // Type definitions for backend models
 // ──────────────────────────────────────
 
@@ -206,6 +213,7 @@ export interface Category {
   name_ar: string;
   parent: number | null;
   image_url: string | null;
+  image: string | null;
   is_active: boolean;
   subcategories: Category[];
   created_at: string;
@@ -227,6 +235,7 @@ export interface Product {
   stock: number;
   unit: string;
   image_url: string | null;
+  image: string | null;
   is_deal: boolean;
   deal_type: "ONE_RIYAL" | "FIVE_RIYAL" | null;
   is_active: boolean;
@@ -248,6 +257,7 @@ export interface Store {
   rating: number;
   is_active: boolean;
   image_url: string | null;
+  image: string | null;
   district: string;
   created_at: string;
 }

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import type { Product } from "@/lib/api";
 import { getUser } from "@/lib/api";
 
@@ -74,10 +80,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return prev.map((i) =>
           i.product.id === product.id
             ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock) }
-            : i
+            : i,
         );
       }
-      return [...prev, { product, quantity: Math.min(quantity, product.stock) }];
+      return [
+        ...prev,
+        { product, quantity: Math.min(quantity, product.stock) },
+      ];
     });
   }, []);
 
@@ -94,8 +103,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       prev.map((i) =>
         i.product.id === productId
           ? { ...i, quantity: Math.min(quantity, i.product.stock) }
-          : i
-      )
+          : i,
+      ),
     );
   }, []);
 
@@ -117,7 +126,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, itemCount, subtotal, deliveryFee, total }}
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        itemCount,
+        subtotal,
+        deliveryFee,
+        total,
+      }}
     >
       {children}
     </CartContext.Provider>
