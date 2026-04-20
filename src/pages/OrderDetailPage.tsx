@@ -174,8 +174,19 @@ const OrderDetailPage = () => {
               <MapPin className="w-4 h-4 text-primary" />
               Delivery Address
             </h2>
-            <p className="text-sm">Riyadh, Saudi Arabia</p>
-            <p className="text-xs text-muted-foreground">Address details available in order confirmation email</p>
+            {order.delivery_address_data ? (
+              <>
+                <p className="text-sm font-medium">{order.delivery_address_data.street}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {order.delivery_address_data.district}, {order.delivery_address_data.city}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {order.delivery_address_data.label}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Address not available</p>
+            )}
           </motion.section>
 
           {/* Payment */}

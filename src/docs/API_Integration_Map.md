@@ -511,22 +511,22 @@
 |---|---|---|---|---|
 | `login-form.tsx` | `apiLogin`, `apiGoogleLogin` | — | No | N/A |
 | `signup-form.tsx` | `apiSignup`, `apiGoogleLogin` | — | No | N/A |
-| `FlashDeals.tsx` | `useDeals()` | ✅ | Yes | ✅ |
-| `FeaturedProducts.tsx` | `useProducts()` | ✅ | Yes | ✅ |
-| `OneSarDeals.tsx` | `useDeals("ONE_RIYAL")` | ✅ | Yes | ✅ |
-| `FiveSarDeals.tsx` | `useDeals("FIVE_RIYAL")` | ✅ | Yes | ✅ |
-| `CategoriesPage.tsx` | `useCategories()` + `useProducts()` | ✅ | Yes | ✅ |
-| `ProductPage.tsx` | `fetchProductById` + `fetchProductReviews` | ❌ direct | Yes | ✅ |
+| `FlashDeals.tsx` | `useDeals()` | ✅ | No | ✅ |
+| `FeaturedProducts.tsx` | `useProducts()` | ✅ | No | ✅ |
+| `OneSarDeals.tsx` | `useDeals("ONE_RIYAL")` | ✅ | No | ✅ |
+| `FiveSarDeals.tsx` | `useDeals("FIVE_RIYAL")` | ✅ | No | ✅ |
+| `CategoriesPage.tsx` | `useCategories()` + `useProducts()` | ✅ | No | ✅ |
+| `ProductPage.tsx` | `useProduct(id)` + `useProductReviews(id)` | ✅ | No | ✅ |
 | `StoresPage.tsx` | `useStores()` | ✅ | No | ✅ |
-| `StorePage.tsx` | `fetchStoreById` + `fetchStoreProducts` + `fetchStoreReviews` | ❌ direct | Yes | ✅ |
-| `SearchResults.tsx` | `searchAll(query)` — backend server-side search | ❌ direct | Yes (client filter) | ✅ |
-| `CheckoutPage.tsx` | `fetchAddresses` + `createAddress` + `createOrder` | ❌ direct | Partial | ProtectedRoute |
-| `OrdersPage.tsx` | `useOrders()` | ✅ | Yes | ProtectedRoute |
+| `StorePage.tsx` | `useStore(id)` + `useStoreProducts(id)` + `useStoreReviews(id)` | ✅ | No | ✅ |
+| `SearchResults.tsx` | `searchAll(query)` — backend server-side search | ❌ direct | No | ✅ |
+| `CheckoutPage.tsx` | `useAddresses()` + `useCreateAddress()` + `useCreateOrder()` | ✅ | No | ProtectedRoute |
+| `OrdersPage.tsx` | `useOrders()` | ✅ | No | ProtectedRoute |
 | `OrderDetailPage.tsx` | `useOrder()` + `useCancelOrder()` | ✅ | No | ProtectedRoute |
 | `OrderConfirmationPage.tsx` | None (static) | — | — | ProtectedRoute |
-| `ProfileSection.tsx` | `updateProfile` | ❌ direct | No | ProtectedRoute |
-| `AddressesSection.tsx` | Full CRUD addresses | ❌ direct | Partial | ProtectedRoute |
-| `SecuritySection.tsx` | `changePassword` | ❌ direct | No | ProtectedRoute |
+| `ProfileSection.tsx` | `useProfile()` + `useUpdateProfile()` | ✅ | No | ProtectedRoute |
+| `AddressesSection.tsx` | `useAddresses()` + `useCreateAddress()` + `useUpdateAddress()` + `useDeleteAddress()` | ✅ | No | ProtectedRoute |
+| `SecuritySection.tsx` | `useChangePassword()` | ✅ | No | ProtectedRoute |
 
 ### Infrastructure Status
 
@@ -552,14 +552,14 @@
 | 3 | ~~Delivery fee mismatch~~ | `use-cart.tsx` + `orders/views.py` | ✅ Fixed — both synced to 5 SAR flat fee |
 | 4 | ~~Cancelled orders don't restore stock~~ | `orders/views.py` | ✅ Fixed — `@transaction.atomic` + stock restoration loop in `OrderCancelView` |
 
-### ⚠️ Important — Should Fix
+### ~~⚠️ Important — Should Fix~~ ✅ All Resolved (Phase 2)
 
-| # | Issue | Location | Fix |
+| # | Issue | Location | Status |
 |---|---|---|---|
-| 5 | **6 pages bypass React Query hooks** — lose caching, dedup, background refetch | ProductPage, StorePage, CheckoutPage, AddressesSection, ProfileSection | Migrate to `use-api.ts` hooks |
-| 6 | **OrderDetailPage address display** — shows hardcoded "Riyadh, Saudi Arabia" instead of actual delivery address | `OrderDetailPage.tsx` | Read `order.delivery_address` data or nest address in order serializer |
-| 7 | **ProfileSection doesn't fetch fresh data** — reads from auth context (localStorage) on mount | `ProfileSection.tsx` | Use `useProfile()` hook to fetch fresh data |
-| 8 | **Product images are empty** — seed data has no image URLs, products show blank placeholders | Seed data / admin | Add product image URLs or upload images via vendor dashboard |
+| 5 | ~~**6 pages bypass React Query hooks**~~ | ProductPage, StorePage, CheckoutPage, AddressesSection, ProfileSection, SecuritySection | ✅ Fixed — all migrated to `use-api.ts` hooks |
+| 6 | ~~**OrderDetailPage address display**~~ | `OrderDetailPage.tsx` + `orders/serializers.py` | ✅ Fixed — nested `delivery_address_data` in OrderSerializer, frontend displays real address |
+| 7 | ~~**ProfileSection doesn't fetch fresh data**~~ | `ProfileSection.tsx` | ✅ Fixed — uses `useProfile()` hook |
+| 8 | ~~**Product images are empty**~~ | `seed_data.py` | ✅ Fixed — all 35 products have placeholder image URLs |
 
 ---
 
@@ -590,7 +590,7 @@
 | 9 | **Rate limiting on auth endpoints** | 🔥🔥 | 15 min | Add `django-ratelimit` or DRF throttling to `/login/`, `/signup/`, `/token/refresh/` to prevent brute force attacks. |
 | 10 | **Email verification on signup** | 🔥 | 1.5 hrs | Users can sign up with any email without verification. Add email verification flow with a confirmation link. |
 | 11 | **CORS lockdown for production** | 🔥🔥 | 5 min | `CORS_ALLOW_ALL_ORIGINS = True` is set. Before deploying, restrict to the actual frontend domain. |
-| 12 | **Remove mock data fallbacks** | 🔥 | 20 min | All `catch` blocks in `api.ts` silently fall back to mock data, masking real API errors. Add proper error handling/display and remove mocks. |
+| 12 | ~~**Remove mock data fallbacks**~~ | ~~🔥~~ | ~~20 min~~ | ✅ Done — Phase 2. All mock fallbacks removed from `api.ts`. |
 
 ### 📦 Business Features
 

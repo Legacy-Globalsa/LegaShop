@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { MapPin, Plus, Star, Pencil, Trash2, Loader2 } from "lucide-react";
-import { Address, AddressInput, fetchAddresses, createAddress, updateAddress, deleteAddress } from "@/lib/api";
+import { type Address, type AddressInput } from "@/lib/api";
+import { useAddresses, useCreateAddress, useUpdateAddress, useDeleteAddress } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,29 +21,15 @@ const labelEmoji: Record<string, string> = { HOME: "🏠", WORK: "🏢", OTHER: 
 
 const AddressesSection = () => {
   const { toast } = useToast();
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { data: addresses = [], isLoading: loading } = useAddresses();
+  const createMutation = useCreateAddress();
+  const updateMutation = useUpdateAddress();
+  const deleteMutation = useDeleteAddress();
 
   // Dialog states
   const [formOpen, setFormOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Address | null>(null);
-
-  const loadAddresses = useCallback(async () => {
-    try {
-      const data = await fetchAddresses();
-      setAddresses(data);
-    } catch {
-      toast({ title: "Error", description: "Failed to load addresses.", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    loadAddresses();
-  }, [loadAddresses]);
 
   const handleCreate = () => {
     setEditingAddress(null);
@@ -54,50 +41,49 @@ const AddressesSection = () => {
     setFormOpen(true);
   };
 
-  const handleFormSubmit = async (data: AddressInput) => {
-    setSaving(true);
-    try {
-      if (editingAddress) {
-        await updateAddress(editingAddress.id, data);
-        toast({ title: "Address updated" });
-      } else {
-        await createAddress(data);
-        toast({ title: "Address added" });
-      }
-      setFormOpen(false);
-      await loadAddresses();
-    } catch (err) {
-      toast({
-        title: "Error",
-        description: err instanceof Error ? err.message : "Something went wrong.",
-        variant: "destructive",
+  const handleFormSubmit = (data: AddressInput) => {
+    const mutation = editingAddress
+      ? updateMutation.mutateAsync({ id: editingAddress.id, data })
+      : createMutation.mutateAsync(data);
+
+    mutation
+      .then(() => {
+        toast({ title: editingAddress ? "Address updated" : "Address added" });
+        setFormOpen(false);
+      })
+      .catch((err) => {
+        toast({
+          title: "Error",
+          description: err instanceof Error ? err.message : "Something went wrong.",
+          variant: "destructive",
+        });
       });
-    } finally {
-      setSaving(false);
-    }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!deleteTarget) return;
-    try {
-      await deleteAddress(deleteTarget.id);
-      toast({ title: "Address deleted" });
-      setDeleteTarget(null);
-      await loadAddresses();
-    } catch {
-      toast({ title: "Error", description: "Failed to delete address.", variant: "destructive" });
-    }
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        toast({ title: "Address deleted" });
+        setDeleteTarget(null);
+      },
+      onError: () => {
+        toast({ title: "Error", description: "Failed to delete address.", variant: "destructive" });
+      },
+    });
   };
 
-  const handleSetDefault = async (addr: Address) => {
-    try {
-      await updateAddress(addr.id, { is_default: true });
-      toast({ title: "Default address updated" });
-      await loadAddresses();
-    } catch {
-      toast({ title: "Error", description: "Failed to set default address.", variant: "destructive" });
-    }
+  const handleSetDefault = (addr: Address) => {
+    updateMutation.mutate(
+      { id: addr.id, data: { is_default: true } },
+      {
+        onSuccess: () => toast({ title: "Default address updated" }),
+        onError: () => toast({ title: "Error", description: "Failed to set default address.", variant: "destructive" }),
+      }
+    );
   };
+
+  const saving = createMutation.isPending || updateMutation.isPending;
 
   if (loading) {
     return (

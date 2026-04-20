@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Star, MapPin, Clock, Phone, Plus, ArrowLeft, ArrowUpDown, Package } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { fetchStoreById, fetchStoreProducts, fetchStoreReviews, type Store, type Product, type Review } from "@/lib/api";
+import { type Product } from "@/lib/api";
+import { useStore, useStoreProducts, useStoreReviews } from "@/hooks/use-api";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useRequireAuth } from "@/hooks/use-require-auth";
@@ -13,30 +14,14 @@ type SortOption = "relevance" | "price-low" | "price-high" | "deals";
 
 const StorePage = () => {
   const { id } = useParams<{ id: string }>();
-  const [store, setStore] = useState<Store | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+  const storeId = Number(id);
+  const { data: store, isLoading: loading } = useStore(storeId);
+  const { data: products = [] } = useStoreProducts(storeId);
+  const { data: reviews = [] } = useStoreReviews(storeId);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [showSortMenu, setShowSortMenu] = useState(false);
   const { addItem } = useCart();
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (!id) return;
-    const storeId = Number(id);
-
-    setLoading(true);
-    Promise.all([
-      fetchStoreById(storeId),
-      fetchStoreProducts(storeId),
-      fetchStoreReviews(storeId),
-    ]).then(([storeData, productsData, reviewsData]) => {
-      setStore(storeData);
-      setProducts(productsData);
-      setReviews(reviewsData);
-    }).finally(() => setLoading(false));
-  }, [id]);
 
   const sortedProducts = (() => {
     const sorted = [...products];

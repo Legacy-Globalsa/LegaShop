@@ -60,50 +60,45 @@
 
 ---
 
-## Phase 2 — Code Quality & Consistency (P0/P1)
+## Phase 2 — Code Quality & Consistency (P0/P1) ✅ COMPLETED
 
 > Goal: Remove tech debt that causes silent failures or stale data.
 
-### 2.1 Migrate 6 pages from direct `useEffect` to React Query hooks
+### 2.1 Migrate 6 pages from direct `useEffect` to React Query hooks ✅
 
-| Page / Component | Current | Migrate to |
-|---|---|---|
-| `ProductPage.tsx` | `useEffect` + `fetchProductById` + `fetchProductReviews` | `useProduct(id)` + `useProductReviews(id)` |
-| `StorePage.tsx` | `useEffect` + `fetchStoreById` + `fetchStoreProducts` + `fetchStoreReviews` | `useStore(id)` + `useStoreProducts(id)` + `useStoreReviews(id)` |
-| `CheckoutPage.tsx` | `useEffect` + `fetchAddresses` | `useAddresses()` |
-| `AddressesSection.tsx` | direct `fetchAddresses` + `createAddress` + `updateAddress` + `deleteAddress` | `useAddresses()` + `useCreateAddress()` + `useUpdateAddress()` + `useDeleteAddress()` |
-| `ProfileSection.tsx` | reads from auth context (stale localStorage) | `useProfile()` for fresh data on mount |
-| `SecuritySection.tsx` | direct `changePassword()` call | `useChangePassword()` mutation hook |
+| Page / Component | Previous | Migrated to | Status |
+|---|---|---|---|
+| `ProductPage.tsx` | `useEffect` + `fetchProductById` + `fetchProductReviews` | `useProduct(id)` + `useProductReviews(id)` | ✅ Done |
+| `StorePage.tsx` | `useEffect` + `fetchStoreById` + `fetchStoreProducts` + `fetchStoreReviews` | `useStore(id)` + `useStoreProducts(id)` + `useStoreReviews(id)` | ✅ Done |
+| `CheckoutPage.tsx` | `useEffect` + `fetchAddresses` | `useAddresses()` + `useCreateAddress()` + `useCreateOrder()` | ✅ Done |
+| `AddressesSection.tsx` | direct `fetchAddresses` + `createAddress` + `updateAddress` + `deleteAddress` | `useAddresses()` + `useCreateAddress()` + `useUpdateAddress()` + `useDeleteAddress()` | ✅ Done |
+| `ProfileSection.tsx` | reads from auth context (stale localStorage) | `useProfile()` + `useUpdateProfile()` for fresh data on mount | ✅ Done |
+| `SecuritySection.tsx` | direct `changePassword()` call | `useChangePassword()` mutation hook | ✅ Done |
 
 **Benefits:** automatic caching, background refetch, deduplication, loading/error states via RQ.
 
-**Effort:** ~1.5 hr total
-
-### 2.2 Fix `OrderDetailPage` address display
+### 2.2 Fix `OrderDetailPage` address display ✅
 
 | | |
 |---|---|
-| **File** | `src/pages/OrderDetailPage.tsx` |
-| **Problem** | Shows hardcoded "Riyadh, Saudi Arabia" instead of the actual delivery address from the order. |
-| **What to do** | Read `order.delivery_address` (ID) and display the address label/street/district from the nested or referenced address object. If the backend doesn't nest it, add address details to `OrderSerializer`. |
-| **Effort** | ~15 min |
+| **File** | `src/pages/OrderDetailPage.tsx` + `backend/orders/serializers.py` |
+| **What was done** | Added `DeliveryAddressSerializer` to backend `OrderSerializer` (field: `delivery_address_data`). Updated frontend `Order` type with `delivery_address_data` object. Updated `OrderDetailPage` to display `street`, `district`, `city`, and `label` from the nested address. |
+| **Status** | ✅ Done |
 
-### 2.3 Remove mock-data fallbacks in `api.ts`
+### 2.3 Remove mock-data fallbacks in `api.ts` ✅
 
 | | |
 |---|---|
 | **File** | `src/lib/api.ts` |
-| **Problem** | Every API function has a `catch` block that silently returns mock data. This masks real errors (network, auth, server) — developers and users never see failures. |
-| **What to do** | Replace mock fallbacks with `throw` (let React Query's `error` state handle display). Add a global error boundary or toast notification for API failures. Keep mock data only in `test/` for Vitest. |
-| **Effort** | ~30 min |
+| **What was done** | Removed all 12 `catch { import("./mock-data") }` blocks from: `fetchProducts`, `fetchProductById`, `fetchDeals`, `fetchCategories`, `fetchStores`, `fetchStoreById`, `fetchStoreProducts`, `fetchProductReviews`, `fetchStoreReviews`, `fetchOrders`, `fetchAddresses`, `searchAll`. All functions now throw on error, letting React Query handle error states. |
+| **Status** | ✅ Done |
 
-### 2.4 Add product seed images
+### 2.4 Add product seed images ✅
 
 | | |
 |---|---|
-| **Problem** | Seed data has no image URLs → product cards show blank placeholders. |
-| **What to do** | Update `seed_data` management command to include real placeholder images (use Cloudinary-hosted Filipino grocery product images or unsplash placeholders). |
-| **Effort** | ~20 min |
+| **What was done** | Added `image_url` (placehold.co placeholder images with product names) to all 35 products in `seed_data.py`. Updated seed defaults to include `image_url` field. |
+| **Status** | ✅ Done |
 
 ---
 

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User as UserIcon, Mail, Phone, Shield, Pencil, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { updateProfile } from "@/lib/api";
+import { useProfile, useUpdateProfile } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -27,10 +27,14 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 const ProfileSection = () => {
-  const { user, updateUser } = useAuth();
+  const { updateUser } = useAuth();
+  const { data: profile } = useProfile();
+  const updateProfileMutation = useUpdateProfile();
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
+
+  // Use fresh profile data from API, fall back to auth context
+  const user = profile ?? null;
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -40,6 +44,16 @@ const ProfileSection = () => {
     },
   });
 
+  // Reset form defaults when fresh profile data arrives
+  useEffect(() => {
+    if (profile) {
+      form.reset({
+        first_name: profile.first_name ?? "",
+        phone_number: profile.phone_number ?? "",
+      });
+    }
+  }, [profile, form]);
+
   const initials = (user?.first_name ?? "U")
     .split(" ")
     .map((w) => w[0])
@@ -47,23 +61,24 @@ const ProfileSection = () => {
     .toUpperCase()
     .slice(0, 2);
 
-  const onSubmit = async (values: ProfileFormValues) => {
-    setSaving(true);
-    try {
-      const updated = await updateProfile(values);
-      updateUser(updated);
-      toast({ title: "Profile updated", description: "Your changes have been saved." });
-      setEditing(false);
-    } catch (err) {
-      toast({
-        title: "Update failed",
-        description: err instanceof Error ? err.message : "Something went wrong.",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
+  const onSubmit = (values: ProfileFormValues) => {
+    updateProfileMutation.mutate(values, {
+      onSuccess: (updated) => {
+        updateUser(updated);
+        toast({ title: "Profile updated", description: "Your changes have been saved." });
+        setEditing(false);
+      },
+      onError: (err) => {
+        toast({
+          title: "Update failed",
+          description: err instanceof Error ? err.message : "Something went wrong.",
+          variant: "destructive",
+        });
+      },
+    });
   };
+
+  const saving = updateProfileMutation.isPending;
 
   const handleCancel = () => {
     form.reset({

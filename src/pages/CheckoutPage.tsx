@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, MapPin, CreditCard, Banknote, Smartphone, Check, Plus, Loader2, AlertTriangle } from "lucide-react";
@@ -6,7 +6,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
-import { Address, AddressInput, fetchAddresses, createAddress, createOrder } from "@/lib/api";
+import { type AddressInput } from "@/lib/api";
+import { useAddresses, useCreateAddress, useCreateOrder } from "@/hooks/use-api";
 import AddressFormDialog from "@/components/account/AddressFormDialog";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -24,48 +25,29 @@ const CheckoutPage = () => {
   const { items, subtotal, deliveryFee, total, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [addressLoading, setAddressLoading] = useState(true);
+  const { data: addresses = [], isLoading: addressLoading } = useAddresses();
+  const createAddressMutation = useCreateAddress();
+  const createOrderMutation = useCreateOrder();
   const [selectedAddress, setSelectedAddress] = useState<number | undefined>();
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>("COD");
   const [notes, setNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
-  const [addressSaving, setAddressSaving] = useState(false);
 
-  const loadAddresses = useCallback(async () => {
-    if (!isAuthenticated) {
-      setAddressLoading(false);
-      return;
-    }
-    try {
-      const data = await fetchAddresses();
-      setAddresses(data);
-      const defaultAddr = data.find((a) => a.is_default) ?? data[0];
-      if (defaultAddr) setSelectedAddress(defaultAddr.id);
-    } catch {
-      // fallback already handled in fetchAddresses
-    } finally {
-      setAddressLoading(false);
-    }
-  }, [isAuthenticated]);
-
+  // Auto-select default address when addresses load
   useEffect(() => {
-    loadAddresses();
-  }, [loadAddresses]);
+    if (addresses.length > 0 && selectedAddress === undefined) {
+      const defaultAddr = addresses.find((a) => a.is_default) ?? addresses[0];
+      if (defaultAddr) setSelectedAddress(defaultAddr.id);
+    }
+  }, [addresses, selectedAddress]);
 
   const handleAddAddress = async (data: AddressInput) => {
-    setAddressSaving(true);
-    try {
-      const newAddr = await createAddress(data);
-      await loadAddresses();
-      setSelectedAddress(newAddr.id);
-      setAddressDialogOpen(false);
-    } catch {
-      // error handled by API layer
-    } finally {
-      setAddressSaving(false);
-    }
+    createAddressMutation.mutate(data, {
+      onSuccess: (newAddr) => {
+        setSelectedAddress(newAddr.id);
+        setAddressDialogOpen(false);
+      },
+    });
   };
 
   if (items.length === 0) {
@@ -88,7 +70,7 @@ const CheckoutPage = () => {
     );
   }
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = () => {
     if (!selectedAddress) {
       toast({ title: "No address selected", description: "Please select or add a delivery address.", variant: "destructive" });
       return;
@@ -106,27 +88,29 @@ const CheckoutPage = () => {
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const order = await createOrder({
+    createOrderMutation.mutate(
+      {
         store: storeId,
         delivery_address: selectedAddress,
         order_type: "LOCAL_RIYADH",
         payment_method: selectedPayment,
         note: notes,
         items: items.map((i) => ({ product: i.product.id, quantity: i.quantity })),
-      });
-      clearCart();
-      navigate(`/order-confirmation/${order.id}`);
-    } catch (err) {
-      toast({
-        title: "Order failed",
-        description: err instanceof Error ? err.message : "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmitting(false);
-    }
+      },
+      {
+        onSuccess: (order) => {
+          clearCart();
+          navigate(`/order-confirmation/${order.id}`);
+        },
+        onError: (err) => {
+          toast({
+            title: "Order failed",
+            description: err instanceof Error ? err.message : "Something went wrong. Please try again.",
+            variant: "destructive",
+          });
+        },
+      }
+    );
   };
 
   return (
@@ -340,10 +324,10 @@ const CheckoutPage = () => {
 
               <button
                 onClick={handlePlaceOrder}
-                disabled={submitting}
+                disabled={createOrderMutation.isPending}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-sm hover:bg-primary/90 transition disabled:opacity-60"
               >
-                {submitting ? (
+                {createOrderMutation.isPending ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Placing Order...
@@ -365,7 +349,7 @@ const CheckoutPage = () => {
         open={addressDialogOpen}
         onOpenChange={setAddressDialogOpen}
         address={null}
-        saving={addressSaving}
+        saving={createAddressMutation.isPending}
         onSubmit={handleAddAddress}
       />
       <Footer />

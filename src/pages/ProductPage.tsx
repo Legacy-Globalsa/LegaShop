@@ -1,36 +1,24 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Star, ShoppingCart, Plus, Minus, ArrowLeft, Store, Tag, Package, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { fetchProductById, fetchProductReviews, type Product, type Review } from "@/lib/api";
-import { useCreateReview } from "@/hooks/use-api";
+import { type Product, type Review } from "@/lib/api";
+import { useProduct, useProductReviews, useCreateReview } from "@/hooks/use-api";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 
 const ProductPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+  const productId = Number(id);
+  const { data: product, isLoading: loading } = useProduct(productId);
+  const { data: reviews = [] } = useProductReviews(productId);
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const { toast } = useToast();
   const { requireAuth } = useRequireAuth();
-
-  useEffect(() => {
-    if (!id) return;
-    const productId = Number(id);
-
-    setLoading(true);
-    fetchProductById(productId)
-      .then((data) => setProduct(data))
-      .finally(() => setLoading(false));
-
-    fetchProductReviews(productId).then((data) => setReviews(data));
-  }, [id]);
 
   if (loading) {
     return (
@@ -260,9 +248,7 @@ const ProductPage = () => {
 
       {/* Write a Review */}
       <section className="container pb-12">
-        <ReviewForm product={product} onSuccess={(newReview) => {
-          setReviews((prev) => [newReview, ...prev]);
-        }} />
+        <ReviewForm product={product} />
       </section>
 
       <Footer />
@@ -274,7 +260,7 @@ const ProductPage = () => {
 // Review Form Component
 // ──────────────────────────────────────
 
-function ReviewForm({ product, onSuccess }: { product: Product; onSuccess: (review: Review) => void }) {
+function ReviewForm({ product }: { product: Product }) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -291,9 +277,8 @@ function ReviewForm({ product, onSuccess }: { product: Product; onSuccess: (revi
     createReviewMutation.mutate(
       { store: product.store, product: product.id, rating, comment },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           toast({ title: "Review submitted!", description: "Thank you for your feedback." });
-          onSuccess(data);
           setRating(0);
           setComment("");
         },

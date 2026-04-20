@@ -991,11 +991,11 @@ Legend: ✅ Done · 🟡 Partial · ⬜ Not started · (P0/P1/P2 = MVP priority)
 16. Docker + docker-compose + GitHub Actions.
 
 **P1 — before public launch**
-17. Migrate 6 pages from direct `useEffect` calls to React Query hooks (ProductPage, StorePage, CheckoutPage, AddressesSection, ProfileSection, SecuritySection).
-18. ProfileSection should fetch fresh data via `useProfile()` instead of reading stale auth context.
-19. OrderDetailPage address display — show real `delivery_address` instead of hardcoded "Riyadh, Saudi Arabia".
-20. Remove mock-data fallbacks in `api.ts` catch blocks — add proper error boundary display.
-21. Add product seed images (currently blank/placeholder).
+17. ~~Migrate 6 pages from direct `useEffect` calls to React Query hooks (ProductPage, StorePage, CheckoutPage, AddressesSection, ProfileSection, SecuritySection).~~ ✅
+18. ~~ProfileSection should fetch fresh data via `useProfile()` instead of reading stale auth context.~~ ✅
+19. ~~OrderDetailPage address display — show real `delivery_address` instead of hardcoded "Riyadh, Saudi Arabia".~~ ✅
+20. ~~Remove mock-data fallbacks in `api.ts` catch blocks — add proper error boundary display.~~ ✅
+21. ~~Add product seed images (currently blank/placeholder).~~ ✅
 22. i18n (EN/TL/AR, RTL).
 23. PH remittance endpoints + FX cache + Puregold CSV ingest.
 24. Admin console UI.

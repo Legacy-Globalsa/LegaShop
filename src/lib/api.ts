@@ -286,48 +286,27 @@ function unwrapResults<T>(data: PaginatedResponse<T> | T[]): T[] {
 // ──────────────────────────────────────
 
 export async function fetchProducts(params?: Record<string, string>): Promise<Product[]> {
-  try {
-    const query = params ? `?${new URLSearchParams(params).toString()}` : "";
-    const res = await fetch(`${API_BASE_URL}/products/${query}`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const items = unwrapResults<Product>(data);
-    if (items.length > 0) return items;
-    throw new Error("empty");
-  } catch {
-    const { mockProducts } = await import("./mock-data");
-    return mockProducts;
-  }
+  const query = params ? `?${new URLSearchParams(params).toString()}` : "";
+  const res = await fetch(`${API_BASE_URL}/products/${query}`);
+  if (!res.ok) throw new Error("Failed to fetch products");
+  const data = await res.json();
+  return unwrapResults<Product>(data);
 }
 
 export async function fetchProductById(id: number): Promise<Product | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/products/${id}/`);
-    if (!res.ok) throw new Error();
-    return await res.json();
-  } catch {
-    const { mockProducts } = await import("./mock-data");
-    return mockProducts.find((p) => p.id === id) ?? null;
-  }
+  const res = await fetch(`${API_BASE_URL}/products/${id}/`);
+  if (!res.ok) throw new Error("Failed to fetch product");
+  return await res.json();
 }
 
 export async function fetchDeals(dealType?: string): Promise<Product[]> {
-  try {
-    const url = dealType
-      ? `${API_BASE_URL}/products/deals/?deal_type=${dealType}`
-      : `${API_BASE_URL}/products/deals/`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const items = unwrapResults<Product>(data);
-    if (items.length > 0) return items;
-    throw new Error("empty");
-  } catch {
-    const { mockProducts } = await import("./mock-data");
-    return dealType
-      ? mockProducts.filter((p) => p.is_deal && p.deal_type === dealType)
-      : mockProducts.filter((p) => p.is_deal);
-  }
+  const url = dealType
+    ? `${API_BASE_URL}/products/deals/?deal_type=${dealType}`
+    : `${API_BASE_URL}/products/deals/`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch deals");
+  const data = await res.json();
+  return unwrapResults<Product>(data);
 }
 
 // ──────────────────────────────────────
@@ -335,16 +314,9 @@ export async function fetchDeals(dealType?: string): Promise<Product[]> {
 // ──────────────────────────────────────
 
 export async function fetchCategories(): Promise<Category[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/categories/`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    if (data.length > 0) return data;
-    throw new Error("empty");
-  } catch {
-    const { mockCategories } = await import("./mock-data");
-    return mockCategories;
-  }
+  const res = await fetch(`${API_BASE_URL}/categories/`);
+  if (!res.ok) throw new Error("Failed to fetch categories");
+  return await res.json();
 }
 
 // ──────────────────────────────────────
@@ -352,42 +324,23 @@ export async function fetchCategories(): Promise<Category[]> {
 // ──────────────────────────────────────
 
 export async function fetchStores(): Promise<Store[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/stores/`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const items = unwrapResults<Store>(data);
-    if (items.length > 0) return items;
-    throw new Error("empty");
-  } catch {
-    const { mockStores } = await import("./mock-data");
-    return mockStores;
-  }
+  const res = await fetch(`${API_BASE_URL}/stores/`);
+  if (!res.ok) throw new Error("Failed to fetch stores");
+  const data = await res.json();
+  return unwrapResults<Store>(data);
 }
 
 export async function fetchStoreById(id: number): Promise<Store | null> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/stores/${id}/`);
-    if (!res.ok) throw new Error();
-    return await res.json();
-  } catch {
-    const { mockStores } = await import("./mock-data");
-    return mockStores.find((s) => s.id === id) ?? null;
-  }
+  const res = await fetch(`${API_BASE_URL}/stores/${id}/`);
+  if (!res.ok) throw new Error("Failed to fetch store");
+  return await res.json();
 }
 
 export async function fetchStoreProducts(storeId: number): Promise<Product[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/products/?store=${storeId}`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const items = unwrapResults<Product>(data);
-    if (items.length > 0) return items;
-    throw new Error("empty");
-  } catch {
-    const { mockProducts } = await import("./mock-data");
-    return mockProducts.filter((p) => p.store === storeId);
-  }
+  const res = await fetch(`${API_BASE_URL}/products/?store=${storeId}`);
+  if (!res.ok) throw new Error("Failed to fetch store products");
+  const data = await res.json();
+  return unwrapResults<Product>(data);
 }
 
 // ──────────────────────────────────────
@@ -395,31 +348,17 @@ export async function fetchStoreProducts(storeId: number): Promise<Product[]> {
 // ──────────────────────────────────────
 
 export async function fetchProductReviews(productId: number): Promise<Review[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews/`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const items = unwrapResults<Review>(data);
-    if (items.length > 0) return items;
-    throw new Error("empty");
-  } catch {
-    const { mockReviews } = await import("./mock-data");
-    return mockReviews.filter((r) => r.product === productId);
-  }
+  const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews/`);
+  if (!res.ok) throw new Error("Failed to fetch product reviews");
+  const data = await res.json();
+  return unwrapResults<Review>(data);
 }
 
 export async function fetchStoreReviews(storeId: number): Promise<Review[]> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/stores/${storeId}/reviews/`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const items = unwrapResults<Review>(data);
-    if (items.length > 0) return items;
-    throw new Error("empty");
-  } catch {
-    const { mockReviews } = await import("./mock-data");
-    return mockReviews.filter((r) => r.store === storeId);
-  }
+  const res = await fetch(`${API_BASE_URL}/stores/${storeId}/reviews/`);
+  if (!res.ok) throw new Error("Failed to fetch store reviews");
+  const data = await res.json();
+  return unwrapResults<Review>(data);
 }
 
 // ──────────────────────────────────────
@@ -432,6 +371,16 @@ export interface Order {
   store: number;
   store_name: string;
   delivery_address: number;
+  delivery_address_data?: {
+    id: number;
+    label: string;
+    street: string;
+    city: string;
+    district: string;
+    latitude: number | null;
+    longitude: number | null;
+    is_default: boolean;
+  } | null;
   order_type: "LOCAL_RIYADH" | "PH_REMITTANCE";
   status: "PENDING" | "CONFIRMED" | "PREPARING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
   subtotal: string;
@@ -476,15 +425,10 @@ export interface CreateOrderData {
 }
 
 export async function fetchOrders(): Promise<Order[]> {
-  try {
-    const res = await authFetch(`${API_BASE_URL}/orders/`);
-    if (!res.ok) throw new Error("Failed to fetch orders");
-    const data = await res.json();
-    return unwrapResults<Order>(data);
-  } catch {
-    const { mockOrders } = await import("./mock-data");
-    return mockOrders as unknown as Order[];
-  }
+  const res = await authFetch(`${API_BASE_URL}/orders/`);
+  if (!res.ok) throw new Error("Failed to fetch orders");
+  const data = await res.json();
+  return unwrapResults<Order>(data);
 }
 
 export async function fetchOrderById(id: number): Promise<Order> {
@@ -559,14 +503,9 @@ export interface Address {
 export type AddressInput = Omit<Address, "id" | "created_at">;
 
 export async function fetchAddresses(): Promise<Address[]> {
-  try {
-    const res = await authFetch(`${API_BASE_URL}/addresses/`);
-    if (!res.ok) throw new Error();
-    return await res.json();
-  } catch {
-    const { mockAddresses } = await import("./mock-data");
-    return mockAddresses.map((a) => ({ ...a, created_at: new Date().toISOString() }));
-  }
+  const res = await authFetch(`${API_BASE_URL}/addresses/`);
+  if (!res.ok) throw new Error("Failed to fetch addresses");
+  return await res.json();
 }
 
 export async function createAddress(data: AddressInput): Promise<Address> {
@@ -651,27 +590,7 @@ export interface SearchResults {
 }
 
 export async function searchAll(query: string): Promise<SearchResults> {
-  try {
-    const res = await fetch(`${API_BASE_URL}/search/?q=${encodeURIComponent(query)}`);
-    if (!res.ok) throw new Error();
-    return await res.json();
-  } catch {
-    // Fallback: client-side filter of mock data
-    const { mockProducts, mockStores, mockCategories } = await import("./mock-data");
-    const q = query.toLowerCase();
-    return {
-      products: mockProducts.filter((p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q)
-      ),
-      stores: mockStores.filter((s) =>
-        s.name.toLowerCase().includes(q) ||
-        s.district.toLowerCase().includes(q)
-      ),
-      categories: mockCategories.filter((c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.name_tl.toLowerCase().includes(q)
-      ),
-    };
-  }
+  const res = await fetch(`${API_BASE_URL}/search/?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error("Failed to search");
+  return await res.json();
 }

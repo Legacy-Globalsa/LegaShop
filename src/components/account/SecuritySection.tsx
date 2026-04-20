@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Loader2, Info } from "lucide-react";
-import { changePassword } from "@/lib/api";
+import { useChangePassword } from "@/hooks/use-api";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +34,7 @@ interface SecuritySectionProps {
 
 const SecuritySection = ({ hasPassword = true }: SecuritySectionProps) => {
   const { toast } = useToast();
-  const [saving, setSaving] = useState(false);
+  const changePasswordMutation = useChangePassword();
 
   const form = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordSchema),
@@ -46,21 +45,22 @@ const SecuritySection = ({ hasPassword = true }: SecuritySectionProps) => {
     },
   });
 
-  const onSubmit = async (values: PasswordFormValues) => {
-    setSaving(true);
-    try {
-      await changePassword(values);
-      toast({ title: "Password changed", description: "Your password has been updated successfully." });
-      form.reset();
-    } catch (err) {
-      toast({
-        title: "Failed to change password",
-        description: err instanceof Error ? err.message : "Something went wrong.",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
+  const saving = changePasswordMutation.isPending;
+
+  const onSubmit = (values: PasswordFormValues) => {
+    changePasswordMutation.mutate(values, {
+      onSuccess: () => {
+        toast({ title: "Password changed", description: "Your password has been updated successfully." });
+        form.reset();
+      },
+      onError: (err) => {
+        toast({
+          title: "Failed to change password",
+          description: err instanceof Error ? err.message : "Something went wrong.",
+          variant: "destructive",
+        });
+      },
+    });
   };
 
   if (!hasPassword) {
