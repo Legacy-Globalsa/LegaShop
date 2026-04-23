@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Search, Menu, X, MapPin, User, LogOut, Package, ChevronDown, Settings } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, MapPin, User, LogOut, Package, ChevronDown, Settings, Store as StoreIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
@@ -111,6 +111,12 @@ const Navbar = () => {
                   <Package className="w-4 h-4 mr-2" />
                   My Orders
                 </DropdownMenuItem>
+                {user?.role === "VENDOR" && (
+                  <DropdownMenuItem onClick={() => navigate("/vendor")}>
+                    <StoreIcon className="w-4 h-4 mr-2" />
+                    Vendor Portal
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
                   <LogOut className="w-4 h-4 mr-2" />
@@ -180,6 +186,11 @@ const Navbar = () => {
                     <Link to="/orders" onClick={() => setMobileOpen(false)} className="py-2.5 px-3 rounded-lg text-foreground/80 hover:text-primary hover:bg-primary/5 font-medium text-sm flex items-center gap-2">
                       <Package className="w-4 h-4" /> My Orders
                     </Link>
+                    {user?.role === "VENDOR" && (
+                      <Link to="/vendor" onClick={() => setMobileOpen(false)} className="py-2.5 px-3 rounded-lg text-foreground/80 hover:text-primary hover:bg-primary/5 font-medium text-sm flex items-center gap-2">
+                        <StoreIcon className="w-4 h-4" /> Vendor Portal
+                      </Link>
+                    )}
                     <button
                       onClick={() => { handleLogout(); setMobileOpen(false); }}
                       className="py-2.5 px-3 rounded-lg text-destructive hover:bg-destructive/5 font-medium text-sm text-left flex items-center gap-2"

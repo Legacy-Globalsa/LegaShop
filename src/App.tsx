@@ -25,6 +25,17 @@ import AccountPage from "./pages/AccountPage";
 import SearchResults from "./pages/SearchResults";
 import StorePage from "./pages/StorePage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import VendorRoute from "./components/VendorRoute";
+import VendorDashboard from "./pages/vendor/VendorDashboard";
+import VendorOrders from "./pages/vendor/VendorOrders";
+import VendorOrderDetail from "./pages/vendor/VendorOrderDetail";
+import VendorProducts from "./pages/vendor/VendorProducts";
+import VendorProductForm from "./pages/vendor/VendorProductForm";
+import VendorStoreSettings from "./pages/vendor/VendorStoreSettings";
+import VendorReviews from "./pages/vendor/VendorReviews";
+import VendorAnalytics from "./pages/vendor/VendorAnalytics";
+import VendorPayouts from "./pages/vendor/VendorPayouts";
+import VendorOnboarding from "./pages/vendor/VendorOnboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -71,6 +82,18 @@ const App = () => (
                 <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+                {/* Vendor portal */}
+                <Route path="/vendor" element={<VendorRoute><VendorDashboard /></VendorRoute>} />
+                <Route path="/vendor/orders" element={<VendorRoute><VendorOrders /></VendorRoute>} />
+                <Route path="/vendor/orders/:id" element={<VendorRoute><VendorOrderDetail /></VendorRoute>} />
+                <Route path="/vendor/products" element={<VendorRoute><VendorProducts /></VendorRoute>} />
+                <Route path="/vendor/products/new" element={<VendorRoute><VendorProductForm /></VendorRoute>} />
+                <Route path="/vendor/products/:id/edit" element={<VendorRoute><VendorProductForm /></VendorRoute>} />
+                <Route path="/vendor/store" element={<VendorRoute><VendorStoreSettings /></VendorRoute>} />
+                <Route path="/vendor/reviews" element={<VendorRoute><VendorReviews /></VendorRoute>} />
+                <Route path="/vendor/analytics" element={<VendorRoute><VendorAnalytics /></VendorRoute>} />
+                <Route path="/vendor/payouts" element={<VendorRoute><VendorPayouts /></VendorRoute>} />
+                <Route path="/vendor/onboarding" element={<VendorRoute><VendorOnboarding /></VendorRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
