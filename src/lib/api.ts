@@ -431,6 +431,7 @@ export interface CreateOrderData {
   order_type?: string;
   payment_method?: string;
   note?: string;
+  idempotency_key?: string;
   items: { product: number; quantity: number }[];
 }
 
@@ -515,7 +516,8 @@ export type AddressInput = Omit<Address, "id" | "created_at">;
 export async function fetchAddresses(): Promise<Address[]> {
   const res = await authFetch(`${API_BASE_URL}/addresses/`);
   if (!res.ok) throw new Error("Failed to fetch addresses");
-  return await res.json();
+  const data = await res.json();
+  return unwrapResults<Address>(data);
 }
 
 export async function createAddress(data: AddressInput): Promise<Address> {

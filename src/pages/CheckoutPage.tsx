@@ -95,6 +95,7 @@ const CheckoutPage = () => {
         order_type: "LOCAL_RIYADH",
         payment_method: selectedPayment,
         note: notes,
+        idempotency_key: crypto.randomUUID(),
         items: items.map((i) => ({ product: i.product.id, quantity: i.quantity })),
       },
       {
