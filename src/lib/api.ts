@@ -353,6 +353,17 @@ export async function fetchStoreProducts(storeId: number): Promise<Product[]> {
   return unwrapResults<Product>(data);
 }
 
+export interface NearbyStore extends Store {
+  distance_km: number;
+  delivery_fee: number | null;
+}
+
+export async function fetchNearbyStores(lat: number, lng: number, radiusKm: number = 10): Promise<NearbyStore[]> {
+  const res = await fetch(`${API_BASE_URL}/stores/nearby/?lat=${lat}&lng=${lng}&radius_km=${radiusKm}`);
+  if (!res.ok) throw new Error("Failed to fetch nearby stores");
+  return await res.json();
+}
+
 // ──────────────────────────────────────
 // Public API — Reviews
 // ──────────────────────────────────────

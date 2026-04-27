@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 import type { Address, AddressInput } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import AddressAutocomplete from "@/components/maps/AddressAutocomplete";
 
 const addressSchema = z.object({
   label: z.enum(["HOME", "WORK", "OTHER"]),
@@ -51,6 +52,12 @@ interface AddressFormDialogProps {
 const AddressFormDialog = ({ open, onOpenChange, address, saving, onSubmit }: AddressFormDialogProps) => {
   const isEdit = !!address;
 
+  // Store lat/lng separately (not part of react-hook-form since autocomplete sets them)
+  const [coords, setCoords] = useState<{ latitude: number | null; longitude: number | null }>({
+    latitude: null,
+    longitude: null,
+  });
+
   const form = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
@@ -72,6 +79,7 @@ const AddressFormDialog = ({ open, onOpenChange, address, saving, onSubmit }: Ad
           city: address.city,
           is_default: address.is_default,
         });
+        setCoords({ latitude: address.latitude, longitude: address.longitude });
       } else {
         form.reset({
           label: "HOME",
@@ -80,15 +88,27 @@ const AddressFormDialog = ({ open, onOpenChange, address, saving, onSubmit }: Ad
           city: "Riyadh",
           is_default: false,
         });
+        setCoords({ latitude: null, longitude: null });
       }
     }
   }, [open, address, form]);
 
+  // When user selects an address from Google Places autocomplete
+  const handleAutocompleteSelect = useCallback(
+    (result: { street: string; district: string; city: string; latitude: number; longitude: number }) => {
+      form.setValue("street", result.street, { shouldValidate: true });
+      form.setValue("district", result.district, { shouldValidate: true });
+      form.setValue("city", result.city, { shouldValidate: true });
+      setCoords({ latitude: result.latitude, longitude: result.longitude });
+    },
+    [form]
+  );
+
   const handleSubmit = (values: AddressFormValues) => {
     onSubmit({
       ...values,
-      latitude: address?.latitude ?? null,
-      longitude: address?.longitude ?? null,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
     });
   };
 
@@ -123,6 +143,22 @@ const AddressFormDialog = ({ open, onOpenChange, address, saving, onSubmit }: Ad
                 </FormItem>
               )}
             />
+
+            {/* Google Places Autocomplete — fills street, district, city, lat/lng */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium leading-none">Search Address</label>
+              <AddressAutocomplete
+                onAddressSelect={handleAutocompleteSelect}
+                placeholder="Type to search your address..."
+                defaultValue={isEdit ? address?.street || "" : ""}
+              />
+              {coords.latitude && coords.longitude && (
+                <p className="flex items-center gap-1 text-xs text-emerald-600">
+                  <MapPin className="w-3 h-3" />
+                  Location pinned ({coords.latitude.toFixed(4)}, {coords.longitude.toFixed(4)})
+                </p>
+              )}
+            </div>
 
             <FormField
               control={form.control}
