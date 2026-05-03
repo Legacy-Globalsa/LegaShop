@@ -617,3 +617,24 @@ export async function searchAll(query: string): Promise<SearchResults> {
   if (!res.ok) throw new Error("Failed to search");
   return await res.json();
 }
+
+// ──────────────────────────────────────
+// Authenticated API — Notifications (FCM)
+// ──────────────────────────────────────
+
+export async function registerDeviceToken(token: string): Promise<{ status: string; token_id: number }> {
+  const res = await authFetch(`${API_BASE_URL}/notifications/register-device/`, {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+  if (!res.ok) throw new Error("Failed to register device token");
+  return await res.json();
+}
+
+export async function sendTestPush(): Promise<{ status: string; devices_notified: number }> {
+  const res = await authFetch(`${API_BASE_URL}/notifications/test-push/`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to send test push");
+  return await res.json();
+}

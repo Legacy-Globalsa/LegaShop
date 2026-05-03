@@ -3,8 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/use-auth";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { CartProvider } from "@/hooks/use-cart";
+import { useNotifications } from "@/hooks/use-notifications";
 import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { toast } from "sonner";
@@ -55,10 +56,18 @@ const queryClient = new QueryClient({
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
+/** Runs FCM setup when user is logged in */
+function NotificationSetup({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  useNotifications(!!user);
+  return <>{children}</>;
+}
+
 const App = () => (
   <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <NotificationSetup>
         <CartProvider>
           <GoogleMapsProvider>
           <TooltipProvider>
@@ -101,10 +110,10 @@ const App = () => (
           </TooltipProvider>
           </GoogleMapsProvider>
         </CartProvider>
+        </NotificationSetup>
       </AuthProvider>
     </QueryClientProvider>
   </GoogleOAuthProvider>
 );
 
 export default App;
-

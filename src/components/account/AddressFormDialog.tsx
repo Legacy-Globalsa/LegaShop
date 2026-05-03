@@ -106,7 +106,11 @@ const AddressFormDialog = ({ open, onOpenChange, address, saving, onSubmit }: Ad
 
   const handleSubmit = (values: AddressFormValues) => {
     onSubmit({
-      ...values,
+      label: values.label,
+      street: values.street,
+      district: values.district,
+      city: values.city,
+      is_default: values.is_default,
       latitude: coords.latitude,
       longitude: coords.longitude,
     });
