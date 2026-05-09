@@ -315,13 +315,14 @@ Recommend **(b)** for MVP. Requires a small backend addition (`POST /api/vendor/
 | A4 | Wire all routes in `App.tsx` | `src/App.tsx` | 15 min |
 | A5 | Add "Vendor portal" link in user menu (when `role==='VENDOR'`) | `src/components/Navbar.tsx` | 15 min |
 
-### Sprint B — Order Management (Day 2)
+### Sprint B — Order Management (Day 2) ✅ COMPLETE
 
-| # | Task | Effort |
-|---|---|---|
-| B1 | `VendorOrders` page (table, status tabs, polling) | 1 hr |
-| B2 | `VendorOrderDetail` page (status actions, items, customer panel) | 1.5 hr |
-| B3 | `OrderStatusBadge` + `OrderStatusActions` shared components | 30 min |
+| # | Task | Effort | Status |
+|---|---|---|---|
+| B1 | `VendorOrders` page (table, status tabs, 30s polling) | 1 hr | ✅ |
+| B2 | `VendorOrderDetail` page (status actions, items, customer panel) | 1.5 hr | ✅ |
+| B3 | `OrderStatusBadge` + `OrderStatusActions` shared components | 30 min | ✅ |
+| B4 | Add `customer_name`/`customer_email` to `OrderSerializer` | 15 min | ✅ |
 
 ### Sprint C — Product Management (Day 3)
 
