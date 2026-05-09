@@ -7,6 +7,7 @@ import {
   fetchStores,
   fetchStoreById,
   fetchStoreProducts,
+  fetchNearbyStores,
   fetchProductReviews,
   fetchStoreReviews,
   fetchOrders,
@@ -75,6 +76,14 @@ export function useStores() {
   return useQuery({
     queryKey: ["stores"],
     queryFn: fetchStores,
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useNearbyStores(lat: number, lng: number, radiusKm: number = 10) {
+  return useQuery({
+    queryKey: ["nearby-stores", lat, lng, radiusKm],
+    queryFn: () => fetchNearbyStores(lat, lng, radiusKm),
     staleTime: 2 * 60 * 1000,
   });
 }

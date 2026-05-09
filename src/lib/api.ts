@@ -353,6 +353,17 @@ export async function fetchStoreProducts(storeId: number): Promise<Product[]> {
   return unwrapResults<Product>(data);
 }
 
+export interface NearbyStore extends Store {
+  distance_km: number;
+  delivery_fee: number | null;
+}
+
+export async function fetchNearbyStores(lat: number, lng: number, radiusKm: number = 10): Promise<NearbyStore[]> {
+  const res = await fetch(`${API_BASE_URL}/stores/nearby/?lat=${lat}&lng=${lng}&radius_km=${radiusKm}`);
+  if (!res.ok) throw new Error("Failed to fetch nearby stores");
+  return await res.json();
+}
+
 // ──────────────────────────────────────
 // Public API — Reviews
 // ──────────────────────────────────────
@@ -433,6 +444,7 @@ export interface CreateOrderData {
   order_type?: string;
   payment_method?: string;
   note?: string;
+  idempotency_key?: string;
   items: { product: number; quantity: number }[];
 }
 
@@ -517,7 +529,8 @@ export type AddressInput = Omit<Address, "id" | "created_at">;
 export async function fetchAddresses(): Promise<Address[]> {
   const res = await authFetch(`${API_BASE_URL}/addresses/`);
   if (!res.ok) throw new Error("Failed to fetch addresses");
-  return await res.json();
+  const data = await res.json();
+  return unwrapResults<Address>(data);
 }
 
 export async function createAddress(data: AddressInput): Promise<Address> {
@@ -604,5 +617,26 @@ export interface SearchResults {
 export async function searchAll(query: string): Promise<SearchResults> {
   const res = await fetch(`${API_BASE_URL}/search/?q=${encodeURIComponent(query)}`);
   if (!res.ok) throw new Error("Failed to search");
+  return await res.json();
+}
+
+// ──────────────────────────────────────
+// Authenticated API — Notifications (FCM)
+// ──────────────────────────────────────
+
+export async function registerDeviceToken(token: string): Promise<{ status: string; token_id: number }> {
+  const res = await authFetch(`${API_BASE_URL}/notifications/register-device/`, {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+  if (!res.ok) throw new Error("Failed to register device token");
+  return await res.json();
+}
+
+export async function sendTestPush(): Promise<{ status: string; devices_notified: number }> {
+  const res = await authFetch(`${API_BASE_URL}/notifications/test-push/`, {
+    method: "POST",
+  });
+  if (!res.ok) throw new Error("Failed to send test push");
   return await res.json();
 }

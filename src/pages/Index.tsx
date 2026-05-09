@@ -5,6 +5,7 @@ import FlashDeals from "@/components/FlashDeals";
 import CategoryGrid from "@/components/CategoryGrid";
 import PromoBanners from "@/components/PromoBanners";
 import FeaturedProducts from "@/components/FeaturedProducts";
+import NearbyStoresSection from "@/components/NearbyStoresSection";
 import RemittancePreview from "@/components/RemittancePreview";
 import StatsSection from "@/components/StatsSection";
 import Footer from "@/components/Footer";
@@ -19,6 +20,7 @@ const Index = () => {
       <CategoryGrid />
       <PromoBanners />
       <FeaturedProducts />
+      <NearbyStoresSection />
       <RemittancePreview />
       <StatsSection />
       <Footer />

@@ -1,18 +1,22 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Clock, Star, Search, Map } from "lucide-react";
+import { MapPin, Clock, Star, Search, Map, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useStores } from "@/hooks/use-api";
+import { useNearbyStores } from "@/hooks/use-api";
 import StoreMap from "@/components/maps/StoreMap";
 import baqalaImg from "@/assets/baqala-store.jpg";
+
+// Hardcoded location: Al Olaya, Riyadh (center of store cluster)
+const USER_LAT = 24.6900;
+const USER_LNG = 46.6850;
 
 const StoresPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showMap, setShowMap] = useState(true);
-  const { data: stores = [], isLoading, isError } = useStores();
+  const { data: stores = [], isLoading, isError } = useNearbyStores(USER_LAT, USER_LNG, 15);
 
   const filteredStores = stores.filter((store) =>
     store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -133,6 +137,12 @@ const StoresPage = () => {
                       >
                         <div className="h-36 overflow-hidden relative">
                           <img src={store.image_url || baqalaImg} alt={store.name} className="w-full h-full object-cover" />
+                          {/* Distance badge */}
+                          {store.distance_km != null && (
+                            <span className="absolute top-2 right-2 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded-full backdrop-blur-sm">
+                              {store.distance_km} km
+                            </span>
+                          )}
                         </div>
                         <div className="p-4 space-y-3">
                           <h3 className="font-bold text-foreground">{store.name}</h3>
@@ -145,7 +155,18 @@ const StoresPage = () => {
                               <Clock className="w-3.5 h-3.5 text-primary" />
                               {store.avg_delivery_min} min
                             </span>
-                            <span className="flex items-center gap-1 font-bold text-foreground">
+                            {/* Delivery fee */}
+                            {store.delivery_fee != null ? (
+                              <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                                <Truck className="w-3.5 h-3.5" />
+                                {store.delivery_fee} SAR
+                              </span>
+                            ) : (
+                              <span className="text-red-500 text-xs font-semibold">Too far</span>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1 text-xs font-bold text-foreground">
                               <Star className="w-3.5 h-3.5 text-accent" fill="currentColor" />
                               {store.rating?.toFixed(1) ?? "—"}
                             </span>
