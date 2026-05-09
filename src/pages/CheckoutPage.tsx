@@ -96,7 +96,11 @@ const CheckoutPage = () => {
         payment_method: selectedPayment,
         note: notes,
         idempotency_key: crypto.randomUUID(),
-        items: items.map((i) => ({ product: i.product.id, quantity: i.quantity })),
+        items: items.map((i) => ({
+          product: i.product.id,
+          quantity: i.quantity,
+          ...(i.variant ? { variant_id: i.variant.id } : {}),
+        })),
       },
       {
         onSuccess: (order) => {
@@ -282,10 +286,13 @@ const CheckoutPage = () => {
               <h2 className="text-base font-bold mb-4">Order Summary</h2>
 
               <div className="space-y-3 mb-4">
-                {items.map(({ product, quantity }) => {
-                  const price = parseFloat(product.sale_price ?? product.price);
+                {items.map(({ product, variant, quantity }) => {
+                  const price = variant
+                    ? parseFloat(variant.sale_price ?? variant.price)
+                    : parseFloat(product.sale_price ?? product.price);
+                  const itemKey = `${product.id}_${variant?.id ?? "base"}`;
                   return (
-                    <div key={product.id} className="flex items-center gap-3">
+                    <div key={itemKey} className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-md bg-muted border border-border overflow-hidden shrink-0">
                         {product.image_url ? (
                           <img src={product.image_url} alt={product.name} className="w-full h-full object-contain p-0.5" />
@@ -294,7 +301,14 @@ const CheckoutPage = () => {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{product.name}</p>
+                        <p className="text-xs font-medium truncate">
+                          {product.name}
+                          {variant && (
+                            <span className="ml-1 text-[10px] text-primary bg-primary/10 px-1 py-0.5 rounded">
+                              {variant.name}
+                            </span>
+                          )}
+                        </p>
                         <p className="text-[10px] text-muted-foreground">{quantity} × {price.toFixed(2)} SAR</p>
                       </div>
                       <span className="text-xs font-bold">{(price * quantity).toFixed(2)}</span>

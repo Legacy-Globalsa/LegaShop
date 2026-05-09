@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Star, ShoppingCart, Plus, Minus, ArrowLeft, Store, Tag, Package, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { type Product, type Review } from "@/lib/api";
+import { type Product, type ProductVariant, type Review } from "@/lib/api";
 import { useProduct, useProductReviews, useCreateReview } from "@/hooks/use-api";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,7 @@ const ProductPage = () => {
   const { data: product, isLoading: loading } = useProduct(productId);
   const { data: reviews = [] } = useProductReviews(productId);
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const { addItem } = useCart();
   const { toast } = useToast();
   const { requireAuth } = useRequireAuth();
@@ -55,12 +56,23 @@ const ProductPage = () => {
     );
   }
 
-  const displayPrice = product.sale_price ?? product.price;
-  const hasDiscount = product.sale_price !== null;
+  // Variant-aware pricing and stock
+  const activeVariants = product.variants?.filter(v => v.is_active) ?? [];
+  const hasVariants = activeVariants.length > 0;
+
+  const effectivePrice = selectedVariant
+    ? (selectedVariant.sale_price ?? selectedVariant.price)
+    : (product.sale_price ?? product.price);
+  const originalPrice = selectedVariant ? selectedVariant.price : product.price;
+  const hasDiscount = selectedVariant
+    ? selectedVariant.sale_price !== null
+    : product.sale_price !== null;
   const discountPercent = hasDiscount
-    ? Math.round((1 - parseFloat(product.sale_price!) / parseFloat(product.price)) * 100)
+    ? Math.round((1 - parseFloat(effectivePrice) / parseFloat(originalPrice)) * 100)
     : 0;
-  const inStock = product.stock > 0;
+
+  const effectiveStock = selectedVariant ? selectedVariant.stock : product.stock;
+  const inStock = effectiveStock > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -140,14 +152,49 @@ const ProductPage = () => {
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-4">
               <span className="text-3xl font-extrabold text-destructive">
-                {displayPrice} <span className="text-base">{product.currency}</span>
+                {effectivePrice} <span className="text-base">{product.currency}</span>
               </span>
               {hasDiscount && (
                 <span className="text-lg text-muted-foreground line-through">
-                  {product.price} {product.currency}
+                  {originalPrice} {product.currency}
                 </span>
               )}
             </div>
+
+            {/* Variant Selector */}
+            {hasVariants && (
+              <div className="mb-6">
+                <p className="text-sm font-semibold text-foreground mb-2">Select Option</p>
+                <div className="flex flex-wrap gap-2">
+                  {activeVariants.map((variant) => (
+                    <button
+                      key={variant.id}
+                      onClick={() => {
+                        setSelectedVariant(selectedVariant?.id === variant.id ? null : variant);
+                        setQuantity(1);
+                      }}
+                      className={`
+                        px-4 py-2 rounded-lg border text-sm font-medium transition-all
+                        ${selectedVariant?.id === variant.id
+                          ? "border-primary bg-primary/10 text-primary ring-2 ring-primary/20"
+                          : "border-border bg-background text-foreground hover:border-primary/50"
+                        }
+                        ${variant.stock === 0 ? "opacity-50 cursor-not-allowed line-through" : "cursor-pointer"}
+                      `}
+                      disabled={variant.stock === 0}
+                    >
+                      {variant.name}
+                      <span className="ml-1.5 text-xs text-muted-foreground">
+                        {variant.sale_price ?? variant.price} {product.currency}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                {hasVariants && !selectedVariant && (
+                  <p className="text-xs text-amber-600 mt-2">Please select an option to add to cart</p>
+                )}
+              </div>
+            )}
 
             {/* Description */}
             {product.description && (
@@ -161,7 +208,7 @@ const ProductPage = () => {
               {inStock ? (
                 <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600">
                   <span className="w-2 h-2 bg-green-500 rounded-full" />
-                  In stock ({product.stock} available)
+                  In stock ({effectiveStock} available)
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600">
@@ -185,7 +232,7 @@ const ProductPage = () => {
                   {quantity}
                 </span>
                 <button
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                  onClick={() => setQuantity(Math.min(effectiveStock, quantity + 1))}
                   className="p-2.5 hover:bg-muted transition"
                   disabled={!inStock}
                 >
@@ -194,11 +241,12 @@ const ProductPage = () => {
               </div>
 
               <button
-                disabled={!inStock}
+                disabled={!inStock || (hasVariants && !selectedVariant)}
                 onClick={() => {
                   if (!requireAuth()) return;
-                  addItem(product, quantity);
-                  toast({ title: "Added to cart", description: `${quantity}× ${product.name}` });
+                  addItem(product, quantity, selectedVariant ?? undefined);
+                  const variantLabel = selectedVariant ? ` (${selectedVariant.name})` : "";
+                  toast({ title: "Added to cart", description: `${quantity}× ${product.name}${variantLabel}` });
                   setQuantity(1);
                 }}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-sm hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed"

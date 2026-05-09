@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Search, Menu, X, MapPin, User, LogOut, Package, ChevronDown, Settings, Store as StoreIcon } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, MapPin, User, LogOut, Package, ChevronDown, Settings, Store as StoreIcon, Heart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
@@ -79,6 +79,11 @@ const Navbar = () => {
           <button className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition" onClick={() => navigate("/search")}>
             <Search className="w-5 h-5 text-foreground/70" />
           </button>
+          {isAuthenticated && (
+            <Link to="/wishlist" className="relative p-2 rounded-lg hover:bg-slate-100 transition">
+              <Heart className="w-5 h-5 text-foreground/70" />
+            </Link>
+          )}
           <button onClick={() => setCartOpen(true)} className="relative p-2 rounded-lg hover:bg-slate-100 transition">
             <ShoppingCart className="w-5 h-5 text-foreground/70" />
             {itemCount > 0 && (
@@ -110,6 +115,10 @@ const Navbar = () => {
                 <DropdownMenuItem onClick={() => navigate("/orders")}>
                   <Package className="w-4 h-4 mr-2" />
                   My Orders
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/wishlist")}>
+                  <Heart className="w-4 h-4 mr-2" />
+                  My Wishlist
                 </DropdownMenuItem>
                 {user?.role === "VENDOR" && (
                   <DropdownMenuItem onClick={() => navigate("/vendor")}>

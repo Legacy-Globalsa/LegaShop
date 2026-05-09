@@ -219,6 +219,16 @@ export interface Category {
   created_at: string;
 }
 
+export interface ProductVariant {
+  id: number;
+  name: string;
+  price: string;
+  sale_price: string | null;
+  stock: number;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface Product {
   id: number;
   store: number;
@@ -240,6 +250,8 @@ export interface Product {
   deal_type: "ONE_RIYAL" | "FIVE_RIYAL" | null;
   is_active: boolean;
   created_at: string;
+  variants: ProductVariant[];
+  has_variants: boolean;
 }
 
 export interface Store {
@@ -637,4 +649,40 @@ export async function sendTestPush(): Promise<{ status: string; devices_notified
   });
   if (!res.ok) throw new Error("Failed to send test push");
   return await res.json();
+}
+
+// ──────────────────────────────────────
+// WISHLIST
+// ──────────────────────────────────────
+
+export interface WishlistItem {
+  id: number;
+  product: Product;
+  created_at: string;
+}
+
+export async function fetchWishlist(): Promise<WishlistItem[]> {
+  const res = await authFetch(`${API_BASE_URL}/api/wishlist/`);
+  if (!res.ok) throw new Error("Failed to fetch wishlist");
+  return await res.json();
+}
+
+export async function addToWishlist(productId: number): Promise<WishlistItem> {
+  const res = await authFetch(`${API_BASE_URL}/api/wishlist/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product_id: productId }),
+  });
+  if (!res.ok) {
+    if (res.status === 400) throw new Error("Already in wishlist");
+    throw new Error("Failed to add to wishlist");
+  }
+  return await res.json();
+}
+
+export async function removeFromWishlist(productId: number): Promise<void> {
+  const res = await authFetch(`${API_BASE_URL}/api/wishlist/${productId}/`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to remove from wishlist");
 }

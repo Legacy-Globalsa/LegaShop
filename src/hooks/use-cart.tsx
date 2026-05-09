@@ -5,19 +5,20 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import type { Product } from "@/lib/api";
+import type { Product, ProductVariant } from "@/lib/api";
 import { getUser } from "@/lib/api";
 
 export interface CartItem {
   product: Product;
+  variant?: ProductVariant;  // optional — null for products without variants
   quantity: number;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  addItem: (product: Product, quantity?: number, variant?: ProductVariant) => void;
+  removeItem: (productId: number, variantId?: number) => void;
+  updateQuantity: (productId: number, quantity: number, variantId?: number) => void;
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
@@ -47,6 +48,11 @@ function saveCart(items: CartItem[]) {
   localStorage.setItem(getCartKey(), JSON.stringify(items));
 }
 
+/** Unique key for a cart item — product + variant combo */
+function cartItemKey(productId: number, variantId?: number): string {
+  return variantId ? `${productId}_v${variantId}` : `${productId}`;
+}
+
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
@@ -73,38 +79,47 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     saveCart(items);
   }, [items]);
 
-  const addItem = useCallback((product: Product, quantity = 1) => {
+  const addItem = useCallback((product: Product, quantity = 1, variant?: ProductVariant) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id);
+      const maxStock = variant ? variant.stock : product.stock;
+      const existing = prev.find(
+        (i) => i.product.id === product.id && (i.variant?.id ?? undefined) === (variant?.id ?? undefined)
+      );
       if (existing) {
         return prev.map((i) =>
-          i.product.id === product.id
-            ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock) }
+          i.product.id === product.id && (i.variant?.id ?? undefined) === (variant?.id ?? undefined)
+            ? { ...i, quantity: Math.min(i.quantity + quantity, maxStock) }
             : i,
         );
       }
       return [
         ...prev,
-        { product, quantity: Math.min(quantity, product.stock) },
+        { product, variant, quantity: Math.min(quantity, maxStock) },
       ];
     });
   }, []);
 
-  const removeItem = useCallback((productId: number) => {
-    setItems((prev) => prev.filter((i) => i.product.id !== productId));
+  const removeItem = useCallback((productId: number, variantId?: number) => {
+    setItems((prev) => prev.filter(
+      (i) => !(i.product.id === productId && (i.variant?.id ?? undefined) === (variantId ?? undefined))
+    ));
   }, []);
 
-  const updateQuantity = useCallback((productId: number, quantity: number) => {
+  const updateQuantity = useCallback((productId: number, quantity: number, variantId?: number) => {
     if (quantity <= 0) {
-      setItems((prev) => prev.filter((i) => i.product.id !== productId));
+      setItems((prev) => prev.filter(
+        (i) => !(i.product.id === productId && (i.variant?.id ?? undefined) === (variantId ?? undefined))
+      ));
       return;
     }
     setItems((prev) =>
-      prev.map((i) =>
-        i.product.id === productId
-          ? { ...i, quantity: Math.min(quantity, i.product.stock) }
-          : i,
-      ),
+      prev.map((i) => {
+        if (i.product.id === productId && (i.variant?.id ?? undefined) === (variantId ?? undefined)) {
+          const maxStock = i.variant ? i.variant.stock : i.product.stock;
+          return { ...i, quantity: Math.min(quantity, maxStock) };
+        }
+        return i;
+      }),
     );
   }, []);
 
@@ -115,7 +130,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   const subtotal = items.reduce((sum, i) => {
-    const price = parseFloat(i.product.sale_price ?? i.product.price);
+    const variant = i.variant;
+    const price = variant
+      ? parseFloat(variant.sale_price ?? variant.price)
+      : parseFloat(i.product.sale_price ?? i.product.price);
     return sum + price * i.quantity;
   }, 0);
 

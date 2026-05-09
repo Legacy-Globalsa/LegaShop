@@ -23,6 +23,9 @@ import {
   changePassword,
   createReview,
   searchAll,
+  fetchWishlist,
+  addToWishlist,
+  removeFromWishlist,
   type CreateOrderData,
   type AddressInput,
   type CreateReviewData,
@@ -257,5 +260,33 @@ export function useSearch(query: string) {
     queryFn: () => searchAll(query),
     enabled: !!query.trim(),
     staleTime: 60 * 1000,
+  });
+}
+
+// ──────────────────────────────────────
+// Wishlist
+// ──────────────────────────────────────
+
+export function useWishlist() {
+  return useQuery({
+    queryKey: ["wishlist"],
+    queryFn: fetchWishlist,
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useAddToWishlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: number) => addToWishlist(productId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["wishlist"] }),
+  });
+}
+
+export function useRemoveFromWishlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (productId: number) => removeFromWishlist(productId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["wishlist"] }),
   });
 }
