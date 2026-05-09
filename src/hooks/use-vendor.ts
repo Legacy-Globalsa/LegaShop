@@ -63,11 +63,15 @@ export function useUpdateMyStore(id: number | undefined) {
 // Products
 // ──────────────────────────────────────
 
-export function useVendorProducts(filters: VendorProductFilters = {}) {
+export function useVendorProducts(
+  filters: VendorProductFilters = {},
+  options: { enabled?: boolean } = {}
+) {
   return useQuery({
     queryKey: ["vendor", "products", filters],
     queryFn: () => fetchVendorProducts(filters),
     staleTime: 30_000,
+    ...options,
   });
 }
 
@@ -81,11 +85,11 @@ export function useCreateVendorProduct() {
   });
 }
 
-export function useUpdateVendorProduct() {
+export function useUpdateVendorProduct(id?: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<ProductInput> | FormData }) =>
-      updateVendorProduct(id, data),
+    mutationFn: (data: Partial<ProductInput> | FormData) =>
+      updateVendorProduct(id as number, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["vendor", "products"] });
     },

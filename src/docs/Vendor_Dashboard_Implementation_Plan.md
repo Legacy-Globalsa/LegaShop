@@ -324,13 +324,13 @@ Recommend **(b)** for MVP. Requires a small backend addition (`POST /api/vendor/
 | B3 | `OrderStatusBadge` + `OrderStatusActions` shared components | 30 min | ✅ |
 | B4 | Add `customer_name`/`customer_email` to `OrderSerializer` | 15 min | ✅ |
 
-### Sprint C — Product Management (Day 3)
+### Sprint C — Product Management (Day 3) ✅ COMPLETE
 
-| # | Task | Effort |
-|---|---|---|
-| C1 | `VendorProducts` page (table, filters, inline stock edit, delete) | 1.5 hr |
-| C2 | `VendorProductForm` (create + edit shared) with Zod | 1.5 hr |
-| C3 | `ImageUploader` component (multipart) | 45 min |
+| # | Task | Effort | Status |
+|---|---|---|---|
+| C1 | `VendorProducts` page (table, filters, inline stock edit, delete) | 1.5 hr | ✅ |
+| C2 | `VendorProductForm` (create + edit shared) with Zod | 1.5 hr | ✅ |
+| C3 | `ImageUploader` component (drag+drop, preview, click-to-upload) | 45 min | ✅ |
 
 ### Sprint D — Store & Onboarding (Day 4)
 

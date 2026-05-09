@@ -10,11 +10,15 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Only initialize Firebase if the required config values are present
+const isConfigured = !!(firebaseConfig.projectId && firebaseConfig.apiKey && firebaseConfig.appId);
 
-// Initialize Cloud Messaging (only in browser, not SSR)
-const messaging = typeof window !== "undefined" ? getMessaging(app) : null;
+const app = isConfigured ? initializeApp(firebaseConfig) : null;
+
+// Initialize Cloud Messaging (only in browser with valid config)
+const messaging = isConfigured && typeof window !== "undefined" && app
+  ? getMessaging(app)
+  : null;
 
 /**
  * Request notification permission and get the FCM token.
