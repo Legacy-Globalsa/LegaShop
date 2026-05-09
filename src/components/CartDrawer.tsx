@@ -55,11 +55,19 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
           <>
             <ScrollArea className="flex-1 px-6">
               <div className="py-4 space-y-4">
-                {items.map(({ product, quantity }) => {
-                  const price = parseFloat(product.sale_price ?? product.price);
-                  const hasDiscount = product.sale_price !== null;
+                {items.map(({ product, variant, quantity }) => {
+                  const price = variant
+                    ? parseFloat(variant.sale_price ?? variant.price)
+                    : parseFloat(product.sale_price ?? product.price);
+                  const origPrice = variant ? variant.price : product.price;
+                  const hasDiscount = variant
+                    ? variant.sale_price !== null
+                    : product.sale_price !== null;
+                  const maxStock = variant ? variant.stock : product.stock;
+                  const variantId = variant?.id;
+                  const itemKey = `${product.id}_${variantId ?? "base"}`;
                   return (
-                    <div key={product.id} className="flex gap-3">
+                    <div key={itemKey} className="flex gap-3">
                       <div className="w-16 h-16 rounded-lg bg-muted border border-border overflow-hidden shrink-0">
                         {product.image_url ? (
                           <img
@@ -72,7 +80,14 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold truncate">{product.name}</h4>
+                        <h4 className="text-sm font-semibold truncate">
+                          {product.name}
+                          {variant && (
+                            <span className="ml-1 text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                              {variant.name}
+                            </span>
+                          )}
+                        </h4>
                         <p className="text-xs text-muted-foreground">{product.store_name}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-sm font-bold text-destructive">
@@ -80,14 +95,14 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                           </span>
                           {hasDiscount && (
                             <span className="text-xs text-muted-foreground line-through">
-                              {product.price} SAR
+                              {origPrice} SAR
                             </span>
                           )}
                         </div>
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center border border-border rounded-md overflow-hidden">
                             <button
-                              onClick={() => updateQuantity(product.id, quantity - 1)}
+                              onClick={() => updateQuantity(product.id, quantity - 1, variantId)}
                               className="p-1.5 hover:bg-muted transition"
                             >
                               <Minus className="w-3 h-3" />
@@ -96,15 +111,15 @@ const CartDrawer = ({ open, onOpenChange }: CartDrawerProps) => {
                               {quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(product.id, quantity + 1)}
+                              onClick={() => updateQuantity(product.id, quantity + 1, variantId)}
                               className="p-1.5 hover:bg-muted transition"
-                              disabled={quantity >= product.stock}
+                              disabled={quantity >= maxStock}
                             >
                               <Plus className="w-3 h-3" />
                             </button>
                           </div>
                           <button
-                            onClick={() => removeItem(product.id)}
+                            onClick={() => removeItem(product.id, variantId)}
                             className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

@@ -1,17 +1,24 @@
 import { motion } from "framer-motion";
-import { Plus, ChevronRight, Loader2 } from "lucide-react";
+import { Plus, ChevronRight, Loader2, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useRequireAuth } from "@/hooks/use-require-auth";
-import { useProducts } from "@/hooks/use-api";
+import { useProducts, useWishlist, useAddToWishlist, useRemoveFromWishlist } from "@/hooks/use-api";
+import { useAuth } from "@/hooks/use-auth";
 import type { Product } from "@/lib/api";
 
 const FeaturedProducts = () => {
   const { addItem } = useCart();
   const { toast } = useToast();
   const { requireAuth } = useRequireAuth();
+  const { isAuthenticated } = useAuth();
   const { data: products = [], isLoading } = useProducts();
+  const { data: wishlistItems = [] } = useWishlist();
+  const addToWishlist = useAddToWishlist();
+  const removeFromWishlist = useRemoveFromWishlist();
+
+  const wishlistProductIds = new Set(wishlistItems.map(w => w.product.id));
 
   const handleQuickAdd = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
@@ -61,6 +68,31 @@ const FeaturedProducts = () => {
                   <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-bold bg-destructive text-white">
                     -{discount}%
                   </span>
+                )}
+                {isAuthenticated && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const isWished = wishlistProductIds.has(product.id);
+                      if (isWished) {
+                        removeFromWishlist.mutate(product.id);
+                        toast({ title: "Removed from wishlist", description: product.name });
+                      } else {
+                        addToWishlist.mutate(product.id);
+                        toast({ title: "Added to wishlist ❤️", description: product.name });
+                      }
+                    }}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center z-10 transition-all hover:scale-110 bg-white/80 backdrop-blur-sm shadow-sm"
+                  >
+                    <Heart
+                      className={`w-4 h-4 transition-colors ${
+                        wishlistProductIds.has(product.id)
+                          ? "fill-red-500 text-red-500"
+                          : "text-muted-foreground"
+                      }`}
+                    />
+                  </button>
                 )}
                 <button
                   onClick={(e) => handleQuickAdd(e, product)}

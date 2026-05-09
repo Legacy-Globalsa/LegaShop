@@ -25,6 +25,7 @@ import OrderDetailPage from "./pages/OrderDetailPage";
 import AccountPage from "./pages/AccountPage";
 import SearchResults from "./pages/SearchResults";
 import StorePage from "./pages/StorePage";
+import WishlistPage from "./pages/WishlistPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import VendorRoute from "./components/VendorRoute";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
@@ -91,6 +92,7 @@ const App = () => (
                 <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+                <Route path="/wishlist" element={<WishlistPage />} />
                 {/* Vendor portal */}
                 <Route path="/vendor" element={<VendorRoute><VendorDashboard /></VendorRoute>} />
                 <Route path="/vendor/orders" element={<VendorRoute><VendorOrders /></VendorRoute>} />
