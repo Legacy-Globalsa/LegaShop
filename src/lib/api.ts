@@ -401,6 +401,8 @@ export async function fetchStoreReviews(storeId: number): Promise<Review[]> {
 export interface Order {
   id: number;
   user: number;
+  customer_name: string;
+  customer_email: string;
   store: number;
   store_name: string;
   delivery_address: number;
