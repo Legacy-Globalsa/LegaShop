@@ -332,13 +332,20 @@ Recommend **(b)** for MVP. Requires a small backend addition (`POST /api/vendor/
 | C2 | `VendorProductForm` (create + edit shared) with Zod | 1.5 hr | ✅ |
 | C3 | `ImageUploader` component (drag+drop, preview, click-to-upload) | 45 min | ✅ |
 
-### Sprint D — Store & Onboarding (Day 4)
+### Sprint D — Store & Onboarding (Day 4) ✅ COMPLETE
 
-| # | Task | Effort |
-|---|---|---|
-| D1 | `VendorOnboarding` (create-store flow) | 1 hr |
-| D2 | `VendorStoreSettings` (profile/delivery/location/status tabs) | 1.5 hr |
-| D3 | Pending-approval banner state | 15 min |
+| # | Task | Effort | Status |
+|---|---|---|---|
+| D1 | `VendorOnboarding` (create-store flow) | 1 hr | ✅ |
+| D2 | `VendorStoreSettings` (profile/delivery/location/status tabs) | 1.5 hr | ✅ |
+| D3 | Pending-approval banner state | 15 min | ✅ |
+
+Notes:
+- Added a vendor store gate: vendors without a store are redirected to `/vendor/onboarding`; vendors with a store are redirected away from onboarding to `/vendor/store`.
+- `VendorOnboarding` now creates a store with profile, district, delivery radius, delivery time, editable coordinates, and banner upload.
+- `VendorStoreSettings` now supports profile, delivery, location, and read-only status tabs using the existing store update endpoint.
+- Pending approval is surfaced in the vendor layout and in Store Settings.
+- Verified with `npm.cmd run build` on May 12, 2026.
 
 ### Sprint E — Dashboard & Reviews (Day 5)
 

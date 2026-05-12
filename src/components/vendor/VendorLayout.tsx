@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut, User as UserIcon, Store as StoreIcon, Home } from "lucide-react";
+import { AlertTriangle, Menu, X, LogOut, User as UserIcon, Store as StoreIcon, Home } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useMyStore } from "@/hooks/use-vendor";
 import VendorSidebar from "@/components/vendor/VendorSidebar";
@@ -122,7 +122,20 @@ const VendorLayout = ({ children }: VendorLayoutProps) => {
         )}
 
         {/* Main content */}
-        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
+          {store && !store.is_active && (
+            <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 flex items-start gap-3">
+              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold">Awaiting admin approval</p>
+                <p className="text-xs mt-0.5 text-amber-800">
+                  Your store profile is saved. Product and order tools are ready, but customers will not see the store until approval is complete.
+                </p>
+              </div>
+            </div>
+          )}
+          {children}
+        </main>
       </div>
     </div>
   );
