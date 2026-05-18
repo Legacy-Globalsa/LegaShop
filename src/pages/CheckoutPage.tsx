@@ -50,24 +50,16 @@ const CheckoutPage = () => {
     });
   };
 
+  // N5: Redirect to home if cart is empty
+  useEffect(() => {
+    if (items.length === 0) {
+      toast({ title: "Cart is empty", description: "Add some products before checking out." });
+      navigate("/", { replace: true });
+    }
+  }, [items.length, navigate, toast]);
+
   if (items.length === 0) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container py-20 text-center">
-          <span className="text-6xl block mb-4">🛒</span>
-          <h1 className="text-2xl font-bold mb-2">Your cart is empty</h1>
-          <p className="text-muted-foreground mb-6">Add some products before checking out.</p>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold text-sm hover:bg-primary/90 transition"
-          >
-            <ArrowLeft className="w-4 h-4" /> Continue Shopping
-          </Link>
-        </div>
-        <Footer />
-      </div>
-    );
+    return null; // Will redirect via useEffect above
   }
 
   const handlePlaceOrder = () => {
@@ -339,14 +331,21 @@ const CheckoutPage = () => {
 
               <button
                 onClick={handlePlaceOrder}
-                disabled={createOrderMutation.isPending}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-sm hover:bg-primary/90 transition disabled:opacity-60"
+                disabled={createOrderMutation.isPending || addressLoading || !selectedAddress}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-sm hover:bg-primary/90 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {createOrderMutation.isPending ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Placing Order...
                   </>
+                ) : addressLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading addresses...
+                  </>
+                ) : !selectedAddress ? (
+                  <>Select a delivery address</>
                 ) : (
                   <>Place Order — {total.toFixed(2)} SAR</>
                 )}

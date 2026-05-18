@@ -26,9 +26,12 @@ import {
   fetchWishlist,
   addToWishlist,
   removeFromWishlist,
+  fetchProductsPaginated,
   type CreateOrderData,
   type AddressInput,
   type CreateReviewData,
+  type PaginatedResponse,
+  type Product,
 } from "@/lib/api";
 
 // ──────────────────────────────────────
@@ -40,6 +43,16 @@ export function useProducts(params?: Record<string, string>) {
     queryKey: ["products", params],
     queryFn: () => fetchProducts(params),
     staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function usePaginatedProducts(page: number, pageSize = 20, extraParams?: Record<string, string>) {
+  const params: Record<string, string> = { page: String(page), page_size: String(pageSize), ...extraParams };
+  return useQuery<PaginatedResponse<Product>>({
+    queryKey: ["products-paginated", page, pageSize, extraParams],
+    queryFn: () => fetchProductsPaginated(params),
+    staleTime: 2 * 60 * 1000,
+    placeholderData: (prev) => prev, // keep previous page visible while loading next
   });
 }
 

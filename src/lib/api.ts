@@ -289,7 +289,7 @@ export interface Review {
 // Pagination helper
 // ──────────────────────────────────────
 
-interface PaginatedResponse<T> {
+export interface PaginatedResponse<T> {
   count: number;
   next: string | null;
   previous: string | null;
@@ -313,6 +313,18 @@ export async function fetchProducts(params?: Record<string, string>): Promise<Pr
   if (!res.ok) throw new Error("Failed to fetch products");
   const data = await res.json();
   return unwrapResults<Product>(data);
+}
+
+export async function fetchProductsPaginated(params?: Record<string, string>): Promise<PaginatedResponse<Product>> {
+  const query = params ? `?${new URLSearchParams(params).toString()}` : "";
+  const res = await fetch(`${API_BASE_URL}/products/${query}`);
+  if (!res.ok) throw new Error("Failed to fetch products");
+  const data = await res.json();
+  // Handle both paginated and plain array responses
+  if (Array.isArray(data)) {
+    return { count: data.length, next: null, previous: null, results: data };
+  }
+  return data as PaginatedResponse<Product>;
 }
 
 export async function fetchProductById(id: number): Promise<Product | null> {

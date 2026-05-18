@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Search, Menu, X, MapPin, User, LogOut, Package, ChevronDown, Settings, Store as StoreIcon, Heart } from "lucide-react";
+import { ShoppingCart, Search, Menu, X, MapPin, User, LogOut, Package, ChevronDown, Settings, Store as StoreIcon, Heart, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
+import { useSearch } from "@/hooks/use-api";
 import CartDrawer from "@/components/CartDrawer";
 import {
   DropdownMenu,
@@ -18,9 +19,46 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const { user, isAuthenticated, logout } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
+  const { data: searchResults, isLoading: searchLoading } = useSearch(debouncedQuery);
+
+  // Debounce search query (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery.trim());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Show dropdown when there are results
+  useEffect(() => {
+    if (debouncedQuery && searchResults) {
+      setShowDropdown(true);
+    }
+  }, [debouncedQuery, searchResults]);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectResult = useCallback((path: string) => {
+    setShowDropdown(false);
+    setSearchQuery("");
+    setDebouncedQuery("");
+    navigate(path);
+  }, [navigate]);
 
   const handleLogout = () => {
     logout();
@@ -48,13 +86,15 @@ const Navbar = () => {
         </Link>
 
         {/* Search Bar - Desktop */}
-        <div className="hidden md:flex flex-1 max-w-xl mx-6">
+        <div ref={searchRef} className="hidden md:flex flex-1 max-w-xl mx-6 relative">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               if (searchQuery.trim()) {
+                setShowDropdown(false);
                 navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
                 setSearchQuery("");
+                setDebouncedQuery("");
               }
             }}
             className="relative w-full"
@@ -64,10 +104,117 @@ const Navbar = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => { if (debouncedQuery && searchResults) setShowDropdown(true); }}
+              onKeyDown={(e) => { if (e.key === "Escape") setShowDropdown(false); }}
               placeholder="Search for products, brands, and stores..."
               className="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
             />
           </form>
+
+          {/* Autocomplete Dropdown */}
+          <AnimatePresence>
+            {showDropdown && debouncedQuery && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-xl z-[60] overflow-hidden max-h-[400px] overflow-y-auto"
+              >
+                {searchLoading ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <>
+                    {/* Products */}
+                    {searchResults && searchResults.products.length > 0 && (
+                      <div>
+                        <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-muted/50">Products</div>
+                        {searchResults.products.slice(0, 5).map((p) => (
+                          <button
+                            key={`p-${p.id}`}
+                            onClick={() => handleSelectResult(`/products/${p.id}`)}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-accent transition text-left"
+                          >
+                            <div className="w-9 h-9 rounded-md bg-white border border-border overflow-hidden shrink-0 flex items-center justify-center">
+                              {p.image_url ? (
+                                <img src={p.image_url} alt={p.name} className="w-full h-full object-contain p-0.5" />
+                              ) : (
+                                <span className="text-sm">📦</span>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{p.name}</p>
+                              <p className="text-xs text-muted-foreground">{p.sale_price ?? p.price} SAR</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Stores */}
+                    {searchResults && searchResults.stores.length > 0 && (
+                      <div>
+                        <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-muted/50">Stores</div>
+                        {searchResults.stores.slice(0, 3).map((s) => (
+                          <button
+                            key={`s-${s.id}`}
+                            onClick={() => handleSelectResult(`/stores/${s.id}`)}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-accent transition text-left"
+                          >
+                            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                              <StoreIcon className="w-4 h-4 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{s.name}</p>
+                              <p className="text-xs text-muted-foreground">{s.district}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Categories */}
+                    {searchResults && searchResults.categories.length > 0 && (
+                      <div>
+                        <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-muted/50">Categories</div>
+                        {searchResults.categories.slice(0, 3).map((c) => (
+                          <button
+                            key={`c-${c.id}`}
+                            onClick={() => handleSelectResult(`/categories?cat=${c.id}`)}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-accent transition text-left"
+                          >
+                            <div className="w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+                              <span className="text-sm">📁</span>
+                            </div>
+                            <p className="text-sm font-medium truncate">{c.name}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* No results */}
+                    {searchResults && searchResults.products.length === 0 && searchResults.stores.length === 0 && searchResults.categories.length === 0 && (
+                      <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                        No results for "{debouncedQuery}"
+                      </div>
+                    )}
+
+                    {/* See all results */}
+                    {searchResults && (searchResults.products.length > 0 || searchResults.stores.length > 0) && (
+                      <button
+                        onClick={() => handleSelectResult(`/search?q=${encodeURIComponent(debouncedQuery)}`)}
+                        className="w-full px-4 py-2.5 text-xs font-semibold text-primary hover:bg-primary/5 transition border-t border-border text-center"
+                      >
+                        See all results for "{debouncedQuery}" →
+                      </button>
+                    )}
+                  </>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Actions */}
