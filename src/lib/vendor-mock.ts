@@ -55,4 +55,4 @@ export const MOCK_VENDOR_PAYOUTS: VendorPayout[] = [
   { id: 3, period: "Apr 15 – Apr 21", gross: 4280, commission: 428, net: 3852, status: "PENDING", paid_at: null },
 ];
 
-export const USE_VENDOR_MOCK = import.meta.env.VITE_VENDOR_USE_MOCK !== "false";
+export const USE_VENDOR_MOCK = import.meta.env.VITE_VENDOR_USE_MOCK === "true";

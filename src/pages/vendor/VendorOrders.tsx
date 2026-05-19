@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import {
   Table,
@@ -32,8 +32,23 @@ const TABS: { label: string; value: Order["status"] | "ALL" }[] = [
 const LIVE_STATUSES: Array<Order["status"] | "ALL"> = ["ALL", "PENDING", "CONFIRMED", "PREPARING"];
 
 const VendorOrders = () => {
-  const [activeTab, setActiveTab] = useState<Order["status"] | "ALL">("ALL");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialStatus = searchParams.get("status") as Order["status"] | null;
+  const [activeTab, setActiveTab] = useState<Order["status"] | "ALL">(
+    initialStatus && TABS.some((tab) => tab.value === initialStatus) ? initialStatus : "ALL"
+  );
   const [search, setSearch] = useState("");
+
+  const handleTabChange = (value: Order["status"] | "ALL") => {
+    setActiveTab(value);
+    const next = new URLSearchParams(searchParams);
+    if (value === "ALL") {
+      next.delete("status");
+    } else {
+      next.set("status", value);
+    }
+    setSearchParams(next, { replace: true });
+  };
 
   const filters = activeTab !== "ALL" ? { status: activeTab as Order["status"] } : {};
   const isLive = LIVE_STATUSES.includes(activeTab);
@@ -65,7 +80,7 @@ const VendorOrders = () => {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as Order["status"] | "ALL")}>
+      <Tabs value={activeTab} onValueChange={(v) => handleTabChange(v as Order["status"] | "ALL")}>
         <TabsList className="flex-wrap h-auto gap-1">
           {TABS.map((t) => (
             <TabsTrigger key={t.value} value={t.value} className="text-xs">
@@ -85,8 +100,8 @@ const VendorOrders = () => {
         />
       </div>
 
-      <div className="rounded-lg border overflow-hidden">
-        <Table>
+      <div className="rounded-lg border overflow-x-auto">
+        <Table className="min-w-[760px]">
           <TableHeader>
             <TableRow>
               <TableHead className="w-20">Order #</TableHead>

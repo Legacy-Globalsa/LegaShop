@@ -4,8 +4,32 @@
 
 **Version:** 1.0
 **Date:** April 20, 2026
-**Status:** Planning
+**Status:** Partial implementation
 **Scope:** No real-time GPS tracking — ETA is calculated once at order time using Google Distance Matrix (driving distance + live traffic).
+
+---
+
+## Status Update - May 20, 2026
+
+Partial Maps work is already in the app:
+
+- Done: `GoogleMapsProvider` wraps the app and loads Maps + Places.
+- Done: `StoreMap` renders store markers and info windows.
+- Done: `AddressAutocomplete` supports Places Autocomplete and browser geolocation in address forms.
+- Done: `GET /api/stores/nearby/?lat=&lng=&radius_km=` exists with approximate distance/fee.
+- Done: StoresPage has a map view.
+
+Still missing:
+
+- `GET /api/stores/<id>/delivery-estimate/?lat=&lng=` with server-side Distance Matrix, cache, and Haversine fallback.
+- `GET /api/geo/reverse/?lat=&lng=` reverse-geocode proxy.
+- `Order.estimated_delivery_min` and `Order.distance_km` fields.
+- Checkout dynamic delivery fee/ETA and out-of-zone blocking UI.
+- Draggable `AddressPickerMap`.
+- StorePage mini-map with delivery-zone radius.
+- Vendor Store Settings map picker.
+
+Backend execution details are now tracked in `backend/FRONTEND_CONNECTED_BACKEND_NEXT_PLAN.md`.
 
 ---
 

@@ -3,7 +3,8 @@
  * All endpoints require role=VENDOR (enforced by backend `IsVendor` permission).
  */
 
-import type { Order, Product, Store } from "@/lib/api";
+import type { Order, Product, Review, Store } from "@/lib/api";
+import type { VendorAnalytics } from "@/lib/vendor-mock";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
@@ -183,4 +184,17 @@ export async function updateVendorOrderStatus(id: number, status: Order["status"
     body: JSON.stringify({ status }),
   });
   return asJson<Order>(res, "Failed to update order status");
+}
+
+// Vendor analytics and reviews
+
+export async function fetchVendorAnalytics(): Promise<VendorAnalytics> {
+  const res = await authFetch(`${API_BASE_URL}/vendor/analytics/`);
+  return asJson<VendorAnalytics>(res, "Failed to fetch analytics");
+}
+
+export async function fetchVendorReviews(): Promise<Review[]> {
+  const res = await authFetch(`${API_BASE_URL}/vendor/reviews/`);
+  const data = await asJson<PaginatedResponse<Review> | Review[]>(res, "Failed to fetch reviews");
+  return unwrap<Review>(data);
 }

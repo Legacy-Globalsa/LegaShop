@@ -7,6 +7,33 @@
 
 ## Current State Summary
 
+### Status update - May 20, 2026
+
+The April audit below is now historical. As of May 20, 2026, the customer marketplace and vendor portal are mostly implemented; the remaining MVP work is concentrated in Maps/delivery-estimate integration, real payments, remittance fulfillment, admin console, and production hardening.
+
+### Backend now
+- Done: user auth, Google OAuth, JWT, profile/address CRUD.
+- Done: product/category/store browsing, search endpoint, reviews, wishlist.
+- Done: customer order creation with stock validation, cancellation stock restoration, and vendor order status machine.
+- Done: vendor store/product/order/review/analytics endpoints.
+- Partial: Google Maps nearby stores endpoint exists with Haversine-style distance, but server-side Distance Matrix delivery estimates and reverse geocoding are still missing.
+- Partial: admin backend exists through Django Admin plus category admin endpoints and store approval endpoint; no full admin API surface for users/orders/platform analytics yet.
+- Missing: PayTabs/Stripe payment gateway, SMS/OTP verification, PH remittance fulfillment, vendor payout endpoint, vendor application flow.
+
+### Frontend now
+- Done: homepage, auth, deals, categories, stores, store detail, product detail/reviews, wishlist, account/profile/security/addresses, search, cart, checkout, order confirmation/history/detail.
+- Done: vendor portal at `/vendor/*`: onboarding, dashboard, products CRUD, orders/status actions, store settings, reviews, analytics, payouts placeholder, route guard, error boundary, loading/empty states.
+- Partial: Google Maps provider, store map, address autocomplete, StoresPage map view, and nearby store hook exist; missing checkout ETA/dynamic fee, draggable AddressPickerMap, StorePage mini-map, vendor store map picker.
+- Partial: remittance is still UI/marketing-level, not a true PH checkout/fulfillment flow.
+- Missing: admin panel routes/pages, real payment return flow, i18n/RTL, E2E tests, production monitoring/deployment polish.
+
+### Current priority order
+1. Finish Maps v1: delivery estimate endpoint, reverse geocode endpoint, order ETA/distance fields, checkout dynamic fee, draggable address picker.
+2. Build Admin Console v1: admin route guard/layout, pending store approvals, users, orders, categories, platform analytics.
+3. Add payment return flow and PayTabs backend integration.
+4. Convert remittance from static UI into a real PH order flow.
+5. Production hardening: lint debt, CI, Sentry, security settings, deployment.
+
 ### Backend (Django REST Framework) — ~85% Core API Complete
 - ✅ User auth (signup, login, Google OAuth, JWT)
 - ✅ Profile & address management (CRUD)
@@ -93,6 +120,8 @@
 
 **Deliverable:** Full product discovery with search, filter, sort, and per-store browsing
 
+**Maps status as of May 20, 2026:** Partial. `GoogleMapsProvider`, `StoreMap`, `AddressAutocomplete`, StoresPage map view, and `GET /api/stores/nearby/` exist. Missing: draggable `AddressPickerMap`, server-side delivery estimate/reverse-geocode endpoints, dynamic checkout delivery fee/ETA, StorePage delivery-zone mini-map, and order ETA/distance persistence.
+
 ---
 
 ### Phase 4: Backend API Integration
@@ -129,6 +158,8 @@
 
 **Deliverable:** Vendors can list products, manage orders, view analytics
 
+**Status as of May 20, 2026:** Complete for MVP. `Vendor_Dashboard_Implementation_Plan.md` now tracks Sprints A-F as complete. Remaining vendor-adjacent backend items are Phase 2: real payouts, vendor application flow, promotions/staff, and map picker polish in store settings.
+
 ---
 
 ### Phase 6: PH Remittance Grocery Enhancement
@@ -161,6 +192,8 @@
 | 7.6 | **Content Moderation** | Review/product flagging and removal |
 
 **Deliverable:** Full admin control panel
+
+**Status as of May 20, 2026:** Not started on the React frontend. Backend has Django Admin, admin category CRUD endpoints, and `PATCH /api/admin/stores/<id>/` for store approval/suspension. Missing for a real admin panel: admin route guard/layout, list/search users, change roles, list pending stores, approve/reject with notes, all-orders oversight, category image workflow, platform analytics, and audit logs.
 
 ---
 

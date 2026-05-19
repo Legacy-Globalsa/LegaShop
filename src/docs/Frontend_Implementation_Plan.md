@@ -16,6 +16,28 @@
 | Pages bypassing RQ hooks (direct `useEffect`) | **6** |
 | Known bugs from audit | **0 critical, 4 important** |
 
+### Status update - May 20, 2026
+
+The headline status has moved forward since this April 18 audit:
+
+| Area | Current state |
+|---|---|
+| Customer shopping flow | Mostly complete: cart, checkout, orders, account/addresses, reviews, wishlist, search are wired to backend APIs. |
+| Vendor dashboard | MVP complete: onboarding, dashboard, products, orders, order detail/status actions, store settings, reviews, analytics, route guard, loading/empty/error states. |
+| Google Maps | Partial: provider, `StoreMap`, address autocomplete, StoresPage map view, nearby store API/hook exist. Missing delivery estimate, reverse geocode proxy, draggable address picker, checkout dynamic fee/ETA, StorePage delivery-zone map. |
+| Payments | Not complete: payment model exists and COD works, but PayTabs/Stripe hosted payment flow and return page are missing. |
+| Admin console | Not started in React. Backend only has Django Admin plus admin category endpoints and store approval update. |
+| Remittance | UI exists, but no true PH grocery checkout, FX cache, Puregold ingest, recipient fulfillment, or PH order status flow. |
+| Production readiness | Build/tests pass for recent vendor work, but lint has existing shared-file debt and CI/deployment/security hardening remain. |
+
+### Recommended next sprint
+
+1. Maps + delivery estimate backend/frontend completion.
+2. Admin Console v1.
+3. PayTabs payment flow.
+4. Remittance backend-connected flow.
+5. Production hardening and CI.
+
 ---
 
 ## Phase 1 — Fix Critical Gaps (P0) ✅ COMPLETED
@@ -163,6 +185,8 @@
 
 **Effort:** ~4–6 hr
 
+**Status as of May 20, 2026:** Vendor Dashboard is complete for MVP. Maps is partial. Payments are still pending. See the May 20 status update and `Vendor_Dashboard_Implementation_Plan.md` Sprint E/F completion notes.
+
 ---
 
 ## Phase 4 — UX Polish (P1)
@@ -254,6 +278,8 @@
 | `AdminCategories` | `/admin/categories` | CRUD categories with image upload |
 
 **Effort:** ~4 hr
+
+**Status as of May 20, 2026:** Not started in React. Backend coverage is partial: Django Admin exists, category admin endpoints exist, and store approval/suspension has `PATCH /api/admin/stores/<id>/`. Missing backend/frontend pairing: admin list endpoints for users/stores/orders, role changes, platform analytics, approval notes, audit logs, and protected `/admin/*` UI routes.
 
 ### 6.2 Security hardening
 

@@ -279,9 +279,11 @@ export interface Review {
   user: number;
   reviewer_name: string;
   store: number;
+  store_name?: string;
   product: number | null;
+  product_name?: string | null;
   rating: number;
-  comment: string;
+  comment: string | null;
   created_at: string;
 }
 

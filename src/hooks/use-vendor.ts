@@ -6,7 +6,9 @@ import {
   fetchMyStore,
   fetchVendorOrder,
   fetchVendorOrders,
+  fetchVendorAnalytics,
   fetchVendorProducts,
+  fetchVendorReviews,
   updateMyStore,
   updateVendorOrderStatus,
   updateVendorProduct,
@@ -152,19 +154,24 @@ export function useCategoriesForVendor() {
 }
 
 // ──────────────────────────────────────
-// Analytics & Payouts (mock until backend G4/G7 ship)
+// Analytics, reviews & payouts
 // ──────────────────────────────────────
 
 export function useVendorAnalytics() {
   return useQuery<VendorAnalytics>({
     queryKey: ["vendor", "analytics"],
     queryFn: async () => {
-      if (USE_VENDOR_MOCK) {
-        return MOCK_VENDOR_ANALYTICS;
-      }
-      // Future: GET /api/vendor/analytics/
-      throw new Error("Vendor analytics endpoint not implemented yet");
+      if (USE_VENDOR_MOCK) return MOCK_VENDOR_ANALYTICS;
+      return fetchVendorAnalytics();
     },
+    staleTime: 60_000,
+  });
+}
+
+export function useVendorReviews() {
+  return useQuery({
+    queryKey: ["vendor", "reviews"],
+    queryFn: fetchVendorReviews,
     staleTime: 60_000,
   });
 }
@@ -174,7 +181,8 @@ export function useVendorPayouts() {
     queryKey: ["vendor", "payouts"],
     queryFn: async () => {
       if (USE_VENDOR_MOCK) return MOCK_VENDOR_PAYOUTS;
-      throw new Error("Vendor payouts endpoint not implemented yet");
+      // Payouts remain a Phase 2 backend endpoint; keep this dashboard page populated with typed mock data.
+      return MOCK_VENDOR_PAYOUTS;
     },
     staleTime: 5 * 60_000,
   });

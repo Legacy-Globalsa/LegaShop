@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -57,7 +57,7 @@ const InlineStock = ({ id, stock }: { id: number; stock: number }) => {
     if (isNaN(n) || n < 0) { setValue(String(stock)); setEditing(false); return; }
     if (n === stock) { setEditing(false); return; }
     updateMutation.mutate(
-      { stock: n } as any,
+      { stock: n },
       {
         onSuccess: () => { toast.success("Stock updated"); setEditing(false); },
         onError: () => { toast.error("Failed to update stock"); setValue(String(stock)); setEditing(false); },
@@ -93,9 +93,10 @@ const InlineStock = ({ id, stock }: { id: number; stock: number }) => {
 };
 
 const VendorProducts = () => {
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
-  const [lowStockOnly, setLowStockOnly] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const [categoryFilter, setCategoryFilter] = useState<string>(searchParams.get("category") ?? "ALL");
+  const [lowStockOnly, setLowStockOnly] = useState(searchParams.get("low_stock") === "true");
 
   const { data: categories } = useCategoriesForVendor();
 
@@ -164,8 +165,8 @@ const VendorProducts = () => {
         </div>
 
         {/* Table */}
-        <div className="rounded-lg border overflow-hidden">
-          <Table>
+        <div className="rounded-lg border overflow-x-auto">
+          <Table className="min-w-[860px]">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">Image</TableHead>

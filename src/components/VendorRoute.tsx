@@ -2,6 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useMyStore } from "@/hooks/use-vendor";
 import VendorLayout from "@/components/vendor/VendorLayout";
+import VendorErrorBoundary from "@/components/vendor/VendorErrorBoundary";
 
 interface VendorRouteProps {
   children: React.ReactNode;
@@ -28,7 +29,11 @@ const VendorStoreGate = ({ children }: VendorRouteProps) => {
     return <Navigate to="/vendor/store" replace />;
   }
 
-  return <VendorLayout>{children}</VendorLayout>;
+  return (
+    <VendorLayout>
+      <VendorErrorBoundary resetKey={location.pathname}>{children}</VendorErrorBoundary>
+    </VendorLayout>
+  );
 };
 
 const VendorRoute = ({ children }: VendorRouteProps) => {

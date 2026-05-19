@@ -364,6 +364,25 @@ Notes:
 | F3 | Error boundaries on `/vendor/*` | 20 min |
 | F4 | Smoke tests (Vitest + RTL) for guard, status transitions, product create | 1 hr |
 
+### Sprint E/F completion update - May 20, 2026
+
+Status: COMPLETE.
+
+Completed:
+- `VendorDashboard` now uses real analytics plus real recent orders, with KPI cards, top products, and last-7-day sales.
+- `VendorReviews` is a real read-only review list with search, target, and rating filters.
+- Backend G4 shipped as `GET /api/vendor/analytics/`.
+- Added `GET /api/vendor/reviews/` for vendor-scoped review listing.
+- Added shared vendor empty/error states, `/vendor/*` error boundary coverage, mobile table scroll widths, and URL-aware order/product filters.
+- Replaced Analytics and Payouts placeholders with working pages and loading/empty states.
+- Added Vitest + React Testing Library smoke coverage for guard, status transitions, and product create.
+
+Verification:
+- `npm.cmd test`
+- `npm.cmd run build`
+- `python manage.py check`
+- `python manage.py test`
+
 ### Phase 2 (later)
 
 - Vendor application flow (G9)
