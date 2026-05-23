@@ -9,6 +9,7 @@ import { useStore, useStoreProducts, useStoreReviews } from "@/hooks/use-api";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import StoreMap from "@/components/maps/StoreMap";
 
 type SortOption = "relevance" | "price-low" | "price-high" | "deals";
 
@@ -131,6 +132,34 @@ const StorePage = () => {
               </span>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Store location */}
+      <section className="border-b border-border bg-card/50 py-5">
+        <div className="container grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-center">
+          <StoreMap
+            stores={[store]}
+            height="220px"
+            showDeliveryZones
+            interactive={false}
+          />
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Delivery coverage</p>
+              <h2 className="mt-1 text-lg font-bold">{store.district}</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="rounded-lg border border-border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Radius</p>
+                <p className="font-bold">{store.delivery_zone} km</p>
+              </div>
+              <div className="rounded-lg border border-border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Prep time</p>
+                <p className="font-bold">~{store.avg_delivery_min} min</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

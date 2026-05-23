@@ -9,25 +9,31 @@
 
 ---
 
-## Status Update - May 20, 2026
+## Status Update - May 24, 2026
 
-Partial Maps work is already in the app:
+Maps v1 is now wired across frontend and backend for local MVP use:
 
 - Done: `GoogleMapsProvider` wraps the app and loads Maps + Places.
 - Done: `StoreMap` renders store markers and info windows.
 - Done: `AddressAutocomplete` supports Places Autocomplete and browser geolocation in address forms.
 - Done: `GET /api/stores/nearby/?lat=&lng=&radius_km=` exists with approximate distance/fee.
 - Done: StoresPage has a map view.
+- Done: `AddressPickerMap` supports search, current location, click/drag pin selection, backend reverse geocode, and client geocode fallback.
+- Done: `CheckoutPage` calls `useDeliveryEstimate`, shows ETA/distance/dynamic fee, warns when estimates are unavailable, and blocks out-of-zone checkout when the estimate endpoint returns that state.
+- Done: `StorePage` shows a mini-map with delivery radius.
+- Done: `VendorStoreSettings` has a map picker for store latitude/longitude and delivery radius preview.
+- Done: `VendorOnboarding` has the same map picker for first-time store creation.
+- Done: `GET /api/stores/<id>/delivery-estimate/?lat=&lng=` returns ETA, distance, fee, and in-zone status. It uses Google Distance Matrix when `GOOGLE_MAPS_SERVER_KEY` exists and Haversine fallback otherwise.
+- Done: `GET /api/geo/reverse/?lat=&lng=` returns address fields and falls back to coordinates if server geocoding is unavailable.
+- Done: `Order.estimated_delivery_min` and `Order.distance_km` fields exist and are set during order creation.
+- Done: Backend order creation enforces map pin presence, delivery zone, dynamic delivery fee, and persisted ETA/distance.
+- Done: Vite loads the shared repo-level `.env`, so `VITE_GOOGLE_CLIENT_ID` and `VITE_GOOGLE_MAPS_API_KEY` work from the existing root `.env`.
 
 Still missing:
 
-- `GET /api/stores/<id>/delivery-estimate/?lat=&lng=` with server-side Distance Matrix, cache, and Haversine fallback.
-- `GET /api/geo/reverse/?lat=&lng=` reverse-geocode proxy.
-- `Order.estimated_delivery_min` and `Order.distance_km` fields.
-- Checkout dynamic delivery fee/ETA and out-of-zone blocking UI.
-- Draggable `AddressPickerMap`.
-- StorePage mini-map with delivery-zone radius.
-- Vendor Store Settings map picker.
+- End-to-end manual verification with a valid Google Maps browser key.
+- Optional production Google server key (`GOOGLE_MAPS_SERVER_KEY`) for Distance Matrix and server-side Geocoding. Without it, local development uses approximate Haversine estimates.
+- Google Cloud Console setup must allow `http://localhost:5173` for the browser key and enable Maps JavaScript API + Places API.
 
 Backend execution details are now tracked in `backend/FRONTEND_CONNECTED_BACKEND_NEXT_PLAN.md`.
 

@@ -16,6 +16,8 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { GoogleLogin } from "@react-oauth/google"
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ""
+
 export function SignupForm({
   className,
   ...props
@@ -141,38 +143,44 @@ export function SignupForm({
                   <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
                 </div>
               </div>
-              <div className="flex justify-center">
-                <GoogleLogin
-                  onSuccess={async (response) => {
-                    if (!response.credential) return
-                    setLoading(true)
-                    const result = await apiGoogleLogin(response.credential)
-                    if (result.error) {
+              {GOOGLE_CLIENT_ID ? (
+                <div className="flex justify-center">
+                  <GoogleLogin
+                    onSuccess={async (response) => {
+                      if (!response.credential) return
+                      setLoading(true)
+                      const result = await apiGoogleLogin(response.credential)
+                      if (result.error) {
+                        toast({
+                          title: "Google signup failed",
+                          description: result.error,
+                          variant: "destructive",
+                        })
+                      } else if (result.data) {
+                        login(result.data)
+                        toast({
+                          title: "Account created!",
+                          description: `Welcome, ${result.data.user.first_name}!`,
+                        })
+                        navigate("/")
+                      }
+                      setLoading(false)
+                    }}
+                    onError={() => {
                       toast({
                         title: "Google signup failed",
-                        description: result.error,
+                        description: "Could not sign up with Google.",
                         variant: "destructive",
                       })
-                    } else if (result.data) {
-                      login(result.data)
-                      toast({
-                        title: "Account created!",
-                        description: `Welcome, ${result.data.user.first_name}!`,
-                      })
-                      navigate("/")
-                    }
-                    setLoading(false)
-                  }}
-                  onError={() => {
-                    toast({
-                      title: "Google signup failed",
-                      description: "Could not sign up with Google.",
-                      variant: "destructive",
-                    })
-                  }}
-                  width={320}
-                />
-              </div>
+                    }}
+                    width={320}
+                  />
+                </div>
+              ) : (
+                <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  Google signup is not configured. Add <code>VITE_GOOGLE_CLIENT_ID</code> to the frontend environment.
+                </div>
+              )}
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}

@@ -20,6 +20,7 @@ interface CartContextType {
   removeItem: (productId: number, variantId?: number) => void;
   updateQuantity: (productId: number, quantity: number, variantId?: number) => void;
   clearCart: () => void;
+  setDeliveryFee: (fee: number | null) => void;
   itemCount: number;
   subtotal: number;
   deliveryFee: number;
@@ -27,6 +28,7 @@ interface CartContextType {
 }
 
 const CART_PREFIX = "legashop_cart";
+const DEFAULT_DELIVERY_FEE = 5;
 
 /** Get a user-scoped cart key. Guest users share a "guest" key. */
 function getCartKey(): string {
@@ -57,6 +59,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadCart);
+  const [deliveryFeeOverride, setDeliveryFeeOverride] = useState<number | null>(null);
 
   // Re-load cart when user changes (login/logout)
   useEffect(() => {
@@ -125,6 +128,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(() => {
     setItems([]);
+    setDeliveryFeeOverride(null);
+  }, []);
+
+  const setDeliveryFee = useCallback((fee: number | null) => {
+    setDeliveryFeeOverride(fee != null && Number.isFinite(fee) ? Math.max(0, fee) : null);
   }, []);
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
@@ -137,8 +145,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return sum + price * i.quantity;
   }, 0);
 
-  const deliveryFee = subtotal > 0 ? 5 : 0; // 5 SAR flat fee — synced with backend orders/views.py
-  // TODO: fetch from store.delivery_fee when per-store delivery pricing is implemented
+  const deliveryFee = subtotal > 0 ? deliveryFeeOverride ?? DEFAULT_DELIVERY_FEE : 0;
 
   const total = subtotal + deliveryFee;
 
@@ -150,6 +157,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeItem,
         updateQuantity,
         clearCart,
+        setDeliveryFee,
         itemCount,
         subtotal,
         deliveryFee,

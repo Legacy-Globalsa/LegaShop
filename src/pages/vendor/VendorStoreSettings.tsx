@@ -6,6 +6,7 @@ import { CalendarDays, CheckCircle2, Clock, Loader2, MapPin, ShieldCheck, Star, 
 import { toast } from "sonner";
 
 import ImageUploader from "@/components/vendor/ImageUploader";
+import AddressPickerMap, { type AddressPickerLocation } from "@/components/maps/AddressPickerMap";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,6 +100,17 @@ const VendorStoreSettings = () => {
   }, [form, store]);
 
   const isPending = updateStore.isPending;
+  const selectedLatitude = form.watch("latitude");
+  const selectedLongitude = form.watch("longitude");
+  const selectedDeliveryZone = form.watch("delivery_zone");
+
+  const handleLocationSelect = (location: AddressPickerLocation) => {
+    form.setValue("latitude", location.lat, { shouldDirty: true, shouldValidate: true });
+    form.setValue("longitude", location.lng, { shouldDirty: true, shouldValidate: true });
+    if (location.district && DISTRICTS.includes(location.district)) {
+      form.setValue("district", location.district, { shouldDirty: true, shouldValidate: true });
+    }
+  };
 
   const onSubmit = (values: FormValues) => {
     const fd = new FormData();
@@ -364,9 +376,14 @@ const VendorStoreSettings = () => {
                     />
                   </div>
 
-                  <div className="rounded-lg border bg-muted/40 p-4 min-h-44 flex items-center justify-center text-center text-sm text-muted-foreground">
-                    Map picker placeholder. The Google Maps address picker can replace this panel without changing the saved fields.
-                  </div>
+                  <AddressPickerMap
+                    initialLat={selectedLatitude}
+                    initialLng={selectedLongitude}
+                    radiusKm={selectedDeliveryZone}
+                    showRadius
+                    height="320px"
+                    onLocationSelect={handleLocationSelect}
+                  />
                 </CardContent>
               </Card>
             </TabsContent>

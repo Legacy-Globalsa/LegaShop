@@ -1,230 +1,160 @@
-# LEGASHOP — Frontend Implementation Plan
+# LEGASHOP Frontend Implementation Plan
 
-**Date:** April 9, 2026  
-**Based on:** MVP Business Plan + Current Codebase Audit
-
----
-
-## Current State Summary
-
-### Status update - May 20, 2026
-
-The April audit below is now historical. As of May 20, 2026, the customer marketplace and vendor portal are mostly implemented; the remaining MVP work is concentrated in Maps/delivery-estimate integration, real payments, remittance fulfillment, admin console, and production hardening.
-
-### Backend now
-- Done: user auth, Google OAuth, JWT, profile/address CRUD.
-- Done: product/category/store browsing, search endpoint, reviews, wishlist.
-- Done: customer order creation with stock validation, cancellation stock restoration, and vendor order status machine.
-- Done: vendor store/product/order/review/analytics endpoints.
-- Partial: Google Maps nearby stores endpoint exists with Haversine-style distance, but server-side Distance Matrix delivery estimates and reverse geocoding are still missing.
-- Partial: admin backend exists through Django Admin plus category admin endpoints and store approval endpoint; no full admin API surface for users/orders/platform analytics yet.
-- Missing: PayTabs/Stripe payment gateway, SMS/OTP verification, PH remittance fulfillment, vendor payout endpoint, vendor application flow.
-
-### Frontend now
-- Done: homepage, auth, deals, categories, stores, store detail, product detail/reviews, wishlist, account/profile/security/addresses, search, cart, checkout, order confirmation/history/detail.
-- Done: vendor portal at `/vendor/*`: onboarding, dashboard, products CRUD, orders/status actions, store settings, reviews, analytics, payouts placeholder, route guard, error boundary, loading/empty states.
-- Partial: Google Maps provider, store map, address autocomplete, StoresPage map view, and nearby store hook exist; missing checkout ETA/dynamic fee, draggable AddressPickerMap, StorePage mini-map, vendor store map picker.
-- Partial: remittance is still UI/marketing-level, not a true PH checkout/fulfillment flow.
-- Missing: admin panel routes/pages, real payment return flow, i18n/RTL, E2E tests, production monitoring/deployment polish.
-
-### Current priority order
-1. Finish Maps v1: delivery estimate endpoint, reverse geocode endpoint, order ETA/distance fields, checkout dynamic fee, draggable address picker.
-2. Build Admin Console v1: admin route guard/layout, pending store approvals, users, orders, categories, platform analytics.
-3. Add payment return flow and PayTabs backend integration.
-4. Convert remittance from static UI into a real PH order flow.
-5. Production hardening: lint debt, CI, Sentry, security settings, deployment.
-
-### Backend (Django REST Framework) — ~85% Core API Complete
-- ✅ User auth (signup, login, Google OAuth, JWT)
-- ✅ Profile & address management (CRUD)
-- ✅ Product browsing + category management (with filters)
-- ✅ Store listing + vendor store CRUD
-- ✅ Review system (store & product reviews)
-- ✅ Order creation with stock validation + status machine
-- ✅ Payment model (Mada, Visa, Apple Pay, COD)
-- ✅ Vendor dashboard endpoints (products, orders, analytics)
-- ❌ Real payment gateway integration (Stripe/PayTabs)
-- ❌ SMS/OTP notifications
-- ❌ Search (Elasticsearch)
-- ❌ PH remittance fulfillment logic
-
-### Frontend (React + Vite + TypeScript) — ~60% Feature Complete
-- ✅ Homepage (hero, deals, categories, stores, remittance preview, stats, footer)
-- ✅ Auth pages (login, signup with Google OAuth)
-- ✅ Deal pages (1 SAR, 5 SAR)
-- ✅ Categories page
-- ✅ Stores page
-- ✅ Remittance page (UI only)
-- ✅ Product detail page (partial API integration)
-- ✅ Design system (Philippine flag palette, Inter/Space Grotesk fonts)
-- ✅ 48 shadcn/ui components installed
-- ✅ Mock data (16 products, 8 categories, 8 stores)
-- ❌ Shopping cart (state + UI)
-- ❌ Checkout flow
-- ❌ Order history / tracking
-- ❌ User profile / address management
-- ❌ Search functionality
-- ❌ Vendor dashboard
-- ❌ Admin panel
+**Canonical frontend plan:** This file replaces the older `Frontend_Implementation_Plan.md`.
+**Last updated:** May 24, 2026
+**Scope:** React/Vite frontend only, with backend dependencies called out where they block frontend completion.
 
 ---
 
-## Phased Implementation Plan
+## Current State
 
-### Phase 1: Core Shopping Flow (Cart → Checkout → Orders)
-> **Goal:** Complete the buyer journey from browsing to purchasing
-> **Priority:** P0 — Without this, there is no usable product
+The April audits are historical. The customer marketplace and vendor portal are now mostly implemented. The remaining launch work is concentrated in Maps backend completion, payments, admin, remittance fulfillment, and production hardening.
 
-| # | Task | Components/Pages | Mock Data |
-|---|------|-----------------|-----------|
-| 1.1 | **Cart State Management** | `useCart` hook (Zustand or Context) | Cart stored in localStorage |
-| 1.2 | **Cart Drawer/Page** | `CartDrawer.tsx`, update `Navbar.tsx` cart badge | Uses mock products |
-| 1.3 | **Add-to-Cart** on all product surfaces | Update `ProductPage`, deal pages, featured products | — |
-| 1.4 | **Checkout Page** | `CheckoutPage.tsx` — address form, order summary, payment method selection | Mock addresses, COD default |
-| 1.5 | **Order Confirmation Page** | `OrderConfirmationPage.tsx` — success state, order ID | Mock order response |
-| 1.6 | **Order History Page** | `OrdersPage.tsx` — list of past orders with status badges | Mock orders |
-| 1.7 | **Order Detail Page** | `OrderDetailPage.tsx` — items, status timeline, tracking | Mock order detail |
-
-**Deliverable:** User can browse → add to cart → checkout (COD) → see order history
+| Area | Current state |
+|---|---|
+| Customer shopping flow | Done for MVP: home, auth, deals, categories, stores, store detail, product detail/reviews, wishlist, account/profile/security/addresses, search, cart, checkout, order confirmation/history/detail. |
+| API integration | Mostly done: React Query hooks cover products, categories, stores, nearby stores, reviews, orders, addresses, profile, wishlist, and vendor APIs. |
+| Vendor portal | Done for MVP at `/vendor/*`: onboarding, dashboard, products CRUD, orders/status actions, store settings, reviews, analytics, payouts placeholder, route guard, loading/empty/error states. |
+| Maps frontend | Done for local MVP as of May 24: Google Maps provider, store map, address autocomplete, StoresPage map view, nearby stores hook, draggable `AddressPickerMap`, checkout estimate UI, dynamic delivery fee override, out-of-zone warning, StorePage delivery radius map, vendor onboarding picker, and vendor store settings picker. |
+| Maps backend | Done for local MVP: nearby stores, delivery estimate, reverse geocode, order ETA/distance fields, dynamic fee, and delivery-zone validation. Production still needs a server-restricted `GOOGLE_MAPS_SERVER_KEY`; local dev falls back to Haversine estimates without it. |
+| Payments | Not complete: COD works through order creation, but hosted PayTabs/Stripe flow and payment return page are missing. |
+| Admin console | Not started in React. Backend has Django Admin, category admin endpoints, and store approval/suspension update, but no full admin API surface yet. |
+| Remittance | UI/marketing-level only. No true PH grocery checkout, FX cache, Puregold ingest, recipient fulfillment, or PH status flow yet. |
+| Production readiness | `npm.cmd run build` passes. Existing warnings remain for Browserslist freshness and large JS chunk size. Lint/CI/Sentry/deployment hardening are still pending. |
 
 ---
 
-### Phase 2: User Account & Address Management
-> **Goal:** Complete user profile experience
-> **Priority:** P0 — Required for checkout to work properly
+## Completed Frontend Work
 
-| # | Task | Components/Pages | Mock Data |
-|---|------|-----------------|-----------|
-| 2.1 | **Profile Page** | `ProfilePage.tsx` — name, email, phone, avatar | Current auth user |
-| 2.2 | **Address Management** | `AddressesPage.tsx` — CRUD addresses, set default | Mock addresses |
-| 2.3 | **Address Picker in Checkout** | Integrate saved addresses into checkout flow | — |
-| 2.4 | **Password Change** | Add to profile page | — |
-| 2.5 | **Protected Routes** | Wire `ProtectedRoute` to cart, checkout, orders, profile | — |
+### Core Marketplace
 
-**Deliverable:** User can manage profile, save addresses, use them at checkout
+- Cart state, cart drawer, add-to-cart surfaces, checkout, order confirmation, order list/detail.
+- Account profile, password/security, address CRUD, protected account route.
+- Store browsing, store detail, store products, product detail, product reviews, wishlist, search results.
+- Navbar search debounce and autocomplete dropdown are already implemented.
 
----
+### API and State Consistency
 
-### Phase 3: Search, Filters & Product Discovery
-> **Goal:** Users can find products efficiently
-> **Priority:** P1 — Critical for usability at scale
+- Removed mock-data fallbacks from API calls so React Query error states can handle failures.
+- Migrated key pages from direct `useEffect` fetching to React Query hooks.
+- Added order address display through `delivery_address_data`.
+- Kept customer and vendor data paths aligned with current backend endpoints.
 
-| # | Task | Components/Pages | Mock Data |
-|---|------|-----------------|-----------|
-| 3.1 | **Global Search** | `SearchResults.tsx` — search across products, stores, categories | Filter mock data |
-| 3.2 | **Search in Navbar** | Wire search input → results page/dropdown | — |
-| 3.3 | **Category Filtering** | Filter products by category on category pages | — |
-| 3.4 | **Store Product Listing** | `StorePage.tsx` — individual store with its products | Mock store-product mapping |
-| 3.5 | **Sort Controls** | Price low/high, rating, newest on product listings | — |
-| 3.6 | **Product Reviews Section** | Display reviews on `ProductPage`, submission form | Mock reviews |
+### Vendor Portal
 
-**Deliverable:** Full product discovery with search, filter, sort, and per-store browsing
+- Vendor route guard and layout.
+- Vendor dashboard, product CRUD, product form, orders, order detail, order status actions.
+- Vendor store settings, reviews, analytics, and payouts placeholder.
+- Vendor loading, empty, and error states.
 
-**Maps status as of May 20, 2026:** Partial. `GoogleMapsProvider`, `StoreMap`, `AddressAutocomplete`, StoresPage map view, and `GET /api/stores/nearby/` exist. Missing: draggable `AddressPickerMap`, server-side delivery estimate/reverse-geocode endpoints, dynamic checkout delivery fee/ETA, StorePage delivery-zone mini-map, and order ETA/distance persistence.
+### Maps V1 Frontend Polish - Completed May 24, 2026
 
----
-
-### Phase 4: Backend API Integration
-> **Goal:** Replace mock data with real API calls
-> **Priority:** P1 — Connects frontend to live backend
-
-| # | Task | Details |
-|---|------|---------|
-| 4.1 | **API client setup** | Axios instance with interceptors, token refresh, error handling |
-| 4.2 | **React Query hooks** | `useProducts`, `useCategories`, `useStores`, `useOrders` |
-| 4.3 | **Auth flow** | Connect signup/login/logout to backend, store JWT properly |
-| 4.4 | **Product endpoints** | GET products, categories, deals, product detail, reviews |
-| 4.5 | **Store endpoints** | GET stores, nearby stores, store detail + products |
-| 4.6 | **Cart → Order** | POST order creation, GET order list/detail |
-| 4.7 | **Address endpoints** | CRUD addresses via API |
-| 4.8 | **Error handling** | Toast notifications for API errors, loading states, retry |
-
-**Deliverable:** Frontend fully operational with live backend data
+| Item | Status | Files |
+|---|---|---|
+| Delivery estimate API helper and hook | Done | `src/lib/api.ts`, `src/hooks/use-api.ts` |
+| Reverse geocode API helper and hook | Done | `src/lib/api.ts`, `src/hooks/use-api.ts` |
+| Draggable address picker map | Done | `src/components/maps/AddressPickerMap.tsx` |
+| Address form map pin integration | Done | `src/components/account/AddressFormDialog.tsx` |
+| Checkout ETA/distance/dynamic fee UI | Done | `src/pages/CheckoutPage.tsx`, `src/hooks/use-cart.tsx` |
+| Checkout out-of-zone warning | Done | `src/pages/CheckoutPage.tsx` |
+| StorePage mini-map with delivery radius | Done | `src/pages/StorePage.tsx`, `src/components/maps/StoreMap.tsx` |
+| Vendor store map picker | Done | `src/pages/vendor/VendorStoreSettings.tsx` |
+| Vendor onboarding map picker | Done | `src/pages/vendor/VendorOnboarding.tsx` |
+| Google Maps env compatibility | Done | Vite loads the shared repo `.env`; supports `VITE_GOOGLE_MAPS_API_KEY` and `VITE_GOOGLE_MAPS_KEY`. |
 
 ---
 
-### Phase 5: Vendor Dashboard
-> **Goal:** Store owners can manage their business
-> **Priority:** P1 — Required for marketplace to function
+## Current Priority Order
 
-| # | Task | Components/Pages |
-|---|------|-----------------|
-| 5.1 | **Vendor Layout** | `VendorLayout.tsx` — sidebar nav, header |
-| 5.2 | **Vendor Dashboard Home** | `VendorDashboard.tsx` — sales stats, recent orders, quick actions |
-| 5.3 | **Product Management** | `VendorProducts.tsx` — list, create, edit, delete products |
-| 5.4 | **Order Management** | `VendorOrders.tsx` — incoming orders, accept/reject, update status |
-| 5.5 | **Store Settings** | `VendorStoreSettings.tsx` — store profile, delivery zone, hours |
-| 5.6 | **Basic Analytics** | Charts (Recharts already installed) — orders/day, revenue, top products |
-
-**Deliverable:** Vendors can list products, manage orders, view analytics
-
-**Status as of May 20, 2026:** Complete for MVP. `Vendor_Dashboard_Implementation_Plan.md` now tracks Sprints A-F as complete. Remaining vendor-adjacent backend items are Phase 2: real payouts, vendor application flow, promotions/staff, and map picker polish in store settings.
+1. Add hosted payment flow: PayTabs/Stripe order redirect and `/payment/return`.
+2. Build Admin Console v1: admin guard/layout, pending store approvals, users, orders, categories, platform analytics.
+3. Convert remittance from static UI into a real PH order flow.
+4. Production hardening: lint debt, CI, Sentry, security settings, deployment, E2E tests.
+5. Production Maps hardening: server-restricted `GOOGLE_MAPS_SERVER_KEY`, Cloud billing/quota alerts, and browser key restrictions.
 
 ---
 
-### Phase 6: PH Remittance Grocery Enhancement
-> **Goal:** Complete the OFW remittance-to-grocery flow
-> **Priority:** P1 — Key differentiator per business plan
+## Roadmap
 
-| # | Task | Details |
-|---|------|---------|
-| 6.1 | **Puregold Catalog Browsing** | Dedicated product grid for PH-available items |
-| 6.2 | **SAR→PHP Live Conversion** | Display prices in both currencies with live rate |
-| 6.3 | **Recipient Form** | Name, phone, Puregold branch selector |
-| 6.4 | **PH Order Tracking** | Separate status flow (PH_PROCESSING → PH_READY_PICKUP → PH_DELIVERED) |
-| 6.5 | **Order History (PH tab)** | Filter orders by LOCAL_RIYADH vs PH_REMITTANCE |
+### Phase 1 - Maps V1 Completion
 
-**Deliverable:** OFW can order groceries for family in Philippines
+**Frontend status:** Done for local MVP.  
+**Backend status:** Done for local MVP.
+
+| Task | Owner | Status |
+|---|---|---|
+| `GET /api/stores/nearby/?lat=&lng=&radius_km=` | Backend | Done with approximate distance/fee. |
+| `GET /api/stores/<id>/delivery-estimate/?lat=&lng=` | Backend | Done with Google Distance Matrix when configured and Haversine fallback locally. |
+| `GET /api/geo/reverse/?lat=&lng=` | Backend | Done with Google Geocoding when configured and coordinate fallback locally. |
+| `Order.estimated_delivery_min` and `Order.distance_km` | Backend | Done. |
+| Backend dynamic fee and zone validation | Backend | Done. |
+| Checkout estimate display, dynamic fee, out-of-zone UI | Frontend | Done. |
+| AddressPickerMap drag/search/current-location picker | Frontend | Done. |
+| StorePage delivery zone mini-map | Frontend | Done. |
+| Vendor store map picker | Frontend | Done. |
+| Vendor onboarding map picker | Frontend | Done. |
+
+**Remaining Maps action:** manual browser verification with valid Google browser key and production Google Cloud restrictions/billing.
+
+### Phase 2 - Payments
+
+| Task | Details | Status |
+|---|---|---|
+| Hosted payment redirect | In `CheckoutPage`, when `payment_method !== "COD"`, redirect to backend returned `payment_url`. | Pending |
+| Payment return page | Add `src/pages/PaymentReturnPage.tsx` at `/payment/return`; read order/status params and link to order detail. | Pending |
+| Payment failure states | Show retry/back-to-orders actions for failed/cancelled payment. | Pending |
+
+**Backend dependency:** order creation must create a PayTabs/Stripe payment session and return `payment_url`; webhook must update payment/order status.
+
+### Phase 3 - Admin Console V1
+
+| Page | Route | Purpose | Status |
+|---|---|---|---|
+| Admin dashboard | `/admin` | KPIs: orders today, revenue, users, pending stores. | Pending |
+| Users | `/admin/users` | List/search users, view profile, role/status controls. | Pending |
+| Stores | `/admin/stores` | Pending approvals, approve/reject/suspend. | Pending |
+| Orders | `/admin/orders` | All-orders oversight with filters. | Pending |
+| Categories | `/admin/categories` | CRUD categories and image workflow. | Pending |
+
+**Backend dependency:** list/search users, list/search stores, all-orders admin list, platform analytics, role changes, approval notes, audit logs.
+
+### Phase 4 - Remittance / Padala Flow
+
+| Task | Details | Status |
+|---|---|---|
+| PH catalog | Browse Puregold/PH-available items separately from Riyadh local stores. | Pending |
+| SAR to PHP display | Show dual currency using backend FX rate cache. | Pending |
+| Recipient form | Recipient name, phone, branch/pickup/delivery details. | Pending |
+| PH checkout | Reuse checkout patterns with `order_type = "PH_REMITTANCE"`. | Pending |
+| PH order history tab | Filter local Riyadh and PH remittance orders. | Pending |
+
+**Backend dependency:** PH catalog ingestion, FX rate cache, recipient model/fields, PH fulfillment/status endpoints.
+
+### Phase 5 - UX and Production Hardening
+
+| Task | Status |
+|---|---|
+| More skeleton states on slower pages | Partial |
+| Order status timeline polish | Pending |
+| Infinite/load-more pagination where backend provides `next` | Pending |
+| E2E tests for auth, cart, checkout, vendor order status | Pending |
+| Sentry frontend integration | Pending |
+| CI pipeline: build, tests, lint | Pending |
+| Bundle splitting for large production chunk | Pending |
+| PWA/SEO/i18n/RTL | Pending |
 
 ---
 
-### Phase 7: Admin Panel
-> **Goal:** Platform operators can moderate and manage
-> **Priority:** P2 — Can use Django Admin initially
+## Verification Notes
 
-| # | Task | Details |
-|---|------|---------|
-| 7.1 | **Admin Layout** | Separate admin route group with sidebar |
-| 7.2 | **User Management** | List/search users, view profiles, suspend accounts |
-| 7.3 | **Store Approval** | Review pending stores, approve/reject with notes |
-| 7.4 | **Order Oversight** | All orders dashboard with filters |
-| 7.5 | **Platform Analytics** | Revenue, orders, users, top stores charts |
-| 7.6 | **Content Moderation** | Review/product flagging and removal |
-
-**Deliverable:** Full admin control panel
-
-**Status as of May 20, 2026:** Not started on the React frontend. Backend has Django Admin, admin category CRUD endpoints, and `PATCH /api/admin/stores/<id>/` for store approval/suspension. Missing for a real admin panel: admin route guard/layout, list/search users, change roles, list pending stores, approve/reject with notes, all-orders oversight, category image workflow, platform analytics, and audit logs.
+- `npm.cmd run build` passes as of May 24, 2026.
+- Build warnings:
+  - Browserslist/caniuse-lite data is outdated.
+  - Main JS chunk is larger than 500 kB; consider route-level lazy loading/manual chunks.
+- Manual Maps checks still need a browser API key and backend endpoints to validate end-to-end estimates.
 
 ---
 
-### Phase 8: Polish & Production Readiness
-> **Goal:** App is launch-ready
-> **Priority:** P2
+## Historical Notes
 
-| # | Task |
-|---|------|
-| 8.1 | **Loading skeletons** on all pages |
-| 8.2 | **Error boundaries** (global + per-section) |
-| 8.3 | **Empty states** (no results, no orders, etc.) |
-| 8.4 | **SEO meta tags** per page |
-| 8.5 | **PWA manifest + service worker** |
-| 8.6 | **i18n** (English, Tagalog, Arabic stubs) |
-| 8.7 | **Accessibility audit** (WCAG 2.1 AA) |
-| 8.8 | **Performance audit** (Lighthouse 90+) |
-| 8.9 | **E2E tests** (Playwright for critical flows) |
-| 8.10 | **Environment config** (.env for API URL, Google Client ID, etc.) |
-
----
-
-## Recommended Starting Point
-
-**Phase 1 (Cart → Checkout → Orders)** is the highest-impact work. It completes the core buyer journey and makes the app functional as an e-commerce platform. All work can be done with mock data, and later connected to the real backend in Phase 4.
-
-### Phase 1 Implementation Order:
-1. Cart state management (Zustand store)
-2. Cart drawer component
-3. Add-to-cart on product surfaces
-4. Checkout page
-5. Order confirmation
-6. Orders list page
-7. Order detail page
+The old `Frontend_Implementation_Plan.md` and the earlier sections in this file tracked April work such as cart, checkout, orders, account, search, API migration, and vendor dashboard. Those items are now summarized above as completed so future planning can focus on what remains.

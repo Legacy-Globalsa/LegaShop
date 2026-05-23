@@ -1,4 +1,4 @@
-import { GoogleMap, Marker, InfoWindow } from "@react-google-maps/api";
+import { Circle, GoogleMap, Marker, InfoWindow } from "@react-google-maps/api";
 import { useState, useCallback } from "react";
 import { useGoogleMaps } from "./GoogleMapsProvider";
 import type { Store } from "@/lib/api";
@@ -8,6 +8,8 @@ interface StoreMapProps {
   selectedStoreId?: number;
   onStoreSelect?: (store: Store) => void;
   height?: string;
+  showDeliveryZones?: boolean;
+  interactive?: boolean;
 }
 
 // Riyadh center
@@ -38,12 +40,20 @@ export default function StoreMap({
   selectedStoreId,
   onStoreSelect,
   height = "400px",
+  showDeliveryZones = false,
+  interactive = true,
 }: StoreMapProps) {
   const { isLoaded, loadError } = useGoogleMaps();
   const [activeStore, setActiveStore] = useState<Store | null>(null);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     if (stores.length === 0) return;
+
+    if (stores.length === 1) {
+      map.setCenter({ lat: stores[0].latitude, lng: stores[0].longitude });
+      map.setZoom(14);
+      return;
+    }
 
     const bounds = new google.maps.LatLngBounds();
     stores.forEach((store) => {
@@ -54,8 +64,10 @@ export default function StoreMap({
 
   if (loadError) {
     return (
-      <div className="flex items-center justify-center bg-muted rounded-xl" style={{ height }}>
-        <p className="text-sm text-muted-foreground">Failed to load map</p>
+      <div className="flex items-center justify-center bg-muted rounded-xl p-4 text-center" style={{ height }}>
+        <p className="text-sm text-muted-foreground">
+          {loadError.message || "Failed to load map. Check your Google Maps browser key."}
+        </p>
       </div>
     );
   }
@@ -73,9 +85,25 @@ export default function StoreMap({
       mapContainerStyle={{ ...mapContainerStyle, height }}
       center={RIYADH_CENTER}
       zoom={12}
-      options={mapOptions}
+      options={{ ...mapOptions, gestureHandling: interactive ? "auto" : "none" }}
       onLoad={onMapLoad}
     >
+      {showDeliveryZones && stores.map((store) => (
+        <Circle
+          key={`zone-${store.id}`}
+          center={{ lat: store.latitude, lng: store.longitude }}
+          radius={Number(store.delivery_zone || 0) * 1000}
+          options={{
+            strokeColor: "#2563eb",
+            strokeOpacity: 0.55,
+            strokeWeight: 2,
+            fillColor: "#2563eb",
+            fillOpacity: 0.08,
+            clickable: false,
+          }}
+        />
+      ))}
+
       {stores.map((store) => (
         <Marker
           key={store.id}

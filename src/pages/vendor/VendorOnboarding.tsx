@@ -28,6 +28,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateMyStore } from "@/hooks/use-vendor";
+import AddressPickerMap, { type AddressPickerLocation } from "@/components/maps/AddressPickerMap";
 
 const DISTRICTS = [
   "Riyadh",
@@ -82,6 +83,17 @@ const VendorOnboarding = () => {
   });
 
   const isPending = createStore.isPending;
+  const selectedLatitude = form.watch("latitude");
+  const selectedLongitude = form.watch("longitude");
+  const selectedDeliveryZone = form.watch("delivery_zone");
+
+  const handleLocationSelect = (location: AddressPickerLocation) => {
+    form.setValue("latitude", location.lat, { shouldDirty: true, shouldValidate: true });
+    form.setValue("longitude", location.lng, { shouldDirty: true, shouldValidate: true });
+    if (location.district && DISTRICTS.includes(location.district)) {
+      form.setValue("district", location.district, { shouldDirty: true, shouldValidate: true });
+    }
+  };
 
   const onSubmit = (values: FormValues) => {
     const fd = new FormData();
@@ -294,9 +306,14 @@ const VendorOnboarding = () => {
                 />
               </div>
 
-              <div className="rounded-lg border border-dashed bg-muted/40 p-4 text-sm text-muted-foreground">
-                Map pin selection will plug into the Google Maps address picker. For now, the coordinates are editable directly.
-              </div>
+              <AddressPickerMap
+                initialLat={selectedLatitude}
+                initialLng={selectedLongitude}
+                radiusKm={selectedDeliveryZone}
+                showRadius
+                height="320px"
+                onLocationSelect={handleLocationSelect}
+              />
             </CardContent>
           </Card>
 

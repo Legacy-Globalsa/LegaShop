@@ -1,7 +1,7 @@
 # LEGASHOP — Vendor Dashboard Implementation Plan
 
 > Created: April 23, 2026
-> Refs: `Frontend_Implementation_Plan.md` · `LEGASHOP_Business_Plan_v2.md` (§5, §15.3)
+> Refs: `LEGASHOP_Frontend_Implementation_Plan.md` · `LEGASHOP_Business_Plan_v2.md` (§5, §15.3)
 > Scope: Frontend vendor portal at `/vendor/*` + backend gap analysis
 
 ---
@@ -205,7 +205,7 @@ Fields (matches `ProductCreateSerializer`):
 Tabs:
 - **Profile**: name, name_ar, phone, district, description, banner image.
 - **Delivery**: delivery_zone (km slider), avg_delivery_min, *(P1)* opening hours JSON.
-- **Location**: lat/lng (mock map picker for now — wire `AddressPickerMap` once Phase 3.1 lands).
+- **Location**: lat/lng with `AddressPickerMap` and delivery-zone radius preview.
 - **Status** (read-only): approval status, joined date, rating.
 
 ### 4.8 VendorReviews `/vendor/reviews`

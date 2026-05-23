@@ -15,14 +15,16 @@ interface AddressAutocompleteProps {
   onAddressSelect: (address: AddressResult) => void;
   placeholder?: string;
   defaultValue?: string;
+  showCurrentLocation?: boolean;
 }
 
 export default function AddressAutocomplete({
   onAddressSelect,
   placeholder = "Search for your address...",
   defaultValue = "",
+  showCurrentLocation = true,
 }: AddressAutocompleteProps) {
-  const { isLoaded } = useGoogleMaps();
+  const { isLoaded, loadError } = useGoogleMaps();
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [value, setValue] = useState(defaultValue);
@@ -88,6 +90,14 @@ export default function AddressAutocomplete({
     );
   };
 
+  if (loadError) {
+    return (
+      <div className="w-full px-4 py-2.5 rounded-lg border border-border bg-muted text-sm text-muted-foreground">
+        {loadError.message || "Address search is unavailable. Check your Google Maps browser key."}
+      </div>
+    );
+  }
+
   if (!isLoaded) {
     return (
       <div className="w-full px-4 py-2.5 rounded-lg border border-border bg-muted animate-pulse text-sm text-muted-foreground">
@@ -109,19 +119,21 @@ export default function AddressAutocomplete({
           className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
-      <button
-        type="button"
-        onClick={handleUseMyLocation}
-        disabled={isLocating}
-        className="flex items-center gap-2 text-xs text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
-      >
-        {isLocating ? (
-          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        ) : (
-          <MapPin className="w-3.5 h-3.5" />
-        )}
-        {isLocating ? "Getting your location..." : "Use my current location"}
-      </button>
+      {showCurrentLocation && (
+        <button
+          type="button"
+          onClick={handleUseMyLocation}
+          disabled={isLocating}
+          className="flex items-center gap-2 text-xs text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+        >
+          {isLocating ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <MapPin className="w-3.5 h-3.5" />
+          )}
+          {isLocating ? "Getting your location..." : "Use my current location"}
+        </button>
+      )}
     </div>
   );
 }

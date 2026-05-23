@@ -1,7 +1,7 @@
 import { useLoadScript } from "@react-google-maps/api";
 import React, { createContext, useContext } from "react";
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GOOGLE_MAPS_KEY || "";
 
 // Libraries to load — Places for autocomplete
 const libraries: ("places")[] = ["places"];
@@ -21,6 +21,23 @@ const GoogleMapsContext = createContext<GoogleMapsContextType>({
  * It loads the Google Maps script once and shares the state via context.
  */
 export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {
+  if (!GOOGLE_MAPS_API_KEY) {
+    return (
+      <GoogleMapsContext.Provider
+        value={{
+          isLoaded: false,
+          loadError: new Error("Google Maps is not configured. Add VITE_GOOGLE_MAPS_API_KEY to frontend/.env."),
+        }}
+      >
+        {children}
+      </GoogleMapsContext.Provider>
+    );
+  }
+
+  return <GoogleMapsLoader>{children}</GoogleMapsLoader>;
+}
+
+function GoogleMapsLoader({ children }: { children: React.ReactNode }) {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries,

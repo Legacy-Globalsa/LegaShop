@@ -8,6 +8,7 @@ import {
   fetchStoreById,
   fetchStoreProducts,
   fetchNearbyStores,
+  fetchDeliveryEstimate,
   fetchProductReviews,
   fetchStoreReviews,
   fetchOrders,
@@ -22,6 +23,7 @@ import {
   updateProfile,
   changePassword,
   createReview,
+  reverseGeocode,
   searchAll,
   fetchWishlist,
   addToWishlist,
@@ -100,7 +102,24 @@ export function useNearbyStores(lat: number, lng: number, radiusKm: number = 10)
   return useQuery({
     queryKey: ["nearby-stores", lat, lng, radiusKm],
     queryFn: () => fetchNearbyStores(lat, lng, radiusKm),
+    enabled: Number.isFinite(lat) && Number.isFinite(lng),
     staleTime: 2 * 60 * 1000,
+  });
+}
+
+export function useDeliveryEstimate(storeId: number | null | undefined, lat: number | null | undefined, lng: number | null | undefined) {
+  return useQuery({
+    queryKey: ["delivery-estimate", storeId, lat, lng],
+    queryFn: () => fetchDeliveryEstimate(storeId as number, lat as number, lng as number),
+    enabled: !!storeId && typeof lat === "number" && typeof lng === "number",
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
+  });
+}
+
+export function useReverseGeocode() {
+  return useMutation({
+    mutationFn: ({ lat, lng }: { lat: number; lng: number }) => reverseGeocode(lat, lng),
   });
 }
 

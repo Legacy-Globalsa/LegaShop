@@ -10,8 +10,8 @@ import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { toast } from "sonner";
 import Index from "./pages/Index";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+import LoginPage from "./pages/Auth/LoginPage";
+import SignupPage from "./pages/Auth/SignupPage";
 import OneSarDeals from "./pages/OneSarDeals";
 import FiveSarDeals from "./pages/FiveSarDeals";
 import CategoriesPage from "./pages/CategoriesPage";
@@ -57,6 +57,11 @@ const queryClient = new QueryClient({
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
+function GoogleAuthBoundary({ children }: { children: React.ReactNode }) {
+  if (!GOOGLE_CLIENT_ID) return <>{children}</>;
+  return <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{children}</GoogleOAuthProvider>;
+}
+
 /** Runs FCM setup when user is logged in */
 function NotificationSetup({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -65,7 +70,7 @@ function NotificationSetup({ children }: { children: React.ReactNode }) {
 }
 
 const App = () => (
-  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+  <GoogleAuthBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <NotificationSetup>
@@ -115,7 +120,7 @@ const App = () => (
         </NotificationSetup>
       </AuthProvider>
     </QueryClientProvider>
-  </GoogleOAuthProvider>
+  </GoogleAuthBoundary>
 );
 
 export default App;

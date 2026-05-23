@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, CreditCard, Banknote, Smartphone, Check, Plus, Loader2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, MapPin, CreditCard, Banknote, Smartphone, Check, Plus, Loader2, AlertTriangle, Clock, Route, Truck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
 import { type AddressInput } from "@/lib/api";
-import { useAddresses, useCreateAddress, useCreateOrder } from "@/hooks/use-api";
+import { useAddresses, useCreateAddress, useCreateOrder, useDeliveryEstimate } from "@/hooks/use-api";
 import AddressFormDialog from "@/components/account/AddressFormDialog";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -22,7 +22,7 @@ const paymentMethods = [
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
-  const { items, subtotal, deliveryFee, total, clearCart } = useCart();
+  const { items, subtotal, deliveryFee, total, clearCart, setDeliveryFee } = useCart();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const { data: addresses = [], isLoading: addressLoading } = useAddresses();
@@ -32,6 +32,34 @@ const CheckoutPage = () => {
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>("COD");
   const [notes, setNotes] = useState("");
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+
+  const storeId = items[0]?.product.store ?? 0;
+  const mixedStores = items.length > 0 && items.some((i) => i.product.store !== storeId);
+  const selectedAddressRecord = useMemo(
+    () => addresses.find((addr) => addr.id === selectedAddress),
+    [addresses, selectedAddress]
+  );
+  const addressLat = selectedAddressRecord?.latitude;
+  const addressLng = selectedAddressRecord?.longitude;
+  const addressHasPin = typeof addressLat === "number" && typeof addressLng === "number";
+  const deliveryEstimate = useDeliveryEstimate(
+    mixedStores ? undefined : storeId,
+    addressHasPin ? addressLat : undefined,
+    addressHasPin ? addressLng : undefined
+  );
+  const estimate = deliveryEstimate.data;
+  const dynamicDeliveryFee = estimate?.within_delivery_zone ? Number(estimate.delivery_fee) : null;
+  const isOutOfZone = estimate?.within_delivery_zone === false;
+  const isEstimatingDelivery = deliveryEstimate.isFetching && addressHasPin && !estimate;
+  const deliveryEstimateError = deliveryEstimate.isError && addressHasPin;
+  const cannotPlaceOrder =
+    createOrderMutation.isPending ||
+    addressLoading ||
+    !selectedAddress ||
+    mixedStores ||
+    !addressHasPin ||
+    isOutOfZone ||
+    isEstimatingDelivery;
 
   // Auto-select default address when addresses load
   useEffect(() => {
@@ -58,6 +86,18 @@ const CheckoutPage = () => {
     }
   }, [items.length, navigate, toast]);
 
+  useEffect(() => {
+    if (dynamicDeliveryFee != null && Number.isFinite(dynamicDeliveryFee)) {
+      setDeliveryFee(dynamicDeliveryFee);
+      return;
+    }
+    setDeliveryFee(null);
+  }, [dynamicDeliveryFee, setDeliveryFee]);
+
+  useEffect(() => {
+    return () => setDeliveryFee(null);
+  }, [setDeliveryFee]);
+
   if (items.length === 0) {
     return null; // Will redirect via useEffect above
   }
@@ -72,11 +112,16 @@ const CheckoutPage = () => {
       return;
     }
 
-    // All cart items must be from the same store
-    const storeId = items[0]?.product.store;
-    const mixedStores = items.some((i) => i.product.store !== storeId);
     if (mixedStores) {
       toast({ title: "Multiple stores", description: "Your cart contains items from different stores. Please remove items so all are from the same store.", variant: "destructive" });
+      return;
+    }
+    if (!addressHasPin) {
+      toast({ title: "Map pin required", description: "Please edit or add an address with a pinned map location.", variant: "destructive" });
+      return;
+    }
+    if (isOutOfZone) {
+      toast({ title: "Out of delivery zone", description: "Please choose another address or browse a closer store.", variant: "destructive" });
       return;
     }
 
@@ -194,10 +239,24 @@ const CheckoutPage = () => {
                           <p className="text-sm text-muted-foreground mt-0.5">
                             {addr.street}, {addr.district}, {addr.city}
                           </p>
+                          {addr.latitude != null && addr.longitude != null && (
+                            <p className="mt-1 flex items-center gap-1 text-[10px] font-medium text-emerald-600">
+                              <MapPin className="w-3 h-3" />
+                              Map pin saved
+                            </p>
+                          )}
                         </div>
                       </label>
                     ))}
                   </div>
+                  {selectedAddress && !addressHasPin && (
+                    <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900">
+                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <p className="text-xs">
+                        This address needs a map pin before checkout can estimate delivery.
+                      </p>
+                    </div>
+                  )}
                   <button
                     onClick={() => setAddressDialogOpen(true)}
                     className="mt-3 inline-flex items-center gap-1.5 text-sm text-primary font-semibold hover:underline"
@@ -317,9 +376,67 @@ const CheckoutPage = () => {
                   <span className="font-semibold">{subtotal.toFixed(2)} SAR</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Delivery Fee</span>
+                  <span className="text-muted-foreground">
+                    Delivery Fee
+                    {estimate?.within_delivery_zone && (
+                      <span className="ml-1 text-xs">({estimate.distance_km} km)</span>
+                    )}
+                  </span>
                   <span className="font-semibold">{deliveryFee.toFixed(2)} SAR</span>
                 </div>
+              </div>
+
+              <div className="mt-4 space-y-2">
+                {isEstimatingDelivery && (
+                  <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    Calculating delivery estimate...
+                  </div>
+                )}
+
+                {deliveryEstimateError && (
+                  <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold">Delivery estimate unavailable</p>
+                      <p className="text-[11px] mt-0.5">Flat delivery fee is shown for now.</p>
+                    </div>
+                  </div>
+                )}
+
+                {estimate?.within_delivery_zone && (
+                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-900">
+                    <div className="flex items-center gap-2 text-xs font-semibold">
+                      <Truck className="w-4 h-4" />
+                      Estimated delivery: ~{estimate.estimated_delivery_min} min
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-emerald-800">
+                      <span className="flex items-center gap-1">
+                        <Route className="w-3.5 h-3.5" />
+                        {estimate.distance_km} km
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        {estimate.duration_in_traffic_min} min drive + {estimate.prep_time_min} min prep
+                      </span>
+                    </div>
+                    {estimate.is_estimate && (
+                      <p className="mt-2 text-[11px] text-emerald-700">Approximate estimate while traffic data is unavailable.</p>
+                    )}
+                  </div>
+                )}
+
+                {isOutOfZone && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive">
+                    <div className="flex items-center gap-2 text-xs font-semibold">
+                      <AlertTriangle className="w-4 h-4" />
+                      Out of delivery zone
+                    </div>
+                    <p className="mt-1 text-[11px]">
+                      This address is {estimate.distance_km} km away. Choose another address or browse closer stores.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <Separator className="my-4" />
@@ -331,7 +448,7 @@ const CheckoutPage = () => {
 
               <button
                 onClick={handlePlaceOrder}
-                disabled={createOrderMutation.isPending || addressLoading || !selectedAddress}
+                disabled={cannotPlaceOrder}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-sm hover:bg-primary/90 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {createOrderMutation.isPending ? (
@@ -346,6 +463,14 @@ const CheckoutPage = () => {
                   </>
                 ) : !selectedAddress ? (
                   <>Select a delivery address</>
+                ) : mixedStores ? (
+                  <>Use one store per order</>
+                ) : !addressHasPin ? (
+                  <>Add a map pin</>
+                ) : isEstimatingDelivery ? (
+                  <>Calculating delivery...</>
+                ) : isOutOfZone ? (
+                  <>Out of delivery zone</>
                 ) : (
                   <>Place Order — {total.toFixed(2)} SAR</>
                 )}

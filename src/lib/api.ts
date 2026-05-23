@@ -390,6 +390,57 @@ export async function fetchNearbyStores(lat: number, lng: number, radiusKm: numb
   return await res.json();
 }
 
+export interface DeliveryEstimate {
+  distance_km: number;
+  duration_min: number;
+  duration_in_traffic_min: number;
+  prep_time_min: number;
+  estimated_delivery_min: number;
+  delivery_fee: string;
+  within_delivery_zone: boolean;
+  is_estimate?: boolean;
+  max_distance_km?: number;
+}
+
+export async function fetchDeliveryEstimate(storeId: number, lat: number, lng: number): Promise<DeliveryEstimate> {
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lng: String(lng),
+  });
+  const res = await fetch(`${API_BASE_URL}/stores/${storeId}/delivery-estimate/?${params.toString()}`);
+  if (!res.ok) {
+    let detail = "Failed to fetch delivery estimate";
+    try {
+      const body = await res.json();
+      detail = typeof body === "object" ? body.detail || body.error || Object.values(body).flat().join(" ") : detail;
+    } catch {
+      /* keep generic message */
+    }
+    throw new Error(detail);
+  }
+  return await res.json();
+}
+
+export interface ReverseGeocodeResult {
+  formatted_address: string;
+  street: string;
+  district: string;
+  city: string;
+  lat?: number;
+  lng?: number;
+  is_estimate?: boolean;
+}
+
+export async function reverseGeocode(lat: number, lng: number): Promise<ReverseGeocodeResult> {
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lng: String(lng),
+  });
+  const res = await fetch(`${API_BASE_URL}/geo/reverse/?${params.toString()}`);
+  if (!res.ok) throw new Error("Failed to reverse geocode location");
+  return await res.json();
+}
+
 // ──────────────────────────────────────
 // Public API — Reviews
 // ──────────────────────────────────────
@@ -434,6 +485,8 @@ export interface Order {
   status: "PENDING" | "CONFIRMED" | "PREPARING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "CANCELLED";
   subtotal: string;
   delivery_fee: string;
+  estimated_delivery_min?: number | null;
+  distance_km?: number | null;
   total: string;
   currency: string;
   note: string;

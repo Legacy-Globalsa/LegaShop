@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import AddressAutocomplete from "@/components/maps/AddressAutocomplete";
+import AddressPickerMap, { type AddressPickerLocation } from "@/components/maps/AddressPickerMap";
 
 const addressSchema = z.object({
   label: z.enum(["HOME", "WORK", "OTHER"]),
@@ -93,13 +93,12 @@ const AddressFormDialog = ({ open, onOpenChange, address, saving, onSubmit }: Ad
     }
   }, [open, address, form]);
 
-  // When user selects an address from Google Places autocomplete
-  const handleAutocompleteSelect = useCallback(
-    (result: { street: string; district: string; city: string; latitude: number; longitude: number }) => {
-      form.setValue("street", result.street, { shouldValidate: true });
-      form.setValue("district", result.district, { shouldValidate: true });
-      form.setValue("city", result.city, { shouldValidate: true });
-      setCoords({ latitude: result.latitude, longitude: result.longitude });
+  const handleLocationSelect = useCallback(
+    (result: AddressPickerLocation) => {
+      if (result.street) form.setValue("street", result.street, { shouldValidate: true });
+      if (result.district) form.setValue("district", result.district, { shouldValidate: true });
+      if (result.city) form.setValue("city", result.city, { shouldValidate: true });
+      setCoords({ latitude: result.lat, longitude: result.lng });
     },
     [form]
   );
@@ -118,7 +117,7 @@ const AddressFormDialog = ({ open, onOpenChange, address, saving, onSubmit }: Ad
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit Address" : "Add New Address"}</DialogTitle>
         </DialogHeader>
@@ -148,15 +147,15 @@ const AddressFormDialog = ({ open, onOpenChange, address, saving, onSubmit }: Ad
               )}
             />
 
-            {/* Google Places Autocomplete — fills street, district, city, lat/lng */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium leading-none">Search Address</label>
-              <AddressAutocomplete
-                onAddressSelect={handleAutocompleteSelect}
-                placeholder="Type to search your address..."
-                defaultValue={isEdit ? address?.street || "" : ""}
+              <label className="text-sm font-medium leading-none">Map Pin</label>
+              <AddressPickerMap
+                initialLat={coords.latitude}
+                initialLng={coords.longitude}
+                onLocationSelect={handleLocationSelect}
+                height="240px"
               />
-              {coords.latitude && coords.longitude && (
+              {coords.latitude != null && coords.longitude != null && (
                 <p className="flex items-center gap-1 text-xs text-emerald-600">
                   <MapPin className="w-3 h-3" />
                   Location pinned ({coords.latitude.toFixed(4)}, {coords.longitude.toFixed(4)})
